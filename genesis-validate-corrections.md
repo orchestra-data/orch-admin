@@ -1,6 +1,6 @@
 # Genesis *validate - Plano de Correcoes Orch v3.5.1
 
-**Status**: EM ANDAMENTO
+**Status**: CONCLUIDO
 **Fonte**: cogedu-main (3)\cogedu-main\apps\web\
 **Commit anterior**: 1256c3e (v3.5.1)
 
@@ -15,38 +15,38 @@
 - [x] 1.6 Adicionar route components com nomes reais (Route suffix)
 - [x] 1.7 Versao atualizada para v3.6.0
 
-### FASE 2: cogedu-admission-fields.yaml [PENDENTE]
-- [ ] 2.1 Adicionar enrollmentMode (single_inherited/multiple_choice)
-- [ ] 2.2 Adicionar AdmissionEditRoute fields
-- [ ] 2.3 Adicionar OfferDetailRoute e OfferEditRoute
-- [ ] 2.4 Adicionar ResumeApplicationRoute
-- [ ] 2.5 Corrigir escala de avaliacao (Kanban 0-10 vs Detail 0-100)
+### FASE 2: cogedu-admission-fields.yaml [CONCLUIDO] (+122 linhas)
+- [x] 2.1 Adicionar enrollmentMode (single_inherited/multiple_choice)
+- [x] 2.2 Adicionar AdmissionEditRoute fields
+- [x] 2.3 Adicionar OfferDetailRoute e OfferEditRoute
+- [x] 2.4 Adicionar ResumeApplicationRoute
+- [x] 2.5 Corrigir escala de avaliacao (Kanban 0-10 vs Detail 0-100)
 
-### FASE 3: cogedu-educational-fields.yaml [PENDENTE]
-- [ ] 3.1 Adicionar modulo Components completo (11 tipos, 8 feature flags)
-- [ ] 3.2 Adicionar Edit pages (CollectionEdit, PathwayEdit, SeriesEdit, UnitEdit)
-- [ ] 3.3 Adicionar Detail pages com drag-and-drop
-- [ ] 3.4 Adicionar isOfferable (marketplace) nas Collections
-- [ ] 3.5 Adicionar checkpoint thresholds e enrollment limits nos Pathways
-- [ ] 3.6 Adicionar grading config nas Series
-- [ ] 3.7 Adicionar release conditions nas Units
-- [ ] 3.8 Adicionar ClassInstanceEdit, StudentView, Recommendations
-- [ ] 3.9 Adicionar ClassInstance notifications modal e chat
+### FASE 3: cogedu-educational-fields.yaml [CONCLUIDO] (+2519 linhas)
+- [x] 3.1 Adicionar modulo Components completo (11 tipos, 8 feature flags)
+- [x] 3.2 Adicionar Edit pages (CollectionEdit, PathwayEdit, SeriesEdit, UnitEdit)
+- [x] 3.3 Adicionar Detail pages com drag-and-drop
+- [x] 3.4 Adicionar isOfferable (marketplace) nas Collections
+- [x] 3.5 Adicionar checkpoint thresholds e enrollment limits nos Pathways
+- [x] 3.6 Adicionar grading config nas Series
+- [x] 3.7 Adicionar release conditions nas Units
+- [x] 3.8 Adicionar ClassInstanceEdit, StudentView, Recommendations
+- [x] 3.9 Adicionar ClassInstance notifications modal e chat
 
-### FASE 4: cogedu-users-fields.yaml [PENDENTE]
-- [ ] 4.1 Adicionar Company Events (EventCreate/Detail/Edit)
-- [ ] 4.2 Adicionar 7 tabs com progress tracking no CompanyCreate
+### FASE 4: cogedu-users-fields.yaml [CONCLUIDO] (+269 linhas)
+- [x] 4.1 Adicionar Company Events (EventCreate/Detail/Edit)
+- [x] 4.2 Adicionar 7 tabs com progress tracking no CompanyCreate
 
-### FASE 5: cogedu-exams-fields.yaml [PENDENTE]
-- [ ] 5.1 Adicionar RubricEditRoute
-- [ ] 5.2 Adicionar BlocklyGameCreate e BlocklyGameEdit
-- [ ] 5.3 Adicionar ActivityGradingRoute
-- [ ] 5.4 Detalhar BI tabs (Overview, Students, Classes, Content, Audit, Risk)
-- [ ] 5.5 Detalhar Privacy Center 3 tabs (LGPD Art. 18)
+### FASE 5: cogedu-exams-fields.yaml [CONCLUIDO] (+810 linhas)
+- [x] 5.1 Adicionar RubricEditRoute
+- [x] 5.2 Adicionar BlocklyGameCreate e BlocklyGameEdit
+- [x] 5.3 Adicionar ActivityGradingRoute
+- [x] 5.4 Detalhar BI tabs (Overview, Students, Classes, Content, Audit, Risk)
+- [x] 5.5 Detalhar Privacy Center 3 tabs (LGPD Art. 18)
 
-### FASE 6: Commit e Push [PENDENTE]
-- [ ] 6.1 Commit com mensagem descritiva
-- [ ] 6.2 Push para remote
+### FASE 6: Commit e Push [CONCLUIDO]
+- [x] 6.1 Commit com mensagem descritiva
+- [x] 6.2 Push para remote
 
 ## URL Patterns a Corrigir (Referencia Rapida)
 

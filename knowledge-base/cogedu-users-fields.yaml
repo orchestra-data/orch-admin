@@ -8,9 +8,10 @@ modules:
   # USERS MODULE
   # ==========================================================================
 
-  UserListPage:
+  UserListRoute:
     file: routes/UserList/UserList.tsx
     component: UserListRoute
+    url: /users
     description: >
       Lists all users (employees and students) with search, filtering by type,
       pagination (infinite scroll), and delete actions.
@@ -84,9 +85,10 @@ modules:
 
   # --------------------------------------------------------------------------
 
-  UserCreatePage:
+  UserCreateRoute:
     file: routes/UserCreate/UserCreate.tsx
     component: UserCreateRoute
+    url: /users/new
     description: >
       Generic user creation wizard with tabs. Supports both employee and student
       user types. Has draft persistence via localStorage.
@@ -424,9 +426,10 @@ modules:
 
   # --------------------------------------------------------------------------
 
-  StudentCreatePage:
+  StudentCreateRoute:
     file: routes/UserCreate/StudentCreate.tsx
     component: StudentCreateRoute
+    url: /users/newStudent
     description: >
       Dedicated student creation wizard with 3 tabs (Identidade, Enderecos,
       +Informacoes). Includes photo upload, social media, guardian info,
@@ -735,9 +738,10 @@ modules:
 
   # --------------------------------------------------------------------------
 
-  EmployeeCreatePage:
+  EmployeeCreateRoute:
     file: routes/UserCreate/EmployeeCreate.tsx
     component: EmployeeCreateRoute
+    url: /users/newEmployee
     description: >
       Dedicated employee creation wizard with 4 tabs (Identidade, Enderecos,
       +Informacoes, Permissoes). Includes photo upload, social media, employee
@@ -994,9 +998,10 @@ modules:
 
   # --------------------------------------------------------------------------
 
-  UserDetailPage:
+  UserDetailRoute:
     file: routes/UserDetail/UserDetail.tsx
     component: UserDetailRoute
+    url: /users/:userId
     description: >
       User detail page with per-block inline editing. Shows user identity,
       addresses, documents, custom fields, social media, guardian info (students),
@@ -1188,9 +1193,10 @@ modules:
 
   # --------------------------------------------------------------------------
 
-  BatchStudentsPage:
+  BatchStudentUploadRoute:
     file: routes/BatchStudentUpload/BatchStudentUpload.tsx
     component: BatchStudentUploadRoute
+    url: /users/batch-students
     description: >
       Bulk student import via Excel file upload (.xlsx/.xls).
       Provides template download, drag-and-drop file upload,
@@ -1277,9 +1283,10 @@ modules:
   # COMPANIES MODULE
   # ==========================================================================
 
-  CompanyListPage:
+  CompanyListRoute:
     file: routes/CompanyList/CompanyList.tsx
     component: CompanyListRoute
+    url: /companies
     description: >
       Lists all companies/institutions with search, group filter
       (internal/external), and delete. Card-based layout.
@@ -1331,29 +1338,45 @@ modules:
 
   # --------------------------------------------------------------------------
 
-  CompanyCreatePage:
+  CompanyCreateRoute:
     file: routes/CompanyCreate/CompanyCreate.tsx
     component: CompanyCreateRoute
+    url: /companies/new
     description: >
       Company/institution creation wizard with 7 tabs. Supports CNPJ validation,
       address management with CEP auto-fill, logo upload, resources, integrations,
-      custom fields, and bootstrap tenant flow.
+      custom fields, and bootstrap tenant flow. Progress tracking advances with
+      each completed tab.
 
     tabs:
       - id: 0
         label: Identidade
+        minProgress: 0
+        description: "Legal name, display name, country, CNPJ, institutional type"
       - id: 1
         label: Localidade
+        minProgress: 20
+        description: "Addresses with CEP auto-fill via ViaCEP"
       - id: 2
         label: +Informacoes
+        minProgress: 30
+        description: "Description, teaching type, responsible person, bank data, digital platforms"
       - id: 3
         label: Id Visual
+        minProgress: 40
+        description: "Logo upload, primary and secondary colors"
       - id: 4
         label: Recursos
+        minProgress: 50
+        description: "Resource CRUD (tipo, nome, descricao, capacidade, locations, status, quantidade)"
       - id: 5
-        label: Integracao (only if isWhitelabel)
+        label: Integracao
+        minProgress: 60
+        description: "IntegrationsTab (Zoom + SmartPlayer). Only shown if isWhitelabel"
       - id: 6
         label: Resumo
+        minProgress: 70
+        description: "Review all entered data before submission"
 
     fields:
       # --- Tab 0: Identidade - Dados Principais ---
@@ -1364,7 +1387,7 @@ modules:
         validation: "maxLength: 2"
         default: BR
 
-      - name: CNPJ
+      - name: Registration Number (CNPJ)
         field_id: "documents[0].value"
         type: text
         required: true
@@ -1462,6 +1485,7 @@ modules:
         type: textarea
         required: false
 
+      # --- Tab 0: Whitelabel / Tenant ---
       - name: Parent Company
         field_id: parentId
         type: select
@@ -1875,9 +1899,10 @@ modules:
 
   # --------------------------------------------------------------------------
 
-  CompanyDetailPage:
+  CompanyDetailRoute:
     file: routes/CompanyDetail/CompanyDetail.tsx
     component: CompanyDetailRoute
+    url: /companies/:companyId
     description: >
       Company detail page with per-block inline editing (identity, contact,
       addresses, social, bank data, visual identity, resources, events,
@@ -1920,7 +1945,7 @@ modules:
         field_id: countryCode
         type: display (readonly)
 
-      - name: CNPJ
+      - name: Registration Number (CNPJ)
         field_id: registrationNumber
         type: display (readonly)
         formatting: formatCnpj
@@ -1952,35 +1977,60 @@ modules:
         type: select
         editable: true
         options:
-          - value: escola
-            label: Escola
           - value: universidade
             label: Universidade
-          - value: centro_formacao
-            label: Centro de Formacao
-          - value: ong
-            label: ONG
-          - value: empresa
-            label: Empresa
-          - value: outro
-            label: Outro
+          - value: faculdade
+            label: Faculdade
+          - value: escola
+            label: Escola
+          - value: centro
+            label: Centro de Ensino
 
       - name: Teaching Type
         field_id: teachingType
         type: select
         editable: true
         options:
-          - value: presencial
-            label: Presencial
+          - value: infantil
+            label: Educacao Infantil
+          - value: fundamental
+            label: Ensino Fundamental
+          - value: medio
+            label: Ensino Medio
+          - value: tecnico
+            label: Ensino Tecnico
+          - value: superior
+            label: Ensino Superior
+          - value: pos
+            label: Pos-Graduacao
           - value: ead
             label: EAD
-          - value: hibrido
-            label: Hibrido
+          - value: livre
+            label: Curso Livre
 
       - name: Institution Description
         field_id: description
         type: textarea
         editable: true
+
+      # --- Tab 0: Whitelabel / Tenant ---
+      - name: Parent Company
+        field_id: parentId
+        type: select
+        editable: true
+        options: "dynamic - from useCompanies()"
+        description: "Parent company for hierarchical structure"
+
+      - name: Is Whitelabel / Tenant
+        field_id: isWhitelabel
+        type: display (readonly)
+        description: "Whether this company is a tenant root"
+
+      - name: Custom Domain
+        field_id: customDomain
+        type: text
+        editable: true
+        condition: "isWhitelabel === true"
 
       # --- Tab 0: Bank Data (bankData block) ---
       - name: Bank Name
@@ -2242,6 +2292,132 @@ modules:
         reversible: false
         confirmation_required: false
 
+  # --------------------------------------------------------------------------
+  # COMPANY EVENTS (3 pages)
+  # --------------------------------------------------------------------------
+
+  EventCreateRoute:
+    file: routes/CompanyEvents/EventCreate.tsx
+    component: EventCreateRoute
+    url: /companies/:companyId/events/new
+    description: >
+      Event creation page for a company. Allows creating a new event
+      with title, date, and notes.
+
+    fields:
+      - name: Event Title
+        field_id: title
+        type: text
+        required: true
+        validation: non-empty
+
+      - name: Event Date
+        field_id: date
+        type: date
+        required: true
+        validation: non-empty
+
+      - name: Notes
+        field_id: notes
+        type: textarea
+        required: false
+
+    modals: []
+
+    actions:
+      - name: Navigate Back
+        type: navigation
+        effect: "navigate('/companies/{companyId}')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Submit (Create Event)
+        type: mutation
+        effect: "apiClient.createEvent({ companyId, title, date, notes })"
+        reversible: false
+        confirmation_required: false
+
+  # --------------------------------------------------------------------------
+
+  EventDetailRoute:
+    file: routes/CompanyEvents/EventDetail.tsx
+    component: EventDetailRoute
+    url: /companies/:companyId/events/:eventId
+    description: >
+      Read-only event detail page. Displays event title, date, and notes
+      for a specific company event.
+
+    fields:
+      - name: Event Title
+        field_id: title
+        type: display (readonly)
+
+      - name: Event Date
+        field_id: date
+        type: display (readonly)
+
+      - name: Notes
+        field_id: notes
+        type: display (readonly)
+
+    modals: []
+
+    actions:
+      - name: Navigate Back
+        type: navigation
+        effect: "navigate('/companies/{companyId}')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Edit Event
+        type: navigation
+        effect: "navigate('/companies/{companyId}/events/{eventId}/edit')"
+        reversible: false
+        confirmation_required: false
+
+  # --------------------------------------------------------------------------
+
+  EventEditRoute:
+    file: routes/CompanyEvents/EventEdit.tsx
+    component: EventEditRoute
+    url: /companies/:companyId/events/:eventId/edit
+    description: >
+      Event editing page. Same fields as EventCreateRoute, pre-filled with
+      existing event data.
+
+    fields:
+      - name: Event Title
+        field_id: title
+        type: text
+        required: true
+        validation: non-empty
+
+      - name: Event Date
+        field_id: date
+        type: date
+        required: true
+        validation: non-empty
+
+      - name: Notes
+        field_id: notes
+        type: textarea
+        required: false
+
+    modals: []
+
+    actions:
+      - name: Navigate Back
+        type: navigation
+        effect: "navigate('/companies/{companyId}')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Submit (Update Event)
+        type: mutation
+        effect: "apiClient.updateEvent({ companyId, eventId, title, date, notes })"
+        reversible: false
+        confirmation_required: false
+
 # ==============================================================================
 # SHARED PATTERNS
 # ==============================================================================
@@ -2322,3 +2498,42 @@ shared_patterns:
       CNPJ: "00.000.000/0000-00 (formatCnpj / maskCNPJ)"
       CEP: "00000-000 (formatCep / maskCEP)"
       Phone: "(00) 00000-0000 (formatPhoneBR / maskPhone)"
+
+  institutional_types:
+    description: "Valid institutional types for companies/institutions"
+    values:
+      - value: universidade
+        label: Universidade
+      - value: faculdade
+        label: Faculdade
+      - value: escola
+        label: Escola
+      - value: centro
+        label: Centro de Ensino
+
+  teaching_types:
+    description: "Valid teaching types for educational institutions"
+    values:
+      - value: infantil
+        label: Educacao Infantil
+      - value: fundamental
+        label: Ensino Fundamental
+      - value: medio
+        label: Ensino Medio
+      - value: tecnico
+        label: Ensino Tecnico
+      - value: superior
+        label: Ensino Superior
+      - value: pos
+        label: Pos-Graduacao
+      - value: ead
+        label: EAD
+      - value: livre
+        label: Curso Livre
+
+  whitelabel_tenant:
+    description: "Fields for multi-tenant / whitelabel support"
+    fields:
+      - parentId: "Reference to parent company (required when not tenant root)"
+      - isWhitelabel: "Boolean flag marking company as tenant root"
+      - customDomain: "Custom domain for whitelabel tenant (only when isWhitelabel)"

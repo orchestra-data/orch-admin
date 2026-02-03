@@ -6,10 +6,10 @@
 pages:
 
   # ===========================================================================
-  # 1. AdmissionListPage (AdmissionsListRoute.tsx)
+  # 1. AdmissionListRoute (AdmissionsListRoute.tsx)
   # ===========================================================================
   - page_id: admission_list
-    page_name: AdmissionListPage
+    page_name: AdmissionListRoute
     route: /educational/admission
     source_file: routes/admission/AdmissionsList/AdmissionsListRoute.tsx
 
@@ -60,10 +60,10 @@ pages:
         confirmation_required: false
 
   # ===========================================================================
-  # 2. AdmissionCreatePage (AdmissionCreateRoute.tsx)
+  # 2. AdmissionCreateRoute (AdmissionCreateRoute.tsx)
   # ===========================================================================
   - page_id: admission_create
-    page_name: AdmissionCreatePage
+    page_name: AdmissionCreateRoute
     route: /educational/admission/new
     source_file: routes/admission/AdmissionCreate/AdmissionCreateRoute.tsx
 
@@ -196,10 +196,10 @@ pages:
         confirmation_required: false
 
   # ===========================================================================
-  # 3. AdmissionDetailPage (AdmissionDetailRoute.tsx)
+  # 3. AdmissionDetailRoute (AdmissionDetailRoute.tsx)
   # ===========================================================================
   - page_id: admission_detail
-    page_name: AdmissionDetailPage
+    page_name: AdmissionDetailRoute
     route: /educational/admission/:id
     source_file: routes/admission/AdmissionDetail/AdmissionDetailRoute.tsx
 
@@ -253,10 +253,10 @@ pages:
         confirmation_required: false
 
   # ===========================================================================
-  # 3b. AdmissionEditPage (AdmissionEditRoute.tsx)
+  # 3b. AdmissionEditRoute (AdmissionEditRoute.tsx)
   # ===========================================================================
   - page_id: admission_edit
-    page_name: AdmissionEditPage
+    page_name: AdmissionEditRoute
     route: /educational/admission/:id/edit
     source_file: routes/admission/AdmissionEdit/AdmissionEditRoute.tsx
 
@@ -366,10 +366,10 @@ pages:
         confirmation_required: false
 
   # ===========================================================================
-  # 4. OfferCreatePage (OfferCreateRoute.tsx)
+  # 4. OfferCreateRoute (OfferCreateRoute.tsx)
   # ===========================================================================
   - page_id: offer_create
-    page_name: OfferCreatePage
+    page_name: OfferCreateRoute
     route: /educational/admission/:admissionId/offers/new
     source_file: routes/admission/OfferCreate/OfferCreateRoute.tsx
 
@@ -514,18 +514,30 @@ pages:
         condition: "Visivel apos criacao da oferta"
 
   # ===========================================================================
-  # 4b. OfferDetailPage (OfferDetailRoute.tsx)
+  # 4b. OfferDetailRoute (OfferDetailRoute.tsx)
   # ===========================================================================
   - page_id: offer_detail
-    page_name: OfferDetailPage
+    page_name: OfferDetailRoute
     route: /educational/admission/offers/:offerId
     source_file: routes/admission/OfferDetail/OfferDetailRoute.tsx
 
     fields: []
-    # Pagina somente de visualizacao - nao possui campos editaveis
-    # Exibe: name, isActive, description, offerType, classInstanceId, admissionFee,
-    # discountPercentage, vacancyConfig.total, vacancyConfig.reserved, createdAt,
-    # totalCandidates, formConfig units, publicUrl
+    # Pagina somente de visualizacao (read-only) - nao possui campos editaveis
+    # Exibe os seguintes dados:
+    #   - name: Nome da oferta
+    #   - description: Descricao da oferta
+    #   - offerType: Tipo da oferta (Regular, Vestibular, ENEM, etc.)
+    #   - admissionFee: Taxa de inscricao (R$)
+    #   - discountPercentage: Desconto (%)
+    #   - vacancyConfig.total: Vagas totais
+    #   - vacancyConfig.reserved: Vagas reservadas
+    #   - pipelineStages: Etapas do pipeline configuradas
+    #   - publicUrl: Link publico de inscricao ({origin}/apply/{offerId})
+    #   - isActive: Status ativo/inativo da oferta
+    #   - totalCandidates: Total de candidatos inscritos
+    #   - classInstanceId: Turma vinculada (modo single_inherited)
+    #   - createdAt: Data de criacao
+    #   - formConfig units: Unidades do formulario configurado
 
     modals:
       - name: Confirmar Exclusao
@@ -572,10 +584,10 @@ pages:
         confirmation_required: false
 
   # ===========================================================================
-  # 4c. OfferEditPage (OfferEditRoute.tsx)
+  # 4c. OfferEditRoute (OfferEditRoute.tsx)
   # ===========================================================================
   - page_id: offer_edit
-    page_name: OfferEditPage
+    page_name: OfferEditRoute
     route: /educational/admission/offers/:offerId/edit
     source_file: routes/admission/OfferEdit/OfferEditRoute.tsx
 
@@ -673,10 +685,10 @@ pages:
         confirmation_required: false
 
   # ===========================================================================
-  # 5. FormBuilderPage (FormBuilderRoute.tsx + FormBuilder.tsx + StepConfig.tsx)
+  # 5. FormBuilderRoute (FormBuilderRoute.tsx + FormBuilder.tsx + StepConfig.tsx)
   # ===========================================================================
   - page_id: form_builder
-    page_name: FormBuilderPage
+    page_name: FormBuilderRoute
     route: /educational/admission/offers/:offerId/form-builder
     source_file: routes/admission/FormBuilderRoute/FormBuilderRoute.tsx
     component_files:
@@ -1190,10 +1202,10 @@ pages:
       description: "Etapa fixa e obrigatoria - nao pode ser modificada. Componente tipo 'dados-pessoais'."
 
   # ===========================================================================
-  # 6. CandidateListPage (CandidatesListRoute.tsx)
+  # 6. CandidateListRoute (CandidatesListRoute.tsx)
   # ===========================================================================
   - page_id: candidate_list
-    page_name: CandidateListPage
+    page_name: CandidateListRoute
     route: /educational/admission/candidates
     source_file: routes/admission/CandidatesList/CandidatesListRoute.tsx
 
@@ -1321,10 +1333,10 @@ pages:
         confirmation_required: false
 
   # ===========================================================================
-  # 7. CandidateKanbanPage (CandidatesKanbanRoute.tsx)
+  # 7. CandidateKanbanRoute (CandidatesKanbanRoute.tsx)
   # ===========================================================================
   - page_id: candidate_kanban
-    page_name: CandidateKanbanPage
+    page_name: CandidateKanbanRoute
     route: /educational/admission/candidates/kanban
     source_file: routes/admission/CandidatesKanban/CandidatesKanbanRoute.tsx
 
@@ -1504,10 +1516,10 @@ pages:
         confirmation_required: false
 
   # ===========================================================================
-  # 8. CandidateDetailPage (CandidateDetailRoute.tsx)
+  # 8. CandidateDetailRoute (CandidateDetailRoute.tsx)
   # ===========================================================================
   - page_id: candidate_detail
-    page_name: CandidateDetailPage
+    page_name: CandidateDetailRoute
     route: /educational/admission/candidates/:candidateId
     source_file: routes/admission/CandidateDetail/CandidateDetailRoute.tsx
 
@@ -1665,6 +1677,43 @@ pages:
         reversible: true
         confirmation_required: false
 
+  # ===========================================================================
+  # 9. ResumeApplicationRoute (public route - no auth required)
+  # ===========================================================================
+  - page_id: resume_application
+    page_name: ResumeApplicationRoute
+    route: /application/resume/:accessToken
+    source_file: routes/public/ResumeApplication/ResumeApplicationRoute.tsx
+    is_public: true
+
+    fields: []
+    # Rota publica que permite ao candidato retomar uma candidatura incompleta.
+    # O accessToken e um token unico enviado por email ao candidato.
+    # A pagina carrega o estado atual da candidatura e exibe o formulario
+    # a partir da etapa onde o candidato parou.
+    # Nao requer autenticacao - acesso via token.
+
+    modals: []
+
+    actions:
+      - name: Continuar Inscricao
+        type: action
+        effect: "Carrega candidatura via accessToken e exibe formulario a partir da etapa incompleta"
+        reversible: true
+        confirmation_required: false
+
+      - name: Salvar Progresso
+        type: submit
+        effect: "Salva progresso parcial da candidatura"
+        reversible: false
+        confirmation_required: false
+
+      - name: Finalizar Inscricao
+        type: submit
+        effect: "Submete candidatura completa e exibe confirmacao"
+        reversible: false
+        confirmation_required: false
+
 # =============================================================================
 # Reference Data: Shared Configurations
 # =============================================================================
@@ -1754,6 +1803,27 @@ shared_configs:
         label: Contrato
         description: "Assinatura de contrato com suporte a assinatura digital OTP"
         fixed: false
+
+  EVALUATION_SCORE_SCALES:
+    description: "ATENCAO: Escalas de nota de avaliacao diferem entre telas"
+    note: |
+      O CandidateKanbanRoute usa escala 0-10 (step 0.1) para evaluationScore
+      nos dialogs de aprovacao e rejeicao.
+      O CandidateDetailRoute usa escala 0-100 (step 0.1) para evaluationScore
+      no dialog de aprovacao.
+      Esta inconsistencia existe no codigo-fonte e deve ser considerada ao
+      implementar ou consumir dados de avaliacao.
+    scales:
+      - page: CandidateKanbanRoute
+        field: approvalDialog.evaluationScore / rejectionDialog.evaluationScore
+        min: 0
+        max: 10
+        step: 0.1
+      - page: CandidateDetailRoute
+        field: approvalDialog.evaluationScore
+        min: 0
+        max: 100
+        step: 0.1
 
   DOCUMENT_STATUSES:
     description: "Status possiveis dos documentos de candidatos"

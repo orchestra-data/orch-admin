@@ -12,11 +12,12 @@ modules:
   exams:
 
     # -------------------------------------------------------------------------
-    # YourEvaluationsPage (TutorAssessments)
+    # YourEvaluationsRoute (TutorAssessments)
+    # Route: /educational/exams/your-evaluations
     # File: routes/exams/YourEvaluations/YourEvaluationsRoute.tsx
     #       routes/exams/YourEvaluations/TutorAssessments.tsx
     # -------------------------------------------------------------------------
-    your_evaluations_page:
+    your_evaluations_route:
       description: >
         Tutor/teacher view for managing assessment attempts (grading student
         submissions). Lists all assessment attempts with filtering.
@@ -116,10 +117,11 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # QuestionBankPage
+    # QuestionBankRoute
+    # Route: /educational/exams/bank
     # File: routes/exams/Bank/QuestionBankList.tsx
     # -------------------------------------------------------------------------
-    question_bank_page:
+    question_bank_route:
       description: >
         Listing page for all questions in the question bank. Supports search,
         filtering by difficulty/type/tags, and CRUD operations.
@@ -456,10 +458,11 @@ modules:
       actions: []
 
     # -------------------------------------------------------------------------
-    # QuestionCreatePage (standalone route)
+    # QuestionCreateRoute (standalone route)
+    # Route: /educational/exams/questions/new
     # File: routes/exams/QuestionCreate/QuestionCreateRoute.tsx
     # -------------------------------------------------------------------------
-    question_create_page:
+    question_create_route:
       description: >
         Standalone page (not modal) for creating a question. Same fields as
         QuestionCreateModal but rendered as a full page with navigation.
@@ -540,10 +543,11 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # ExamBuilderPage (AssessmentBuilderList)
+    # ExamBuilderRoute (AssessmentBuilderList)
+    # Route: /educational/exams/builder
     # File: routes/exams/Builder/AssessmentBuilderList.tsx
     # -------------------------------------------------------------------------
-    exam_builder_page:
+    exam_builder_route:
       description: >
         Listing page for assessments/exams. Supports search, CRUD via modals,
         and viewing assessment details.
@@ -908,10 +912,11 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # RubricListPage
+    # RubricListRoute
+    # Route: /educational/exams/rubrics
     # File: routes/exams/Rubrics/RubricsList.tsx
     # -------------------------------------------------------------------------
-    rubric_list_page:
+    rubric_list_route:
       description: >
         Listing page for grading rubrics. Supports search, creation (via
         fullscreen RubricBuilder dialog), deletion with confirmation.
@@ -955,19 +960,89 @@ modules:
           confirmation_required: true  # AlertDialog
 
     # -------------------------------------------------------------------------
-    # RubricEditPage
+    # RubricEditRoute
+    # Route: /educational/exams/rubrics/:rubricId/edit
     # File: routes/exams/Rubrics/RubricEditRoute.tsx
+    # Component: RubricBuilder
     # -------------------------------------------------------------------------
-    rubric_edit_page:
+    rubric_edit_route:
       description: >
         Loads rubric by ID and renders RubricBuilder component for editing.
-        All fields are managed by RubricBuilder.
+        Displays RubricGradingMatrix for visual preview of criteria vs levels.
+        Rubric may be locked (lock status) preventing edits if already in use
+        by published assessments.
+      component: RubricBuilder
       fields:
-        - note: >
-            Fields managed by RubricBuilder component.
-            Rubric data model includes: name, description, criteria (each with
-            name, description, sequence_order, levels array), where each level
-            has: id, label, description, points, sequence_order.
+        - name: rubricName
+          field_id: rubricName
+          type: text
+          required: true
+          validation: must_not_be_empty
+          description: Rubric name
+
+        - name: rubricDescription
+          field_id: rubricDescription
+          type: textarea
+          required: false
+          validation: null
+          description: Rubric description
+
+        - name: isLocked
+          field_id: isLocked
+          type: boolean
+          required: false
+          validation: null
+          description: >
+            Lock status - when true, rubric is in use by published assessments
+            and cannot be edited. Displayed as read-only indicator.
+
+        - name: criteria
+          field_id: criteria
+          type: dynamic_list
+          required: true
+          validation: at_least_one_criterion
+          description: >
+            List of rubric criteria. Each criterion contains:
+            - id: unique identifier
+            - name: criterion name (required)
+            - description: criterion description (optional)
+            - sequence_order: display order (number)
+            - levels: array of score levels for this criterion
+
+        - name: criterionName
+          field_id: criterionName
+          type: text
+          required: true
+          validation: must_not_be_empty
+          description: Name of individual criterion (within criteria list)
+
+        - name: criterionDescription
+          field_id: criterionDescription
+          type: textarea
+          required: false
+          validation: null
+          description: Description of individual criterion
+
+        - name: scoreLevels
+          field_id: scoreLevels
+          type: dynamic_list
+          required: true
+          validation: at_least_one_level_per_criterion
+          description: >
+            Score levels within each criterion. Each level contains:
+            - id: unique identifier
+            - label: level name (e.g., "Excelente", "Bom", "Regular", "Insuficiente")
+            - description: what this level means for this criterion
+            - points: numeric score value
+            - sequence_order: display order
+
+      sub_components:
+        - name: RubricGradingMatrix
+          description: >
+            Visual matrix/table displaying criteria as rows and score levels
+            as columns. Each cell shows the level description and point value.
+            Used for preview and reference during assessment grading.
+
       modals: []
       actions:
         - name: Save Rubric
@@ -976,11 +1051,48 @@ modules:
           reversible: false
           confirmation_required: false
 
+        - name: Add Criterion
+          type: button
+          effect: Adds a new criterion row to the rubric
+          reversible: true
+          confirmation_required: false
+
+        - name: Remove Criterion
+          type: icon_button
+          effect: Removes criterion from rubric
+          reversible: false
+          confirmation_required: true
+
+        - name: Add Score Level
+          type: button
+          effect: Adds a new score level to a criterion
+          reversible: true
+          confirmation_required: false
+
+        - name: Remove Score Level
+          type: icon_button
+          effect: Removes score level from criterion
+          reversible: false
+          confirmation_required: false
+
+        - name: Reorder Criteria
+          type: drag_drop
+          effect: Changes sequence_order of criteria
+          reversible: true
+          confirmation_required: false
+
+        - name: Go Back
+          type: navigation
+          effect: Navigate back to rubric list
+          reversible: true
+          confirmation_required: false
+
     # -------------------------------------------------------------------------
-    # BlocklyGamesListPage
+    # BlocklyGamesListRoute
+    # Route: /educational/exams/blockly-games
     # File: routes/educational/BlocklyGameList/BlocklyGameListRoute.tsx
     # -------------------------------------------------------------------------
-    blockly_games_list_page:
+    blockly_games_list_route:
       description: >
         Listing page for Blockly visual programming games/activities.
       fields:
@@ -1021,20 +1133,328 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # ProctoringPage
+    # BlocklyGameCreateRoute
+    # Route: /educational/exams/blockly-games/new
+    # File: routes/educational/BlocklyGameCreate/BlocklyGameCreateRoute.tsx
+    # Component: BlocklyEditor
+    # -------------------------------------------------------------------------
+    blockly_game_create_route:
+      description: >
+        Page for creating a new Blockly visual programming game/activity.
+        Uses the BlocklyEditor component for visual block-based programming
+        configuration.
+      component: BlocklyEditor
+      fields:
+        - name: title
+          field_id: title
+          type: text
+          required: true
+          validation: must_not_be_empty
+          description: Game title
+
+        - name: description
+          field_id: description
+          type: textarea
+          required: false
+          validation: null
+          description: Game description/instructions
+
+        - name: difficulty
+          field_id: difficulty
+          type: select
+          required: true
+          validation: null
+          options:
+            - value: easy
+              label: Facil
+            - value: medium
+              label: Medio
+            - value: hard
+              label: Dificil
+
+        - name: maxAttempts
+          field_id: maxAttempts
+          type: number
+          required: false
+          validation: min=1
+          description: Maximum number of attempts allowed
+
+        - name: timeLimit
+          field_id: timeLimit
+          type: number
+          required: false
+          validation: min=0
+          description: Time limit in minutes (0 = unlimited)
+
+        - name: blocklyWorkspace
+          field_id: blocklyWorkspace
+          type: blockly_editor
+          required: true
+          validation: must_have_blocks
+          description: >
+            BlocklyEditor component - visual block-based programming workspace.
+            Stores workspace XML/JSON configuration defining available blocks,
+            toolbox categories, and initial block arrangement.
+
+        - name: expectedSolution
+          field_id: expectedSolution
+          type: blockly_editor
+          required: false
+          validation: null
+          description: Expected solution workspace for auto-grading
+
+        - name: availableBlocks
+          field_id: availableBlocks
+          type: multi_select
+          required: true
+          validation: at_least_one_block
+          description: Categories/types of blocks available to the student
+
+        - name: gameConfig
+          field_id: gameConfig
+          type: json_config
+          required: false
+          validation: null
+          description: >
+            Additional game configuration (grid size, character settings,
+            goal conditions, visual theme, etc.)
+
+      modals: []
+      actions:
+        - name: Save Game
+          type: submit
+          effect: POST to create new Blockly game
+          reversible: false
+          confirmation_required: false
+
+        - name: Preview
+          type: button
+          effect: Opens preview of the game in student view
+          reversible: true
+          confirmation_required: false
+
+        - name: Cancel
+          type: navigation
+          effect: Navigate back to Blockly games list
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # BlocklyGameEditRoute
+    # Route: /educational/exams/blockly-games/:gameId/edit
+    # File: routes/educational/BlocklyGameEdit/BlocklyGameEditRoute.tsx
+    # Component: BlocklyEditor
+    # -------------------------------------------------------------------------
+    blockly_game_edit_route:
+      description: >
+        Page for editing an existing Blockly visual programming game/activity.
+        Loads game by ID and renders the BlocklyEditor component with
+        pre-populated configuration. Same fields as BlocklyGameCreateRoute.
+      component: BlocklyEditor
+      fields:
+        - name: title
+          field_id: title
+          type: text
+          required: true
+          validation: must_not_be_empty
+          description: Game title
+
+        - name: description
+          field_id: description
+          type: textarea
+          required: false
+          validation: null
+          description: Game description/instructions
+
+        - name: difficulty
+          field_id: difficulty
+          type: select
+          required: true
+          validation: null
+          options:
+            - value: easy
+              label: Facil
+            - value: medium
+              label: Medio
+            - value: hard
+              label: Dificil
+
+        - name: maxAttempts
+          field_id: maxAttempts
+          type: number
+          required: false
+          validation: min=1
+          description: Maximum number of attempts allowed
+
+        - name: timeLimit
+          field_id: timeLimit
+          type: number
+          required: false
+          validation: min=0
+          description: Time limit in minutes (0 = unlimited)
+
+        - name: blocklyWorkspace
+          field_id: blocklyWorkspace
+          type: blockly_editor
+          required: true
+          validation: must_have_blocks
+          description: >
+            BlocklyEditor component - visual block-based programming workspace.
+            Pre-loaded with existing game workspace configuration.
+
+        - name: expectedSolution
+          field_id: expectedSolution
+          type: blockly_editor
+          required: false
+          validation: null
+          description: Expected solution workspace for auto-grading
+
+        - name: availableBlocks
+          field_id: availableBlocks
+          type: multi_select
+          required: true
+          validation: at_least_one_block
+          description: Categories/types of blocks available to the student
+
+        - name: gameConfig
+          field_id: gameConfig
+          type: json_config
+          required: false
+          validation: null
+          description: >
+            Additional game configuration (grid size, character settings,
+            goal conditions, visual theme, etc.)
+
+      modals: []
+      actions:
+        - name: Save Changes
+          type: submit
+          effect: PUT to update existing Blockly game by gameId
+          reversible: false
+          confirmation_required: false
+
+        - name: Preview
+          type: button
+          effect: Opens preview of the game in student view
+          reversible: true
+          confirmation_required: false
+
+        - name: Cancel
+          type: navigation
+          effect: Navigate back to Blockly games list
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # ActivityGradingRoute
+    # Route: /educational/exams/activity-grade/:attemptId
+    # File: routes/exams/ActivityGrading/ActivityGradingRoute.tsx
+    # -------------------------------------------------------------------------
+    activity_grading_route:
+      description: >
+        Grading interface for student assessment attempts. Loads a specific
+        attempt by attemptId and displays student responses alongside
+        questions for manual grading by tutor/teacher.
+      fields:
+        - name: attemptId
+          field_id: attemptId
+          type: route_param
+          required: true
+          validation: valid_uuid
+          description: URL parameter - ID of the student attempt to grade
+
+        - name: questionGrades
+          field_id: questionGrades
+          type: dynamic_list
+          required: true
+          validation: all_questions_must_be_graded
+          description: >
+            Per-question grading entries. Each entry contains:
+            - questionId: reference to the question
+            - score: points awarded (number, 0 to question max points)
+            - feedback: optional text feedback for the student
+            - isCorrect: boolean (auto-computed for objective questions)
+
+        - name: score
+          field_id: score
+          type: number
+          required: true
+          validation: min=0, max=total_points
+          description: >
+            Individual question score input. Constrained between 0 and the
+            question's maximum point value.
+
+        - name: feedback
+          field_id: feedback
+          type: textarea
+          required: false
+          validation: null
+          description: Optional feedback text for individual question
+
+        - name: overallFeedback
+          field_id: overallFeedback
+          type: textarea
+          required: false
+          validation: null
+          description: General feedback for the entire attempt
+
+        - name: totalScore
+          field_id: totalScore
+          type: number
+          required: false
+          validation: null
+          description: >
+            Auto-computed total score (sum of all question scores).
+            Displayed as read-only summary.
+
+      display_fields:
+        - studentName
+        - studentEmail
+        - assessmentTitle
+        - submittedAt
+        - attemptStatus  # submitted, graded, in_progress
+        - studentResponses  # per-question answers (text, selected alternatives)
+
+      modals: []
+
+      actions:
+        - name: Submit Grades
+          type: submit
+          effect: >
+            POST/PUT grades for the attempt. Updates attempt status to 'graded'.
+            Saves all question scores and feedback.
+          reversible: false
+          confirmation_required: true  # Confirm before finalizing grades
+
+        - name: Save Draft
+          type: button
+          effect: Saves current grading progress without finalizing
+          reversible: true
+          confirmation_required: false
+
+        - name: Go Back
+          type: navigation
+          effect: Navigate back to evaluations list
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # ProctoringRoute
+    # Route: /educational/exams/proctoring
     # File: routes/exams/Proctoring/ProctoringRoute.tsx
     # -------------------------------------------------------------------------
-    proctoring_page:
+    proctoring_route:
       description: Coming soon placeholder page. No interactive elements.
       fields: []
       modals: []
       actions: []
 
     # -------------------------------------------------------------------------
-    # BrokerPage
+    # BrokerRoute
+    # Route: /educational/exams/broker
     # File: routes/exams/Broker/BrokerRoute.tsx
     # -------------------------------------------------------------------------
-    broker_page:
+    broker_route:
       description: Coming soon placeholder page. No interactive elements.
       fields: []
       modals: []
@@ -1046,10 +1466,11 @@ modules:
   certification:
 
     # -------------------------------------------------------------------------
-    # CertTemplateListPage
+    # CertTemplateListRoute
+    # Route: /educational/certificates/templates
     # File: routes/certification/CertificateTemplateList/CertificateTemplateListRoute.tsx
     # -------------------------------------------------------------------------
-    cert_template_list_page:
+    cert_template_list_route:
       description: >
         Listing page for certificate templates. Supports filtering by status,
         type, and category. CRUD via navigation and API calls.
@@ -1139,10 +1560,11 @@ modules:
           confirmation_required: true  # confirm dialog
 
     # -------------------------------------------------------------------------
-    # CertTemplateEditorPage
+    # CertTemplateEditorRoute
+    # Route: /educational/certificates/templates/:templateId/edit
     # File: routes/certification/CertificateTemplateEditor/CertificateTemplateEditorRoute.tsx
     # -------------------------------------------------------------------------
-    cert_template_editor_page:
+    cert_template_editor_route:
       description: >
         Full canvas-based visual editor for certificate templates. Supports
         drag-and-drop element positioning, text/image/qrcode/signature
@@ -1359,10 +1781,11 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # IssuedCertListPage (CertificateListRoute)
+    # IssuedCertListRoute (CertificateListRoute)
+    # Route: /educational/certificates/issued
     # File: routes/certification/CertificateList/CertificateListRoute.tsx
     # -------------------------------------------------------------------------
-    issued_cert_list_page:
+    issued_cert_list_route:
       description: >
         Listing page for issued certificates. Shows stats cards and supports
         search/filter with actions like validate, download, revoke.
@@ -1424,10 +1847,11 @@ modules:
           confirmation_required: true  # prompt for reason (min 10 chars)
 
     # -------------------------------------------------------------------------
-    # CertificateDetailPage
+    # CertificateDetailRoute
+    # Route: /educational/certificates/issued/:certificateId
     # File: routes/certification/CertificateDetail/CertificateDetailRoute.tsx
     # -------------------------------------------------------------------------
-    certificate_detail_page:
+    certificate_detail_route:
       description: >
         Read-only detail page for a single issued certificate. Displays full
         certificate info with QR code, hash, and blockchain TX.
@@ -1473,10 +1897,11 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # DocumentsPage (DocumentListRoute)
+    # DocumentsRoute (DocumentListRoute)
+    # Route: /educational/certificates/documents
     # File: routes/certification/DocumentList/DocumentListRoute.tsx
     # -------------------------------------------------------------------------
-    documents_page:
+    documents_route:
       description: >
         Academic document management page. Lists documents with status
         tracking and approval workflow.
@@ -1574,13 +1999,15 @@ modules:
   admin:
 
     # -------------------------------------------------------------------------
-    # BIPage (Business Intelligence)
+    # BIRoute (Business Intelligence)
+    # Route: /bi
     # File: routes/BI/BIDashboardV2.tsx
     # -------------------------------------------------------------------------
-    bi_page:
+    bi_route:
       description: >
         Business Intelligence dashboard with tabbed navigation. Main tabs
         contain sub-tabs (Metricas/Listas/Logs). Fields are in sub-components.
+        Includes BISidebar for filtering and BIExportButton for data export.
       fields:
         - name: mainTab
           field_id: mainTab
@@ -1622,10 +2049,127 @@ modules:
             Sub-tabs for each main tab (except FinOps which has no sub-tabs).
             Global tab excludes the 'logs' sub-tab.
 
+      tabs_detail:
+
+        overview_tab:
+          label: Global
+          description: >
+            General KPIs and platform-wide metrics. Shows high-level
+            aggregated data across all classes, students, and content.
+            Sub-tabs: Metricas (charts/KPIs), Listas (tabular data).
+            Does NOT include Logs sub-tab.
+          kpis:
+            - total_students
+            - active_students
+            - total_classes
+            - total_courses
+            - completion_rate
+            - average_grade
+
+        students_tab:
+          label: Pessoas > Estudantes
+          component: BIStudentRisk
+          description: >
+            Student risk analysis dashboard. Identifies students at risk
+            of dropout or poor performance based on engagement metrics,
+            grade trends, access frequency, and activity completion rates.
+          metrics:
+            - risk_level  # alto, medio, baixo
+            - last_access_date
+            - completion_percentage
+            - average_grade
+            - access_frequency
+            - pending_activities
+
+        classes_tab:
+          label: Turmas
+          component: BIClasses
+          description: >
+            Class performance dashboard. Shows per-class metrics including
+            average grades, completion rates, attendance, and comparative
+            analysis between classes.
+          metrics:
+            - class_average_grade
+            - class_completion_rate
+            - student_count
+            - active_student_percentage
+            - content_progress
+
+        content_tab:
+          label: Conteudo
+          component: BIContent
+          description: >
+            Content usage metrics. Tracks how educational content is being
+            consumed: video watch time, document views, activity completions,
+            most/least accessed materials, and content effectiveness scores.
+          metrics:
+            - total_content_items
+            - most_accessed_content
+            - least_accessed_content
+            - average_watch_time
+            - content_completion_rate
+            - content_effectiveness_score
+
+        audit_tab:
+          label: Logs
+          component: BIAdminAudit
+          description: >
+            Admin action logs / audit trail. Records administrative actions
+            performed on the platform including user management, content
+            changes, configuration updates, and security events.
+          log_fields:
+            - timestamp
+            - admin_user
+            - action_type
+            - target_entity
+            - details
+            - ip_address
+
+        risk_tab:
+          label: Evasao
+          description: >
+            Evasion/dropout analysis. Dedicated view for analyzing student
+            dropout patterns, identifying at-risk cohorts, and tracking
+            retention metrics over time.
+          metrics:
+            - evasion_rate
+            - at_risk_count
+            - dropout_trend
+            - retention_rate
+            - risk_factors
+
       sidebar:
+        component: BISidebar
         description: >
-          BISidebar component with class filters. Shown only for 'pessoas'
-          and 'turmas' main tabs. Uses FilterProvider for URL-synced filters.
+          BISidebar component with contextual filters. Uses FilterProvider
+          for URL-synced filters. Shown conditionally based on active tab.
+        fields:
+          - name: dateRange
+            field_id: dateRange
+            type: date_range
+            required: false
+            description: >
+              Date range filter. Always visible in sidebar.
+              Filters all BI data by the selected time period.
+
+          - name: classFilter
+            field_id: classFilter
+            type: select
+            required: false
+            options: dynamic_from_api
+            description: >
+              Class filter. Conditional - shown only for 'pessoas' and
+              'turmas' main tabs. Filters data to specific class.
+
+      export:
+        component: BIExportButton
+        description: >
+          Data export button. Exports currently visible BI data in
+          downloadable format (CSV/Excel). Respects active filters
+          and selected tab context.
+        formats:
+          - csv
+          - xlsx
 
       modals: []
       actions:
@@ -1643,11 +2187,25 @@ modules:
           reversible: true
           confirmation_required: false
 
+        - name: Export Data
+          type: button
+          effect: >
+            Downloads BI data for current tab/filters via BIExportButton
+          reversible: true
+          confirmation_required: false
+
+        - name: Apply Filters
+          type: sidebar_interaction
+          effect: Updates URL-synced filters and refreshes BI data
+          reversible: true
+          confirmation_required: false
+
     # -------------------------------------------------------------------------
-    # ZoomIntegrationPage
+    # ZoomIntegrationRoute
+    # Route: /integrations/zoom
     # File: routes/integrations/ZoomInstructions/ZoomInstructionsRoute.tsx
     # -------------------------------------------------------------------------
-    zoom_integration_page:
+    zoom_integration_route:
       description: >
         Static instruction page for configuring Zoom integration.
         Step-by-step guide with no interactive form elements.
@@ -1662,13 +2220,15 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # PrivacyCenterPage
+    # PrivacyCenterRoute
+    # Route: /settings/privacy
     # File: routes/settings/PrivacyCenter/PrivacyCenterRoute.tsx
     # -------------------------------------------------------------------------
-    privacy_center_page:
+    privacy_center_route:
       description: >
-        LGPD compliance center with three tabs: Consent History, My Data,
-        and Data Deletion. Allows users to manage their privacy settings.
+        LGPD compliance center with three tabs: Consent History (Consentimentos),
+        My Data (Meus Dados), and Data Deletion (Exclusao de Dados).
+        Allows users to manage their privacy settings and exercise LGPD rights.
       fields:
         - name: activeTab
           field_id: activeTab
@@ -1697,6 +2257,97 @@ modules:
           validation: null
           description: Optional reason for data deletion request
 
+      tabs_detail:
+
+        consents_tab:
+          label: Historico de Consentimentos
+          description: >
+            Displays all signed legal documents and consent records.
+            Shows version history, timestamps, and consent methods.
+          display_fields:
+            - document_name
+            - document_version
+            - signed_at  # timestamp of when consent was given
+            - consent_method
+            - document_text_preview
+            - legal_basis
+          consent_methods:
+            - checkbox  # User explicitly checked a consent checkbox
+            - button  # User clicked an explicit "I agree" button
+            - implicit  # Consent implied by continued use (with notice)
+            - API  # Consent registered programmatically via API integration
+          features:
+            - version_tracking  # Shows which version of each document was signed
+            - timestamp_history  # Full chronological history of consent events
+            - document_preview  # Expandable preview of the legal document text
+
+        data_tab:
+          label: Meus Dados
+          description: >
+            Allows user to export all their personal data as JSON file.
+            Data preview organized by category before download.
+          export_format: JSON
+          export_filename: "meus-dados-{date}.json"
+          data_categories:
+            - profile  # name, email, phone, birthDate, etc.
+            - documents  # uploaded documents (CPF, RG, etc.)
+            - addresses  # registered addresses
+            - guardian  # guardian/responsible data (if minor)
+            - education  # enrollment, grades, courses, certificates
+            - consents  # consent history records
+          display_fields:
+            - category_name
+            - data_count_per_category
+            - legal_basis  # LGPD legal basis for processing each category
+            - retention_period  # How long data is retained (e.g., "5 years after last enrollment")
+          features:
+            - preview_by_category  # User can expand each category to preview data before export
+            - full_json_export  # Downloads complete data package
+
+        deletion_tab:
+          label: Exclusao de Dados
+          description: >
+            Request deletion of personal data per LGPD Art. 18 - Right to
+            Erasure (Direito ao Apagamento). Requires email confirmation
+            and provides status tracking for the deletion request.
+          legal_reference: "LGPD Art. 18 - Direito ao Apagamento"
+          fields:
+            - name: confirmEmail
+              field_id: confirmEmail
+              type: text
+              required: true
+              validation: must_match_user_email
+              description: >
+                User must type their registered email to confirm the
+                deletion request. Validated against current user email.
+            - name: deletionReason
+              field_id: deletionReason
+              type: text
+              required: false
+              validation: null
+              description: Optional reason for requesting data deletion
+          request_statuses:
+            - value: pending
+              label: Pendente
+              description: Request submitted, awaiting processing
+            - value: in_progress
+              label: Em Processamento
+              description: Request being processed by data protection team
+            - value: completed
+              label: Concluido
+              description: Data successfully deleted
+            - value: rejected
+              label: Rejeitado
+              description: >
+                Request rejected (e.g., legal obligation to retain data,
+                ongoing contractual relationship)
+          processing_time: "15 business days"
+          processing_notes: >
+            Upon submission, user receives email confirmation. Processing
+            takes up to 15 business days as per LGPD requirements.
+            Rejection includes justification citing the legal basis for
+            continued data retention.
+
       modals: []
 
       actions:
@@ -1704,7 +2355,16 @@ modules:
           type: button
           effect: >
             Downloads JSON file with all user data via apiClient.getMyData().
-            Creates blob and triggers download as meus-dados-{date}.json
+            Creates blob and triggers download as meus-dados-{date}.json.
+            Available in "Meus Dados" tab.
+          reversible: true
+          confirmation_required: false
+
+        - name: Preview Data Category
+          type: expandable_section
+          effect: >
+            Expands a data category section to show preview of data
+            in that category before full export.
           reversible: true
           confirmation_required: false
 
@@ -1713,6 +2373,7 @@ modules:
           effect: >
             POST deletion request via requestDeletion({ reason, confirmEmail }).
             Validates that confirmEmail matches user's actual email.
+            Available in "Exclusao de Dados" tab.
           reversible: false
           confirmation_required: true  # Email match validation
 
@@ -1728,10 +2389,11 @@ modules:
   public:
 
     # -------------------------------------------------------------------------
-    # PublicApplicationPage
+    # PublicApplicationRoute
+    # Route: /application/:processId
     # File: routes/admission/PublicApplication/PublicApplicationRoute.tsx
     # -------------------------------------------------------------------------
-    public_application_page:
+    public_application_route:
       description: >
         Multi-step public application/enrollment form wizard. Steps and fields
         are dynamically configured via form_config from the admission process.
@@ -1858,10 +2520,55 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # ApplicationStatusPage
+    # ResumeApplicationRoute
+    # Route: /application/resume/:accessToken
+    # File: routes/admission/ResumeApplication/ResumeApplicationRoute.tsx
+    # -------------------------------------------------------------------------
+    resume_application_route:
+      description: >
+        Public route for resuming an in-progress application using an
+        access token sent via email. Validates the access token and
+        redirects the user to their application form at the correct step.
+        No authentication required - token-based access.
+      fields:
+        - name: accessToken
+          field_id: accessToken
+          type: route_param
+          required: true
+          validation: valid_token
+          description: >
+            URL parameter - access token for resuming the application.
+            Sent to applicant's email when they start or request to
+            resume an application.
+
+      modals: []
+
+      actions:
+        - name: Validate Token
+          type: automatic
+          effect: >
+            On page load, validates the access token via
+            GET /api/public/applications/resume/{accessToken}.
+            If valid, redirects to application form at last saved step.
+            If invalid/expired, shows error with option to request new link.
+          reversible: false
+          confirmation_required: false
+
+        - name: Request New Access Link
+          type: button
+          effect: >
+            POST /api/public/applications/resend-access with email.
+            Sends a new access link to the applicant's email.
+          reversible: true
+          confirmation_required: false
+          condition: token_invalid_or_expired
+
+    # -------------------------------------------------------------------------
+    # ApplicationStatusRoute
+    # Route: /application/status/:candidateId
     # File: routes/admission/PublicApplicationStatus/PublicApplicationStatusRoute.tsx
     # -------------------------------------------------------------------------
-    application_status_page:
+    application_status_route:
       description: >
         Public status tracking page for admission applications. Shows
         pipeline stages, step statuses, document statuses, and contract
@@ -1936,10 +2643,11 @@ modules:
           confirmation_required: false
 
     # -------------------------------------------------------------------------
-    # CertificateValidationPage
+    # CertificateValidationRoute
+    # Route: /validate/:code?
     # File: routes/certification/PublicValidation/PublicValidationRoute.tsx
     # -------------------------------------------------------------------------
-    certificate_validation_page:
+    certificate_validation_route:
       description: >
         Public page for validating certificates and academic documents.
         Accepts a validation code and returns verification results.
