@@ -1,0 +1,69 @@
+# ============================================================================
+# Orch FAQ Bank - Perguntas Frequentes dos Usuarios
+#
+# Gerado automaticamente pelo Orch quando detecta duvidas recorrentes.
+# Cada entrada registra: pergunta, resposta, pagina, frequencia e data.
+#
+# Formato: YYYY-MM-DD_HH-MM-SS para timestamps
+# Status: active | archived | merged
+# ============================================================================
+
+metadata:
+  version: "1.0.0"
+  description: "Banco de perguntas frequentes coletadas pelo Orch"
+  created_at: "2026-02-03"
+  last_updated: "2026-02-03"
+  total_entries: 0
+  auto_generated: true
+
+# ============================================================================
+# CATEGORIAS
+# ============================================================================
+categories:
+  - id: "navigation"
+    label: "Navegacao e acesso"
+    description: "Duvidas sobre como acessar paginas, menus e funcionalidades"
+
+  - id: "fields"
+    label: "Campos e formularios"
+    description: "Duvidas sobre o que preencher, formatos e validacoes"
+
+  - id: "actions"
+    label: "Botoes e acoes"
+    description: "Duvidas sobre o que botoes fazem e consequencias"
+
+  - id: "errors"
+    label: "Erros e problemas"
+    description: "Erros recorrentes que usuarios encontram"
+
+  - id: "workflow"
+    label: "Fluxos de trabalho"
+    description: "Duvidas sobre a ordem de passos e processos"
+
+  - id: "permissions"
+    label: "Permissoes e acesso"
+    description: "Duvidas sobre niveis de acesso e autorizacoes"
+
+  - id: "concepts"
+    label: "Conceitos do sistema"
+    description: "Duvidas sobre termos e conceitos usados no sistema"
+
+# ============================================================================
+# ENTRADAS FAQ
+# ============================================================================
+entries: []
+  # Exemplo de entrada:
+  #
+  # - id: "faq-2026-02-03-001"
+  #   question: "O que e um processo seletivo?"
+  #   answer: "Um processo seletivo e o conjunto de etapas..."
+  #   category: "concepts"
+  #   module: "admission"
+  #   page_url: "/educational/admission"
+  #   frequency: 12
+  #   first_asked: "2026-02-03T10:30:00Z"
+  #   last_asked: "2026-02-03T15:45:00Z"
+  #   asked_by_count: 8
+  #   status: "active"
+  #   tags: ["processo-seletivo", "admissao", "conceito"]
+  #   related_faqs: []
