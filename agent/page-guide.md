@@ -1,7 +1,7 @@
 ---
 id: page-guide
 name: Orch
-version: 3.6.0
+version: 3.7.0
 type: assistant
 description: Agente guia contextual do sistema de gestao Cogedu - explica paginas, preenche formularios, coleta feedback, guia workflows, consulta dados com permissao, mantem memoria persistente, adapta comportamento por perfil zodiacal, envia alertas proativos e monitora metricas de uso
 author: Genesis/Synkra AIOS
@@ -19,6 +19,10 @@ field_mappings_admission: "knowledge-base/cogedu-admission-fields.yaml"
 field_mappings_educational: "knowledge-base/cogedu-educational-fields.yaml"
 field_mappings_users: "knowledge-base/cogedu-users-fields.yaml"
 field_mappings_exams: "knowledge-base/cogedu-exams-fields.yaml"
+ava_architecture_file: "knowledge-base/cogedu-ava-architecture.yaml"
+ava_pages_routes_file: "knowledge-base/cogedu-ava-pages-routes.yaml"
+ava_api_endpoints_file: "knowledge-base/cogedu-ava-api-endpoints.yaml"
+ava_data_schema_file: "knowledge-base/cogedu-ava-data-schema.yaml"
 feedback_faq_file: "feedback/faq-bank.yaml"
 feedback_improvements_file: "feedback/improvements-bank.yaml"
 insight_corrections_file: "feedback/insight-corrections.yaml"
@@ -27,7 +31,7 @@ integration_component: "apps/web/src/components/communication-hub/CommunicationH
 integration_panel: "apps/web/src/components/communication-hub/HubPanel.tsx"
 ---
 
-# @page-guide - Orch v3.6.0
+# @page-guide - Orch v3.7.0
 
 > Guia contextual inteligente do sistema de gestao Cogedu. Explica paginas, **preenche formularios**, **coleta feedback**, **guia workflows**, **consulta dados com permissao**, **lembra de tudo** via memoria persistente, **adapta sua personalidade** ao perfil comportamental de cada usuario, **envia alertas proativos** sobre situacoes criticas, e **monitora suas proprias metricas** para melhoria continua.
 
@@ -1135,6 +1139,30 @@ tools:
         - menu_items  # lista de itens do menu a clicar
         - sub_tabs    # sub-abas se aplicavel
         - url         # URL final
+
+  # === TOOLS DO AVA (Ambiente Virtual de Aprendizagem) ===
+
+  # Buscar informacao no AVA
+  - name: "search_ava"
+    type: "retrieval"
+    description: "Busca informacoes do AVA (frontend do aluno) - rotas, componentes, API endpoints, schema"
+    config:
+      knowledge_bases:
+        - "cogedu-ava-architecture"
+        - "cogedu-ava-pages-routes"
+        - "cogedu-ava-api-endpoints"
+        - "cogedu-ava-data-schema"
+      search_fields: ["description", "path", "name", "purpose", "component"]
+      top_k: 5
+      score_threshold: 0.5
+    usage: |
+      Usar quando o usuario perguntar sobre:
+      - O AVA (ambiente do aluno)
+      - Funcionalidades do player de conteudo
+      - API endpoints do backend
+      - Schema do banco de dados
+      - Rotas e paginas do AVA
+      - Diferenca entre AVA e sistema admin
 
   # === TOOLS DE ADAPTACAO COMPORTAMENTAL ===
 
@@ -2629,11 +2657,57 @@ knowledge_base:
             - "useExperienceEvents"
             - "useExperienceMetrics"
 
+  # =============================================================================
+  # BASE DE CONHECIMENTO AVA (Ambiente Virtual de Aprendizagem)
+  # =============================================================================
+  # O AVA e o frontend student-facing do Cogedu (separado do admin/gestao acima).
+  # Tech stack diferente: React 18, Router v6, Zustand v4, Tailwind v3, Axios.
+  # Documentacao completa nos arquivos externos:
+  ava_knowledge_base:
+    architecture: "knowledge-base/cogedu-ava-architecture.yaml"
+    pages_routes: "knowledge-base/cogedu-ava-pages-routes.yaml"
+    api_endpoints: "knowledge-base/cogedu-ava-api-endpoints.yaml"
+    data_schema: "knowledge-base/cogedu-ava-data-schema.yaml"
+
+  ava_summary:
+    description: "AVA - Ambiente Virtual de Aprendizagem (student-facing)"
+    version: "1.0.6"
+    tech_stack: "React 18.2 + TypeScript 5.3 + Vite 7.2 + Tailwind 3.4"
+    pages: "25+ paginas (Home, Player, Communities, Progress, Admission, etc.)"
+    api_endpoints: "~179 endpoints organizados por dominio"
+    content_players: "28+ tipos de player (video, quiz, H5P, Blockly, SCORM, etc.)"
+    features:
+      - "Autenticacao via Keycloak SSO"
+      - "Multi-tenant com Zustand store"
+      - "Gamificacao (XP, levels, streaks, badges)"
+      - "Comunidades com forum e WebSocket"
+      - "Sistema de frequencia (QR code, geolocalizacao)"
+      - "Player polimorfico (28+ tipos de conteudo)"
+      - "Admissao multi-step com assinatura digital"
+      - "Certificados com QR code de verificacao"
+      - "IA integrada (AIAssistant, FloatingAI, AIChatPlayer)"
+      - "xAPI experience events tracking"
+      - "S3 presigned URLs para upload/download"
+      - "LGPD compliance (Privacy Center)"
+      - "Acessibilidade (VLibras, dark mode)"
+
+  ava_vs_admin:
+    note: "O AVA e DIFERENTE do sistema admin (Orchestra) documentado acima"
+    differences:
+      - "AVA: React 18 | Admin: React 19"
+      - "AVA: Router v6 | Admin: Router v7"
+      - "AVA: Zustand v4 | Admin: Zustand v5"
+      - "AVA: Tailwind v3 | Admin: Tailwind v4"
+      - "AVA: Axios | Admin: React Query"
+      - "AVA: Student-facing | Admin: Gestores/Professores"
+      - "AVA: Sidebar + Header | Admin: Header-based only"
+
   # NOTA: Os campos (fields), modais (modals) e acoes (actions) de cada pagina
   # estao documentados nos arquivos externos referenciados em field_mappings acima.
   # Cada arquivo foi extraido do codigo-fonte real do Cogedu (apps/web/src/).
   # Todas as 62 rotas do router.tsx do Cogedu estao mapeadas acima.
   # Para detalhes de um campo especifico, consulte o arquivo YAML do modulo correspondente.
+  # Para duvidas sobre o AVA, consulte os arquivos ava_knowledge_base acima.
 ```
 
 ---

@@ -1,0 +1,565 @@
+# =============================================================================
+# CogEdu AVA - Arquitetura e Stack Tecnico
+# Versao: 1.0.0
+# Descricao: Ambiente Virtual de Aprendizagem (AVA) - frontend student-facing
+# Fonte: cogedu-ava-main/frontend + cogedu-ava-main/docs
+# =============================================================================
+
+project:
+  name: "CogEdu AVA"
+  type: "Ambiente Virtual de Aprendizagem"
+  version: "1.0.6"
+  description: "Frontend student-facing do sistema educacional CogEdu"
+  architecture: "Monorepo (frontend + API)"
+  workspaces:
+    - frontend/  # React SPA
+    - docs/      # API documentation
+
+# =============================================================================
+# TECH STACK
+# =============================================================================
+
+tech_stack:
+  core:
+    react: "^18.2.0"
+    react_dom: "^18.2.0"
+    typescript: "^5.3.3"
+    vite: "^7.2.6"
+    vitejs_plugin_react: "^4.2.1"
+
+  routing:
+    react_router_dom: "^6.20.0"  # v6 (diferente do admin que usa v7)
+
+  state_management:
+    zustand: "^4.4.7"  # v4 (diferente do admin que usa v5)
+    react_context: true  # 7 context providers
+
+  authentication:
+    keycloak_js: "^26.2.1"
+    flow: "OAuth2/OpenID Connect"
+    client_id: "ava"
+    realm: "cogedu"
+
+  ui_framework:
+    radix_ui_accordion: "^1.2.12"
+    radix_ui_dialog: "^1.1.15"
+    radix_ui_popover: "^1.1.15"
+    radix_ui_select: "^2.1.6"
+    radix_ui_slot: "^1.2.3"
+    geist: "^1.5.1"
+    lucide_react: "^0.344.0"
+
+  styling:
+    tailwindcss: "^3.4.0"  # v3 (diferente do admin que usa v4)
+    autoprefixer: "^10.4.16"
+    postcss: "^8.4.32"
+    class_variance_authority: "^0.7.1"
+    clsx: "^2.1.0"
+    tailwind_merge: "^2.2.0"
+
+  content_players:
+    h5p_standalone: "^3.8.0"
+    blockly: "^12.3.1"
+    scorm_again: "^2.6.7"
+    react_markdown: "^9.0.1"
+    remark_gfm: "^4.0.0"
+
+  media:
+    livekit_components_react: "^2.9.15"  # Video conferencing
+    qrcode: "^1.5.4"
+    zxing_browser: "^0.1.5"
+    zxing_library: "^0.21.3"
+
+  documents:
+    jspdf: "^3.0.4"
+    html2canvas: "^1.4.1"
+    jszip: "^3.10.1"
+
+  http:
+    axios: "^1.13.2"
+
+  i18n:
+    i18next: "^25.8.0"
+    i18next_browser_languagedetector: "^8.2.0"
+    react_i18next: "^16.5.3"
+
+  utils:
+    date_fns: "^4.1.0"
+    framer_motion: "^12.23.25"
+    isomorphic_dompurify: "^2.33.0"
+    dotenv: "^17.2.3"
+    uuid: "^13.0.0"
+
+# =============================================================================
+# DIFERENCAS AVA vs ADMIN (Orchestra)
+# =============================================================================
+
+diff_ava_vs_admin:
+  react:
+    ava: "18.2.0"
+    admin: "19.1.0"
+  react_router:
+    ava: "v6"
+    admin: "v7"
+  tailwind:
+    ava: "v3"
+    admin: "v4"
+  zustand:
+    ava: "v4"
+    admin: "v5"
+  data_fetching:
+    ava: "axios + custom hooks (sem React Query)"
+    admin: "React Query 5.89"
+  ui_library:
+    ava: "Radix UI + Geist"
+    admin: "@cogedu/ui (Radix-based)"
+  layout:
+    ava: "Sidebar + Header (StandardMenu)"
+    admin: "Header-based (MainLayout)"
+  target_user:
+    ava: "Alunos (student-facing)"
+    admin: "Gestores/Professores (admin-facing)"
+
+# =============================================================================
+# AUTENTICACAO
+# =============================================================================
+
+authentication:
+  provider: "Keycloak"
+  protocol: "OAuth2/OpenID Connect"
+
+  config:
+    base_url: "VITE_KEYCLOAK_BASE_URL (default: http://localhost:8080)"
+    realm: "VITE_KEYCLOAK_REALM (default: cogedu)"
+    client_id: "VITE_KEYCLOAK_CLIENT_ID (default: ava)"
+
+  token_storage:
+    key: "cogedu_keycloak_tokens"
+    fields:
+      - access_token
+      - refresh_token
+      - id_token
+      - expires_in
+      - refresh_expires_in
+      - expires_at
+      - refresh_expires_at
+
+  jwt_claims:
+    - tenant_id
+    - "company_id[] (array)"
+    - preferred_username
+    - given_name
+    - family_name
+    - email
+    - email_verified
+
+  auth_flow:
+    1_initial_load: "AuthProvider inicializa Keycloak, verifica tokens armazenados"
+    2_login: "Redireciona para Keycloak, salva tokens, extrai tenant do JWT"
+    3_token_refresh: "Refresh automatico antes da expiracao"
+    4_logout: "Revoga tokens, limpa localStorage, limpa cache API"
+    5_guest_mode: "Token='guest', acesso limitado"
+
+  route_guards:
+    - name: "ProtectedRoute"
+      description: "Verifica isAuthenticated, redireciona para /login"
+    - name: "RoleProtectedRoute"
+      description: "Verifica role do usuario, mostra 403"
+    - name: "AdminProtectedRoute"
+      description: "Verifica role admin, mostra 403"
+
+  auth_context_hook:
+    fields:
+      - "user (User | null)"
+      - "token (string | null)"
+      - "isAuthenticated (boolean)"
+      - "isLoading (boolean)"
+      - "login(redirectPath?: string)"
+      - "logout()"
+      - "loginAsGuest()"
+      - "updateUser(updates)"
+      - "purchasedCourses/Series/Pathways/Collections/Graduations"
+      - "purchaseCourse(courseId)"
+      - "hasCourse(courseId)"
+
+  request_headers:
+    Authorization: "Bearer {token}"
+    x-tenant-id: "{currentTenantId}"
+    x-company-id: "{currentCompanyId}"
+    Content-Type: "application/json"
+
+# =============================================================================
+# MULTI-TENANT
+# =============================================================================
+
+multi_tenant:
+  description: "Isolamento por tenant com suporte a multiplas empresas"
+
+  tenant_store:
+    library: "Zustand com persist middleware"
+    file: "src/stores/tenantStore.ts"
+    state:
+      - "currentTenantId: string | null"
+      - "currentCompanyId: string | null"
+      - "availableTenants: TenantInfo[]"
+      - "availableCompanies: CompanyInfo[]"
+      - "tenantContext: TenantContext | null"
+      - "userType: string | null (student/employee)"
+      - "companyLogo: string | null"
+      - "isInitialized: boolean"
+      - "isLoading: boolean"
+      - "isTenantsLoaded: boolean"
+
+    exported_hooks:
+      - "useTenantStore() - acesso completo"
+      - "useTenantHeaders() - headers atuais"
+      - "getTenantHeaders() - getter sincrono"
+      - "useHasMultipleTenants() - verifica multi-tenant"
+      - "useHasMultipleCompanies() - verifica multi-company"
+      - "useTenantsLoaded() - verifica inicializacao"
+
+  access_model:
+    users: "Multiplos tenants via user_tenant table"
+    companies: "Exatamente um tenant (via tenant_id)"
+    whitelabel: "Companies onde tenant_id = company_id"
+    hierarchy: "Parent-child com permissoes em cascata"
+
+  ui_components:
+    - "CompanySwitcher - Seletor de empresa"
+    - "TenantSwitcher - Seletor de tenant"
+    - "NavigateToRoleBasedRoute - Navegacao por role"
+
+# =============================================================================
+# STATE MANAGEMENT
+# =============================================================================
+
+state_management:
+  layer_1_react_context:
+    - name: "AuthProvider (AuthContext)"
+      purpose: "User data, auth state, token management, tenant switching"
+      hook: "useAuth()"
+
+    - name: "EnrollmentProvider (EnrollmentContext)"
+      purpose: "Course enrollment state (persisted em localStorage)"
+      hook: "useEnrollment()"
+
+    - name: "ChatProvider (ChatContext)"
+      purpose: "Chat/messaging state, conversations e messages"
+      hook: "useChatContext()"
+
+    - name: "GamificationProvider (GamificationContext)"
+      purpose: "Achievements, badges, points, learning streaks"
+      hook: "useGamification()"
+
+    - name: "NotificationProvider (NotificationContext)"
+      purpose: "System notifications"
+      hook: "useNotifications()"
+
+    - name: "ThemeProvider (ThemeContext)"
+      purpose: "Dark/light mode toggle"
+      hook: "useTheme()"
+
+    - name: "ToastProvider (ToastContext)"
+      purpose: "Toast notifications"
+      hook: "useToast()"
+
+  layer_2_zustand:
+    store: "tenantStore"
+    purpose: "Multi-tenant context management"
+    persistence: "localStorage"
+
+  layer_3_localStorage:
+    - "cogedu_keycloak_tokens - Access tokens"
+    - "cogedu_auth_user - Current user data"
+    - "cogedu_tenant_* - Tenant context"
+    - "cogedu_enrollment_* - Enrollment state"
+
+  layer_4_memory:
+    - "fetch interceptors"
+    - "API cache (in-memory)"
+    - "WebSocket connections"
+
+# =============================================================================
+# CONTENT PLAYER SYSTEM (28+ Players)
+# =============================================================================
+
+content_players:
+  description: "Sistema polimórfico de players renderizados pelo PlayerRenderer"
+  location: "src/components/players/"
+  renderer: "PlayerRenderer.tsx (seleciona player por component_type)"
+
+  player_types:
+    video:
+      - name: "VideoNativePlayer"
+        types: ["video_on_demand"]
+        description: "Player HTML5 nativo (MP4, WebM)"
+      - name: "VideoEmbedPlayer"
+        types: ["video_embed"]
+        description: "Videos embarcados (YouTube, Vimeo)"
+      - name: "VideoConferencePlayer"
+        types: ["video_conference"]
+        description: "Videoconferencia ao vivo (LiveKit)"
+
+    audio:
+      - name: "AudioPlayer"
+        types: ["audio", "audio_podcast", "audio_lecture"]
+        description: "Conteudo em audio"
+
+    documents:
+      - name: "PDFPlayer"
+        types: ["pdf"]
+        description: "Visualizador de PDF"
+      - name: "MarkdownPlayer"
+        types: ["markdown"]
+        description: "Renderizacao Markdown"
+      - name: "HTMLPlayer"
+        types: ["html"]
+        description: "Conteudo HTML (sanitizado com DOMPurify)"
+      - name: "RichTextPlayer"
+        types: ["rich_text"]
+        description: "Editor de texto rico"
+      - name: "ReadingPlayer"
+        types: ["reading_text"]
+        description: "Material de leitura"
+
+    interactive:
+      - name: "H5PPlayer"
+        types: ["h5p"]
+        description: "Conteudo interativo H5P"
+      - name: "BlocklyPlayer"
+        types: ["blockly"]
+        description: "Programacao visual Blockly"
+      - name: "SCORMPlayer"
+        types: ["scorm"]
+        description: "Conteudo padrao SCORM"
+      - name: "QuizPlayer"
+        types: ["formative_assessment", "summative_assessment", "self_assessment"]
+        description: "Quizzes e avaliacoes"
+      - name: "AssessmentPlayer"
+        types: ["online_quiz", "proctored_exam"]
+        description: "Provas e exames"
+
+    activities:
+      - name: "IndividualActivityPlayer"
+        types: ["trabalho_individual"]
+        description: "Atividades individuais"
+      - name: "GroupActivityPlayer"
+        types: ["trabalho_grupo"]
+        description: "Atividades em grupo"
+      - name: "HybridActivityPlayer"
+        types: ["hybrid"]
+        description: "Atividades hibridas"
+      - name: "OnlineActivityPlayer"
+        types: ["online"]
+        description: "Atividades online"
+      - name: "OnSiteActivityPlayer"
+        types: ["aula_presencial", "estagio", "palestra"]
+        description: "Atividades presenciais"
+      - name: "DiscussionGroupPlayer"
+        types: ["forum_discussion"]
+        description: "Discussoes em grupo"
+      - name: "DissertationPlayer"
+        types: ["dissertation"]
+        description: "Submissao de dissertacoes"
+
+    live:
+      - name: "LivePlayer"
+        types: ["live_streaming", "live_broadcast"]
+        description: "Streaming ao vivo"
+      - name: "MeetingMockPlayer"
+        types: ["meeting_mock"]
+        description: "Reunioes simuladas"
+
+    ai:
+      - name: "AIChatPlayer"
+        types: ["ai_assistant", "ai_qa"]
+        description: "Chatbot com IA"
+
+    resources:
+      - name: "FilePlayer"
+        types: ["file"]
+        description: "Download de arquivos"
+      - name: "LinkPlayer"
+        types: ["link"]
+        description: "Links externos"
+      - name: "ResourcePlayer"
+        types: ["resource"]
+        description: "Recursos de aprendizagem"
+
+    special:
+      - name: "PasswordProtectedPlayer"
+        types: ["password_protected"]
+        description: "Conteudo protegido por senha"
+
+  player_ui:
+    left_sidebar: "Navegacao por unidades/licoes (CollapsibleSidebarLeft)"
+    main_area: "Renderizacao do conteudo (ContentPlayerWrapper)"
+    right_sidebar: "Tabs contextuais (CollapsibleSidebarrRight)"
+    right_sidebar_tabs:
+      - "AIChatTab - Assistente IA"
+      - "MaterialsTab - Materiais relacionados"
+      - "NotesTab - Anotacoes do aluno"
+      - "CaseStudyTab - Estudos de caso"
+      - "NewsTab - Noticias/atualizacoes"
+
+  player_controls:
+    - "Play/pause, seek bar"
+    - "Velocidade (0.5x, 1x, 1.5x, 2x)"
+    - "Fullscreen toggle"
+    - "Seletor de qualidade"
+    - "Legendas/captions"
+    - "Autoplay"
+    - "Modo teatro"
+
+  progress_tracking:
+    - "Status de conclusao por componente"
+    - "Tempo gasto (time_spent_seconds)"
+    - "Bookmark/resume watching"
+    - "Continue watching widget (Home page)"
+
+# =============================================================================
+# CUSTOM HOOKS (17 hooks)
+# =============================================================================
+
+custom_hooks:
+  data_fetching:
+    - name: "useUserData"
+      purpose: "Profile do usuario atual com cache"
+    - name: "useUserType"
+      purpose: "Determina tipo (student/employee)"
+    - name: "useUserCompanies"
+      purpose: "Lista empresas do usuario"
+    - name: "useCompanyData"
+      purpose: "Detalhes da empresa"
+    - name: "useContentData"
+      purpose: "Fetch de conteudo (series, units, etc.)"
+
+  learning:
+    - name: "useProgress"
+      purpose: "Progresso de aprendizagem"
+    - name: "useAnalytics"
+      purpose: "Analytics do estudante"
+    - name: "useActivityLog"
+      purpose: "Log de atividades"
+    - name: "useRecentActivity"
+      purpose: "Atividade recente"
+    - name: "useLastWatched"
+      purpose: "Resume watching"
+    - name: "useExperienceEvents"
+      purpose: "Eventos de experiencia (xAPI)"
+
+  features:
+    - name: "useAdmission"
+      purpose: "Processo de admissao"
+    - name: "useScorm"
+      purpose: "Interacao com SCORM"
+    - name: "useScormLoader"
+      purpose: "Inicializacao SCORM"
+    - name: "useH5PLoader"
+      purpose: "Carregamento H5P"
+    - name: "useCommunityWebSocket"
+      purpose: "Atualizacoes em tempo real da comunidade"
+    - name: "usePrivacyCenter"
+      purpose: "Gestao de privacidade"
+
+# =============================================================================
+# API SERVICE LAYER
+# =============================================================================
+
+api_layer:
+  main_file: "src/lib/api.ts"
+  export_count: "314+"
+  base_url: "VITE_API_BASE_URL (vazio para relative URLs em dev)"
+
+  core_functions:
+    - name: "apiFetch<T>(path, options)"
+      purpose: "HTTP client principal com tipos genericos"
+    - name: "setupFetchInterceptor(token)"
+      purpose: "Middleware global de fetch (auth + tenant headers)"
+    - name: "updateFetchInterceptorToken(token)"
+      purpose: "Atualiza token do interceptor"
+
+  dev_proxy:
+    path: "/api"
+    target: "http://localhost:3000"
+    port: 3001
+
+  response_types:
+    api_response: "{ data: T }"
+    paginated: "{ data: T[], pagination: { total, limit, offset, hasMore } }"
+    api_error: "extends Error { status?: number, data?: unknown }"
+
+# =============================================================================
+# GAMIFICATION
+# =============================================================================
+
+gamification:
+  context: "GamificationContext"
+  stats:
+    - "currentLevel - Nivel atual"
+    - "totalXP - Experiencia total"
+    - "currentLevelXP - XP no nivel atual"
+    - "xpToNextLevel - XP para proximo nivel"
+    - "currentStreak - Dias consecutivos"
+    - "longestStreak - Melhor sequencia"
+  features:
+    - "Achievements com raridade (legendary, epic, rare, common)"
+    - "Badges com icones e datas"
+    - "Progress bars animados com gradiente"
+    - "Icones: Trophy (XP), Flame (Streak), Award (Achievements)"
+
+# =============================================================================
+# ACESSIBILIDADE
+# =============================================================================
+
+accessibility:
+  - "VLibras - Interpretacao em libras (widget)"
+  - "Dark mode completo"
+  - "Navegacao por teclado"
+  - "ARIA labels (via Radix UI)"
+  - "Foco gerenciado"
+  - "Design responsivo (mobile, tablet, desktop)"
+
+# =============================================================================
+# INTEGRACOES EXTERNAS
+# =============================================================================
+
+external_integrations:
+  - name: "Keycloak"
+    purpose: "SSO authentication"
+  - name: "ViaCEP API"
+    purpose: "Busca de endereco por CEP (Brasil)"
+  - name: "DiceBear API"
+    purpose: "Geracao de avatares"
+  - name: "YouTube/Vimeo"
+    purpose: "Embed de videos"
+  - name: "SmartPlayer"
+    purpose: "Player de video com DRM"
+  - name: "LiveKit"
+    purpose: "Videoconferencia"
+  - name: "WebSocket"
+    purpose: "Chat e notificacoes em tempo real"
+  - name: "AWS S3"
+    purpose: "Upload/download de documentos (presigned URLs)"
+  - name: "Geolocation API"
+    purpose: "Check-in por localizacao"
+
+# =============================================================================
+# S3 FILE STORAGE
+# =============================================================================
+
+s3_storage:
+  approach: "Presigned URLs (browser direto para S3)"
+  upload_flow:
+    1: "Frontend solicita presigned URL ao backend"
+    2: "Backend gera URL + documentId, salva no banco"
+    3: "Frontend faz upload direto para S3"
+    4: "Frontend notifica backend apos conclusao"
+  download_flow:
+    1: "Frontend solicita presigned download URL"
+    2: "Backend gera URL com 1h de expiracao"
+    3: "Frontend baixa direto do S3"
+  key_structure: "{tenant_id}/{document_type}/{entity_id}/{document_id}/{file_name}"
+  buckets:
+    - "S3_ADMISSION_BUCKET - Documentos de admissao"
+    - "S3_EDUCATIONAL_BUCKET - Arquivos de componentes, provas de presenca"
