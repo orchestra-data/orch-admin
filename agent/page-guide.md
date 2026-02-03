@@ -1,7 +1,7 @@
 ---
 id: page-guide
 name: Orch
-version: 3.5.1
+version: 3.6.0
 type: assistant
 description: Agente guia contextual do sistema de gestao Cogedu - explica paginas, preenche formularios, coleta feedback, guia workflows, consulta dados com permissao, mantem memoria persistente, adapta comportamento por perfil zodiacal, envia alertas proativos e monitora metricas de uso
 author: Genesis/Synkra AIOS
@@ -27,7 +27,7 @@ integration_component: "apps/web/src/components/communication-hub/CommunicationH
 integration_panel: "apps/web/src/components/communication-hub/HubPanel.tsx"
 ---
 
-# @page-guide - Orch v3.5.1
+# @page-guide - Orch v3.6.0
 
 > Guia contextual inteligente do sistema de gestao Cogedu. Explica paginas, **preenche formularios**, **coleta feedback**, **guia workflows**, **consulta dados com permissao**, **lembra de tudo** via memoria persistente, **adapta sua personalidade** ao perfil comportamental de cada usuario, **envia alertas proativos** sobre situacoes criticas, e **monitora suas proprias metricas** para melhoria continua.
 
@@ -2016,12 +2016,22 @@ knowledge_base:
   name: "cogedu-pages-guide"
   description: "Documentacao de todas as paginas do sistema de gestao Cogedu"
   tech_stack:
-    frontend: "React 19 + TypeScript + Vite"
-    ui_library: "Radix UI + Tailwind CSS"
-    state: "Zustand + React Query"
-    routing: "React Router v7"
-    validation: "Manual (useState + validate functions, sem Zod/react-hook-form)"
-    auth: "Keycloak"
+    frontend: "React 19.1 + TypeScript 5.9 + Vite 7.1"
+    ui_library: "Radix UI (via @cogedu/ui monorepo) + Tailwind CSS 4.1"
+    state: "Zustand 5.0 (primary) + React Query 5.89 (server state)"
+    routing: "React Router v7.9"
+    validation: "Manual (useState + validate functions). Zod 3.23 no package.json mas NAO usado nos forms"
+    auth: "Keycloak JS 26.0 + KeycloakAuthProvider com JWT multi-tenant"
+    i18n: "i18next 25.6 + react-i18next 16.3 (labels traduzidos, nao hardcoded)"
+    realtime: "socket.io-client 4.8 (chat, notificacoes)"
+    drag_drop: "@hello-pangea/dnd 18.0 (reordenacao de listas)"
+    rich_text: "CKEditor5 41.4"
+    charts: "Recharts 3.6 (BI dashboard)"
+    animations: "Framer Motion 11.18"
+    visual_programming: "Blockly 12.3 (jogos de programacao)"
+    toasts: "Sonner 1.7"
+    navigation: "Header-based (NAO sidebar). MainLayout > ContentLayout/OffersLayout/ExamsLayout"
+    state_deprecated: "Redux Toolkit 2.5 presente mas DEPRECATED (migrado para Zustand)"
 
   # Mapeamento completo de campos, modais e acoes de cada pagina
   # Extraido do codigo-fonte real do Cogedu (apps/web/src/)
@@ -2031,40 +2041,93 @@ knowledge_base:
     users_and_companies: "knowledge-base/cogedu-users-fields.yaml"
     exams_certs_admin_public: "knowledge-base/cogedu-exams-fields.yaml"
 
+  # Layout hierarchy: MainLayout > ContentLayout | OffersLayout | ExamsLayout
+  # Navegacao: header tabs (NAO sidebar)
+
   structure:
+    # === MODULO: AUTENTICACAO ===
+    - modulo: "auth"
+      base_route: ""
+      description: "Rotas de autenticacao e gestao de senha (sem MainLayout)"
+      pages:
+        - name: "Registro"
+          url_pattern: "/auth-register"
+          route_component: "AuthRoute"
+          description: "Registro de novo usuario"
+
+        - name: "Primeiro Acesso"
+          url_pattern: "/primeiro-acesso"
+          route_component: "FirstAccessRoute"
+          description: "Configuracao de primeiro acesso"
+
+        - name: "Definir Senha"
+          url_pattern: "/auth/set-password"
+          route_component: "SetPasswordRoute"
+          description: "Definir senha inicial (Keycloak)"
+
+        - name: "Esqueci Senha"
+          url_pattern: "/password-forgot"
+          route_component: "ForgotPasswordRoute"
+          description: "Solicitar recuperacao de senha"
+
+        - name: "Resetar Senha"
+          url_pattern: "/password-reset"
+          route_component: "ResetPasswordRoute"
+          description: "Redefinir senha via token"
+
     # === MODULO: ADMISSAO ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-admission-fields.yaml
+    # Layout: OffersLayout
     - modulo: "admission"
       base_route: "/educational/admission"
       description: "Gerenciamento do processo seletivo e matriculas"
       pages:
-        # Campos, modais e acoes detalhados em: knowledge-base/cogedu-admission-fields.yaml
         - name: "Lista de Processos Seletivos"
           url_pattern: "/educational/admission"
-          route_component: "AdmissionListPage"
+          route_component: "AdmissionsListRoute"
           description: "Tela principal com todos os processos seletivos cadastrados"
 
         - name: "Criar Processo Seletivo"
-          url_pattern: "/educational/admission/create"
-          route_component: "AdmissionCreatePage"
-          description: "Formulario para criar um novo processo seletivo"
+          url_pattern: "/educational/admission/new"
+          route_component: "AdmissionCreateRoute"
+          description: "Formulario para criar novo processo seletivo"
 
         - name: "Detalhes do Processo Seletivo"
-          url_pattern: "/educational/admission/:admissionId"
-          route_component: "AdmissionDetailPage"
-          description: "Detalhes e configuracoes de um processo seletivo"
+          url_pattern: "/educational/admission/:id"
+          route_component: "AdmissionDetailRoute"
+          description: "Detalhes, metricas e ofertas de um processo seletivo"
 
-        - name: "Ofertas do Processo"
-          url_pattern: "/educational/admission/:admissionId/offers/create"
-          route_component: "OfferCreatePage"
+        - name: "Editar Processo Seletivo"
+          url_pattern: "/educational/admission/:id/edit"
+          route_component: "AdmissionEditRoute"
+          description: "Editar processo seletivo existente"
+
+        - name: "Criar Oferta"
+          url_pattern: "/educational/admission/:admissionId/offers/new"
+          route_component: "OfferCreateRoute"
           description: "Criar oferta dentro de um processo seletivo"
 
+        - name: "Detalhes da Oferta"
+          url_pattern: "/educational/admission/offers/:offerId"
+          route_component: "OfferDetailRoute"
+          description: "Detalhes e configuracoes de uma oferta"
+
+        - name: "Editar Oferta"
+          url_pattern: "/educational/admission/offers/:offerId/edit"
+          route_component: "OfferEditRoute"
+          description: "Editar oferta existente"
+
         - name: "Form Builder"
-          url_pattern: "/educational/admission/:admissionId/offers/:offerId/form-builder"
-          route_component: "FormBuilderPage"
+          url_pattern: "/educational/admission/offers/:offerId/form-builder"
+          route_component: "FormBuilderRoute"
           description: "Construtor de formularios de inscricao com drag-and-drop"
           components:
             - "FormBuilder (drag-and-drop)"
+            - "ComponentPalette"
             - "FormPreview"
+            - "StudentPreview"
+            - "StepCard"
+            - "StepConfig"
             - "StepConfigModal"
           field_types_available:
             - text
@@ -2080,185 +2143,311 @@ knowledge_base:
             - dados-pessoais (Dados Pessoais)
             - campos (Campos Customizados)
             - documentos (Upload de Documentos)
-            - pagamento (Pagamento)
+            - pagamento (Pagamento - Em desenvolvimento)
             - avaliacao (Avaliacao)
             - contrato (Contrato)
 
         - name: "Lista de Candidatos"
           url_pattern: "/educational/admission/candidates"
-          route_component: "CandidateListPage"
-          description: "Lista de todos os candidatos inscritos"
+          route_component: "CandidatesListRoute"
+          description: "Lista de candidatos com drawer de 3 tabs (timeline, documentos, notas)"
 
         - name: "Kanban de Candidatos"
           url_pattern: "/educational/admission/candidates/kanban"
-          route_component: "CandidateKanbanPage"
-          description: "Visao kanban do pipeline de candidatos"
+          route_component: "CandidatesKanbanRoute"
+          description: "Visao kanban do pipeline (CRMKanban component)"
 
         - name: "Detalhes do Candidato"
           url_pattern: "/educational/admission/candidates/:candidateId"
-          route_component: "CandidateDetailPage"
-          description: "Detalhes e historico de um candidato"
+          route_component: "CandidateDetailRoute"
+          description: "Detalhes completos, documentos, contratos e avaliacao"
 
     # === MODULO: CONTEUDO EDUCACIONAL ===
     # Campos, modais e acoes detalhados em: knowledge-base/cogedu-educational-fields.yaml
+    # Layout: ContentLayout (sub-tabs pill-style)
     - modulo: "educational"
       base_route: "/educational"
-      description: "Gerenciamento de conteudo educacional (colecoes, trilhas, series, unidades)"
+      description: "Gerenciamento de conteudo educacional (colecoes, trilhas, series, unidades, componentes)"
+      sub_navigation: "ContentLayout pill tabs: Colecoes | Trilhas | Disciplinas | Modulos | Avaliacoes | Certificados"
       pages:
         - name: "Colecoes"
           url_pattern: "/educational/collections"
-          route_component: "CollectionListPage"
-          description: "Lista de colecoes de conteudo"
+          route_component: "CollectionListRoute"
+          description: "Lista de colecoes com filtros (status, marketplace)"
 
         - name: "Criar Colecao"
-          url_pattern: "/educational/collections/create"
-          route_component: "CollectionCreatePage"
-          description: "Formulario para criar colecao de conteudo"
+          url_pattern: "/educational/collections/new"
+          route_component: "CollectionCreateRoute"
+          description: "Formulario para criar colecao (com isOfferable para marketplace)"
+
+        - name: "Detalhes da Colecao"
+          url_pattern: "/educational/collections/:collectionId"
+          route_component: "CollectionDetailRoute"
+          description: "Detalhes com trilhas vinculadas (drag-and-drop reordenacao)"
+
+        - name: "Editar Colecao"
+          url_pattern: "/educational/collections/:collectionId/edit"
+          route_component: "CollectionEditRoute"
+          description: "Editar colecao existente"
 
         - name: "Trilhas de Aprendizagem"
           url_pattern: "/educational/pathways"
-          route_component: "PathwayListPage"
+          route_component: "PathwayListRoute"
           description: "Lista de trilhas de aprendizagem"
 
         - name: "Criar Trilha"
-          url_pattern: "/educational/pathways/create"
-          route_component: "PathwayCreatePage"
-          description: "Formulario para criar trilha de aprendizagem"
+          url_pattern: "/educational/pathways/new"
+          route_component: "PathwayCreateRoute"
+          description: "Criar trilha (multi-parent: multiplas colecoes, checkpoint thresholds)"
 
-        - name: "Series"
+        - name: "Detalhes da Trilha"
+          url_pattern: "/educational/pathways/:pathwayId"
+          route_component: "PathwayDetailRoute"
+          description: "Detalhes com series vinculadas (drag-and-drop)"
+
+        - name: "Editar Trilha"
+          url_pattern: "/educational/pathways/:pathwayId/edit"
+          route_component: "PathwayEditRoute"
+          description: "Editar trilha existente"
+
+        - name: "Disciplinas (Series)"
           url_pattern: "/educational/series"
-          route_component: "SeriesListPage"
-          description: "Lista de series de conteudo"
+          route_component: "SeriesListRoute"
+          description: "Lista de series/disciplinas de conteudo"
 
-        - name: "Unidades"
+        - name: "Criar Serie"
+          url_pattern: "/educational/series/new"
+          route_component: "SeriesCreateRoute"
+          description: "Criar serie (multi-parent, grading config, workload)"
+
+        - name: "Detalhes da Serie"
+          url_pattern: "/educational/series/:seriesId"
+          route_component: "SeriesDetailRoute"
+          description: "Detalhes com unidades vinculadas (drag-and-drop)"
+
+        - name: "Editar Serie"
+          url_pattern: "/educational/series/:seriesId/edit"
+          route_component: "SeriesEditRoute"
+          description: "Editar serie existente"
+
+        - name: "Modulos (Unidades)"
           url_pattern: "/educational/units"
-          route_component: "UnitListPage"
+          route_component: "UnitListRoute"
           description: "Lista de unidades de aprendizagem"
 
-        - name: "Builder de Unidade"
+        - name: "Criar Unidade"
+          url_pattern: "/educational/units/new"
+          route_component: "UnitCreateRoute"
+          description: "Criar unidade (multi-parent, release conditions, sequence order)"
+
+        - name: "Detalhes da Unidade"
+          url_pattern: "/educational/units/:unitId"
+          route_component: "UnitDetailRoute"
+          description: "Detalhes com componentes vinculados e botao Open Builder"
+
+        - name: "Editar Unidade"
+          url_pattern: "/educational/units/:unitId/edit"
+          route_component: "UnitEditRoute"
+          description: "Editar unidade existente"
+
+        - name: "Component Builder"
           url_pattern: "/educational/units/:unitId/builder"
-          route_component: "UnitBuilderPage"
-          description: "Construtor visual de unidade (arrastar e soltar componentes de conteudo)"
+          route_component: "ComponentBuilderRoute"
+          description: "Construtor visual de componentes de conteudo"
           components:
             - "ComponentCanvas (area de construcao)"
-            - "ConfigPanel (painel de configuracao - componente complexo)"
-            - "TemplateSidebar (sidebar de templates)"
+            - "ConfigPanel (painel de configuracao)"
+            - "TemplateSidebar (sidebar com categorias: Media, Activity, Assessment, Resource)"
             - "ComponentFileUpload"
             - "ComponentPdfUpload"
             - "ComponentH5pUpload"
             - "ComponentScormUpload"
+            - "SmartPlayerUpload"
             - "AssessmentConfigSection"
             - "ActivityGradingConfigSection"
             - "ShareWithUnitsDialog"
             - "AttendanceProofList"
             - "GroupWorkManagement"
+            - "PasswordPrompt"
+          component_types:
+            - video
+            - text
+            - quiz
+            - formative_assessment
+            - summative_assessment
+            - assignment
+            - discussion
+            - link
+            - file
+            - interactive
+            - live_session
+          feature_flags:
+            - xAPI Tracking
+            - AI Features
+            - Annotations
+            - AI Q&A Assistant
+            - Group Work
+            - Discussion Groups
+            - Proctoring
+            - Anti-Plagiarism
 
     # === MODULO: TURMAS ===
     # Campos, modais e acoes detalhados em: knowledge-base/cogedu-educational-fields.yaml (class-instances section)
+    # Layout: OffersLayout
     - modulo: "class-instances"
       base_route: "/educational/class-instances"
-      description: "Gerenciamento de turmas, matriculas e atividades"
+      description: "Gerenciamento de turmas, matriculas, atividades e recomendacoes"
       pages:
         - name: "Lista de Turmas"
           url_pattern: "/educational/class-instances"
-          route_component: "ClassInstanceListPage"
-          description: "Lista de todas as turmas cadastradas"
+          route_component: "ClassInstanceListRoute"
+          description: "Lista com filtros (status, delivery mode, search)"
 
         - name: "Criar Turma"
-          url_pattern: "/educational/class-instances/create"
-          route_component: "ClassInstanceCreatePage"
-          description: "Formulario para criar nova turma"
+          url_pattern: "/educational/class-instances/new"
+          route_component: "ClassInstanceCreateRoute"
+          description: "Formulario com 3 secoes (conteudo, config, identificacao)"
 
         - name: "Detalhes da Turma"
           url_pattern: "/educational/class-instances/:id"
-          route_component: "ClassInstanceDetailPage"
-          description: "Detalhes e configuracoes de uma turma"
+          route_component: "ClassInstanceDetailStudentView"
+          description: "Visao do aluno da turma"
+
+        - name: "Detalhes da Turma (Simples)"
+          url_pattern: "/educational/class-instances/:id/simple"
+          route_component: "ClassInstanceDetailRoute"
+          description: "Detalhes admin com notificacoes, chat e acoes"
+
+        - name: "Editar Turma"
+          url_pattern: "/educational/class-instances/:id/edit"
+          route_component: "ClassInstanceEditRoute"
+          description: "Editar turma existente"
+
+        - name: "Recomendacoes IA"
+          url_pattern: "/educational/class-instances/:id/recommendations"
+          route_component: "RecommendationsRoute"
+          description: "Recomendacoes de IA para a turma"
 
         - name: "Matriculas da Turma"
-          url_pattern: "/educational/class-instances/:id/enrollments"
-          route_component: "EnrollmentListPage"
+          url_pattern: "/educational/class-instances/:classInstanceId/enrollments"
+          route_component: "ClassEnrollmentListRoute"
           description: "Lista de alunos matriculados na turma"
 
         - name: "Nova Matricula"
-          url_pattern: "/educational/class-instances/:id/enrollments/create"
-          route_component: "EnrollmentCreatePage"
-          description: "Formulario para matricular aluno na turma"
+          url_pattern: "/educational/class-instances/:classInstanceId/enrollments/new"
+          route_component: "ClassEnrollmentCreateRoute"
+          description: "Matricular aluno na turma"
 
         - name: "Atividades da Turma"
-          url_pattern: "/educational/class-instances/:id/activities"
-          route_component: "ClassActivitiesPage"
-          description: "Atividades e exercicios vinculados a turma"
+          url_pattern: "/educational/class-instances/:classInstanceId/activities"
+          route_component: "ActivityManagementRoute"
+          description: "Gerenciamento de atividades da turma"
 
     # === MODULO: AVALIACOES ===
     # Campos, modais e acoes detalhados em: knowledge-base/cogedu-exams-fields.yaml
+    # Layout: ContentLayout > ExamsLayout (sub-tabs com icones)
     - modulo: "exams"
       base_route: "/educational/exams"
-      description: "Gerenciamento de avaliacoes, questoes, rubricas e proctoring"
+      description: "Gerenciamento de avaliacoes, questoes, rubricas, blockly e proctoring"
+      sub_navigation: "ExamsLayout tabs: Suas Avaliacoes | Atividades | Banco de Questoes | Construtor | Rubricas | Blockly"
       pages:
         - name: "Suas Avaliacoes"
           url_pattern: "/educational/exams/your-evaluations"
-          route_component: "YourEvaluationsPage"
-          description: "Avaliacoes criadas pelo usuario logado"
+          route_component: "YourEvaluationsRoute"
+          description: "Avaliacoes do usuario (TutorAssessments, AssessmentGradingView)"
 
         - name: "Suas Atividades"
           url_pattern: "/educational/exams/your-activities"
-          route_component: "YourActivitiesPage"
-          description: "Atividades atribuidas ao usuario"
+          route_component: "YourActivitiesRoute"
+          description: "Atividades atribuidas (TutorActivities)"
 
         - name: "Banco de Questoes"
           url_pattern: "/educational/exams/bank"
-          route_component: "QuestionBankPage"
-          description: "Repositorio de questoes reutilizaveis"
+          route_component: "BankRoute"
+          description: "Repositorio de questoes com filtros (dificuldade, tipo, tags)"
 
         - name: "Nova Questao"
           url_pattern: "/educational/exams/questions/new"
-          route_component: "QuestionCreatePage"
-          description: "Formulario para criar nova questao"
+          route_component: "QuestionCreateRoute"
+          description: "Criar questao (manual ou via IA - QuestionAiModal)"
 
         - name: "Builder de Avaliacao"
           url_pattern: "/educational/exams/builder"
-          route_component: "ExamBuilderPage"
-          description: "Construtor visual de avaliacoes"
+          route_component: "BuilderRoute"
+          description: "Construtor de avaliacoes (AssessmentBuilderList)"
 
         - name: "Rubricas"
           url_pattern: "/educational/exams/rubrics"
-          route_component: "RubricListPage"
+          route_component: "RubricsRoute"
           description: "Lista de rubricas de avaliacao"
+
+        - name: "Editar Rubrica"
+          url_pattern: "/educational/exams/rubrics/:rubricId/edit"
+          route_component: "RubricEditRoute"
+          description: "Editor de rubrica (RubricBuilder + RubricGradingMatrix)"
 
         - name: "Jogos Blockly"
           url_pattern: "/educational/exams/blockly-games"
-          route_component: "BlocklyGamesListPage"
+          route_component: "BlocklyGameListRoute"
           description: "Lista de jogos de programacao visual"
+
+        - name: "Criar Jogo Blockly"
+          url_pattern: "/educational/exams/blockly-games/new"
+          route_component: "BlocklyGameCreateRoute"
+          description: "Criar novo jogo de programacao"
+
+        - name: "Editar Jogo Blockly"
+          url_pattern: "/educational/exams/blockly-games/:gameId/edit"
+          route_component: "BlocklyGameEditRoute"
+          description: "Editar jogo de programacao existente"
+
+        - name: "Corrigir Atividade"
+          url_pattern: "/educational/exams/activity-grade/:attemptId"
+          route_component: "ActivityGradingRoute"
+          description: "Interface de correcao de tentativa de atividade"
+
+        - name: "Broker"
+          url_pattern: "/educational/exams/broker"
+          route_component: "BrokerRoute"
+          description: "Broker de avaliacoes (coming soon)"
 
         - name: "Proctoring"
           url_pattern: "/educational/exams/proctoring"
-          route_component: "ProctoringPage"
-          description: "Monitoramento de provas online"
+          route_component: "ProctoringRoute"
+          description: "Monitoramento de provas online (coming soon)"
 
     # === MODULO: CERTIFICADOS ===
     # Campos, modais e acoes detalhados em: knowledge-base/cogedu-exams-fields.yaml (certification section)
     - modulo: "certification"
       base_route: "/educational/certificates"
-      description: "Gerenciamento de certificados, templates e documentos"
+      description: "Gerenciamento de certificados, templates e documentos academicos"
       pages:
         - name: "Templates de Certificado"
           url_pattern: "/educational/certificates/templates"
-          route_component: "CertTemplateListPage"
+          route_component: "CertificateTemplateListRoute"
           description: "Lista de modelos de certificado"
 
-        - name: "Criar Template"
-          url_pattern: "/educational/certificates/templates/create"
-          route_component: "CertTemplateCreatePage"
-          description: "Formulario para criar modelo de certificado"
+        - name: "Criar/Editar Template"
+          url_pattern: "/educational/certificates/templates/new"
+          route_component: "CertificateTemplateEditorRoute"
+          description: "Editor visual de template de certificado (canvas-based)"
+          url_variants:
+            - "/educational/certificates/templates/:templateId"
+            - "/educational/certificates/templates/:templateId/edit"
 
         - name: "Certificados Emitidos"
           url_pattern: "/educational/certificates/issued"
-          route_component: "IssuedCertListPage"
-          description: "Lista de certificados ja emitidos"
+          route_component: "CertificateListRoute"
+          description: "Lista de certificados emitidos (busca, filtro, revogacao)"
 
-        - name: "Documentos"
+        - name: "Detalhes do Certificado"
+          url_pattern: "/educational/certificates/issued/:certificateId"
+          route_component: "CertificateDetailRoute"
+          description: "Detalhes do certificado emitido"
+
+        - name: "Documentos Academicos"
           url_pattern: "/educational/certificates/documents"
-          route_component: "DocumentsPage"
+          route_component: "DocumentListRoute"
           description: "Gerenciamento de documentos academicos"
 
     # === MODULO: USUARIOS ===
@@ -2269,37 +2458,40 @@ knowledge_base:
       pages:
         - name: "Lista de Usuarios"
           url_pattern: "/users"
-          route_component: "UserListPage"
-          description: "Lista de todos os usuarios do sistema"
+          route_component: "UserListRoute"
+          description: "Lista com filtro por tipo (employee/student) e busca"
 
         - name: "Criar Usuario"
-          url_pattern: "/users/create"
-          route_component: "UserCreatePage"
-          description: "Formulario para cadastrar novo usuario"
+          url_pattern: "/users/new"
+          route_component: "UserCreateRoute"
+          description: "Formulario generico com 5 tabs (Identity, Affiliation, Addresses, +Info, Permissions)"
 
         - name: "Criar Aluno"
-          url_pattern: "/users/create/student"
-          route_component: "StudentCreatePage"
-          description: "Formulario especifico para cadastrar aluno"
+          url_pattern: "/users/newStudent"
+          route_component: "StudentCreateRoute"
+          description: "Formulario de aluno com 3 tabs (Identity, Addresses, +Info)"
 
         - name: "Criar Funcionario"
-          url_pattern: "/users/create/employee"
-          route_component: "EmployeeCreatePage"
-          description: "Formulario especifico para cadastrar funcionario"
+          url_pattern: "/users/newEmployee"
+          route_component: "EmployeeCreateRoute"
+          description: "Formulario de funcionario com 4 tabs (Identity, Addresses, +Info, Permissions)"
 
         - name: "Detalhes do Usuario"
           url_pattern: "/users/:userId"
-          route_component: "UserDetailPage"
-          description: "Perfil e detalhes do usuario"
+          route_component: "UserDetailRoute"
+          description: "Perfil com edicao por blocos (identity, documents, addresses, etc.)"
           components:
             - "ProfilePhotoCard"
             - "ChangePasswordBlock"
             - "AdminActionsBlock"
+            - "UserChat"
+            - "PermissionsConfigurator"
+            - "CFManagerModal"
 
         - name: "Upload em Lote"
           url_pattern: "/users/batch-students"
-          route_component: "BatchStudentsPage"
-          description: "Upload de planilha para cadastro em massa de alunos"
+          route_component: "BatchStudentUploadRoute"
+          description: "Upload de planilha Excel para cadastro em massa de alunos"
 
     # === MODULO: EMPRESAS ===
     # Campos, modais e acoes detalhados em: knowledge-base/cogedu-users-fields.yaml (companies section)
@@ -2309,44 +2501,68 @@ knowledge_base:
       pages:
         - name: "Lista de Empresas"
           url_pattern: "/companies"
-          route_component: "CompanyListPage"
-          description: "Lista de empresas cadastradas"
+          route_component: "CompanyListRoute"
+          description: "Lista com filtro por grupo (internal/external)"
 
         - name: "Criar Empresa"
-          url_pattern: "/companies/create"
-          route_component: "CompanyCreatePage"
-          description: "Formulario para cadastrar nova empresa"
+          url_pattern: "/companies/new"
+          route_component: "CompanyCreateRoute"
+          description: "Wizard 7 tabs (Identity, Location, +Info, Visual ID, Resources, Integration, Summary)"
 
         - name: "Detalhes da Empresa"
           url_pattern: "/companies/:companyId"
-          route_component: "CompanyDetailPage"
-          description: "Detalhes e configuracoes da empresa"
+          route_component: "CompanyDetailRoute"
+          description: "Detalhes com edicao por blocos e 8 tabs"
+
+        - name: "Criar Evento"
+          url_pattern: "/companies/:companyId/events/new"
+          route_component: "EventCreateRoute"
+          description: "Criar evento para a empresa"
+
+        - name: "Detalhes do Evento"
+          url_pattern: "/companies/:companyId/events/:eventId"
+          route_component: "EventDetailRoute"
+          description: "Detalhes de um evento da empresa"
+
+        - name: "Editar Evento"
+          url_pattern: "/companies/:companyId/events/:eventId/edit"
+          route_component: "EventEditRoute"
+          description: "Editar evento existente"
 
     # === MODULO: ADMINISTRATIVO ===
     # Campos, modais e acoes detalhados em: knowledge-base/cogedu-exams-fields.yaml (admin section)
     - modulo: "admin"
       base_route: "/"
-      description: "Paginas administrativas e configuracoes"
+      description: "Paginas administrativas, BI, privacidade e integracoes"
       pages:
         - name: "Home / Dashboard"
           url_pattern: "/"
-          route_component: "HomePage"
+          route_component: "HomeRoute"
           description: "Pagina inicial com visao geral"
 
         - name: "Central de Privacidade"
           url_pattern: "/privacy"
-          route_component: "PrivacyCenterPage"
-          description: "Gerenciamento de consentimentos e LGPD"
+          route_component: "PrivacyCenterRoute"
+          description: "LGPD Art. 18 - 3 tabs: Consentimentos, Meus Dados, Exclusao"
 
         - name: "BI Dashboard"
           url_pattern: "/bi"
-          route_component: "BIPage"
-          description: "Dashboard de Business Intelligence"
+          route_component: "BIRoute"
+          description: "Business Intelligence com 6 tabs (Overview, Students, Classes, Content, Audit, Risk)"
+          components:
+            - "BIDashboard / BIDashboardV2"
+            - "BIOverview"
+            - "BIStudentRisk"
+            - "BIClasses"
+            - "BIContent"
+            - "BIAdminAudit"
+            - "BISidebar (filtros: data, turma)"
+            - "BIExportButton"
 
         - name: "Integracoes Zoom"
           url_pattern: "/integrations/zoom"
-          route_component: "ZoomIntegrationPage"
-          description: "Configuracao de integracao com Zoom"
+          route_component: "ZoomInstructionsRoute"
+          description: "Guia passo-a-passo de configuracao do Zoom"
 
     # === PAGINAS PUBLICAS ===
     # Campos, modais e acoes detalhados em: knowledge-base/cogedu-exams-fields.yaml (public section)
@@ -2356,23 +2572,67 @@ knowledge_base:
       pages:
         - name: "Formulario de Inscricao"
           url_pattern: "/apply/:offerId"
-          route_component: "PublicApplicationPage"
-          description: "Formulario publico de inscricao em oferta"
+          route_component: "PublicApplicationRoute"
+          description: "Formulario publico multi-step de inscricao em oferta"
 
         - name: "Status da Inscricao"
           url_pattern: "/application/status/:accessToken"
-          route_component: "ApplicationStatusPage"
+          route_component: "PublicApplicationStatusRoute"
           description: "Acompanhamento do status da inscricao"
+
+        - name: "Retomar Inscricao"
+          url_pattern: "/application/resume/:accessToken"
+          route_component: "ResumeApplicationRoute"
+          description: "Retomar inscricao em andamento"
 
         - name: "Validar Certificado"
           url_pattern: "/validate/:code"
-          route_component: "CertificateValidationPage"
+          route_component: "PublicValidationRoute"
           description: "Validacao publica de certificados via codigo"
+
+    # === SISTEMAS TRANSVERSAIS (nao sao modulos de rota, mas componentes globais) ===
+    - modulo: "cross-cutting"
+      base_route: ""
+      description: "Sistemas que operam em multiplas paginas sem rota propria"
+      systems:
+        - name: "Communication Hub"
+          description: "Chat global do sistema (renderizado em app.tsx)"
+          components:
+            - "CommunicationHub"
+            - "ChatScreen"
+            - "HubPanel"
+            - "FloatingHubButton"
+            - "Dock"
+          context: "ChatContext"
+
+        - name: "Attendance System"
+          description: "Sistema de presenca (QR check-in, justificativas, risco)"
+          components:
+            - "BulkAttendanceForm"
+            - "CheckinPopup"
+            - "QRCodeDisplay"
+            - "QRCodeScanner"
+            - "AttendanceProgressBar"
+            - "AttendanceStatusBadge"
+            - "RiskIndicator"
+          hook: "useAttendanceControl"
+
+        - name: "Legal Consent"
+          description: "Gestao de consentimento LGPD (modal global)"
+          components:
+            - "ConsentModal"
+          hook: "useLegalConsent"
+
+        - name: "Experience Tracking"
+          description: "Telemetria xAPI-like de aprendizagem"
+          hooks:
+            - "useExperienceEvents"
+            - "useExperienceMetrics"
 
   # NOTA: Os campos (fields), modais (modals) e acoes (actions) de cada pagina
   # estao documentados nos arquivos externos referenciados em field_mappings acima.
   # Cada arquivo foi extraido do codigo-fonte real do Cogedu (apps/web/src/).
-  # A estrutura acima mapeia todas as rotas existentes no router.tsx do Cogedu.
+  # Todas as 62 rotas do router.tsx do Cogedu estao mapeadas acima.
   # Para detalhes de um campo especifico, consulte o arquivo YAML do modulo correspondente.
 ```
 
