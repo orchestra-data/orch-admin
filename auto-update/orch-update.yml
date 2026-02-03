@@ -1,0 +1,98 @@
+# GitHub Action: Orch Knowledge Base Auto-Update
+#
+# Roda automaticamente quando o Cogedu recebe push no main.
+# Escaneia o codebase, detecta paginas/campos novos e atualiza o YAML.
+#
+# SETUP:
+# 1. Copiar este arquivo para .github/workflows/ no repo do Cogedu
+# 2. Configurar secret ORCH_ADMIN_PAT com token de acesso ao repo orch-admin
+# 3. Ajustar paths se necessario
+
+name: Orch KB Auto-Update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/src/routes/**'
+      - 'apps/web/src/components/**'
+      - 'apps/web/src/router.tsx'
+      - 'apps/web/src/validation/**'
+
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (nao escreve mudancas)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  scan-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Cogedu
+        uses: actions/checkout@v4
+        with:
+          path: cogedu
+
+      - name: Checkout Orch Admin
+        uses: actions/checkout@v4
+        with:
+          repository: orchestra-data/orch-admin
+          token: ${{ secrets.ORCH_ADMIN_PAT }}
+          path: orch-admin
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd orch-admin/auto-update
+          npm install yaml typescript tsx
+
+      - name: Run Orch Scanner
+        run: |
+          cd orch-admin
+          npx tsx auto-update/orch-scanner.ts \
+            --cogedu-path=../cogedu \
+            --output=./knowledge-base/cogedu-pages-guide.yaml \
+            ${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
+
+      - name: Check for changes
+        id: changes
+        run: |
+          cd orch-admin
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and Push
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          cd orch-admin
+          git config user.name "Orch Scanner Bot"
+          git config user.email "steevens@gmail.com"
+          git add knowledge-base/
+          git commit -m "chore(kb): auto-update knowledge base from Cogedu changes
+
+          Detected changes in Cogedu routes/components.
+          Scanner updated the knowledge base automatically.
+
+          Source commit: ${{ github.sha }}
+          Triggered by: ${{ github.event_name }}"
+          git push
+
+      - name: Summary
+        run: |
+          echo "## Orch Scanner Results" >> $GITHUB_STEP_SUMMARY
+          if [ -f orch-admin/knowledge-base/scan-report.md ]; then
+            cat orch-admin/knowledge-base/scan-report.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No report generated" >> $GITHUB_STEP_SUMMARY
+          fi
