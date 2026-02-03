@@ -1,0 +1,2324 @@
+# ============================================================================
+# Cogedu - Users & Companies Modules: Fields, Modals & Actions
+# Extracted from source code analysis
+# ============================================================================
+
+modules:
+  # ==========================================================================
+  # USERS MODULE
+  # ==========================================================================
+
+  UserListPage:
+    file: routes/UserList/UserList.tsx
+    component: UserListRoute
+    description: >
+      Lists all users (employees and students) with search, filtering by type,
+      pagination (infinite scroll), and delete actions.
+
+    fields:
+      - name: Search
+        field_id: q
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: Free text search filtering by fullName or email (client-side)
+
+      - name: Type Filter
+        field_id: typeFilter
+        type: toggle_pill
+        required: false
+        validation: null
+        options:
+          - employee
+          - student
+        default: employee
+        description: Switches between employee and student listing
+
+    modals: []
+
+    actions:
+      - name: New Employee
+        type: navigation
+        effect: "navigate('/users/newEmployee')"
+        reversible: false
+        confirmation_required: false
+        condition: "typeFilter === 'employee'"
+
+      - name: New Student
+        type: navigation
+        effect: "navigate('/users/newStudent')"
+        reversible: false
+        confirmation_required: false
+        condition: "typeFilter === 'student'"
+
+      - name: Batch Import
+        type: navigation
+        effect: "navigate('/users/batch-students')"
+        reversible: false
+        confirmation_required: false
+        condition: "typeFilter === 'student'"
+        icon: FileUp
+
+      - name: Delete User
+        type: mutation
+        effect: "apiClient.deleteUser({ id: userId })"
+        reversible: false
+        confirmation_required: true
+        confirmation_message: "users.deleteConfirmMessage (window.confirm)"
+        icon: Trash2
+
+      - name: View User Details
+        type: navigation
+        effect: "navigate('/users/{id}')"
+        reversible: false
+        confirmation_required: false
+        trigger: Card click
+
+      - name: Load More
+        type: pagination
+        effect: "list.fetchNextPage()"
+        reversible: false
+        confirmation_required: false
+        condition: list.hasNextPage
+
+  # --------------------------------------------------------------------------
+
+  UserCreatePage:
+    file: routes/UserCreate/UserCreate.tsx
+    component: UserCreateRoute
+    description: >
+      Generic user creation wizard with tabs. Supports both employee and student
+      user types. Has draft persistence via localStorage.
+
+    tabs:
+      - id: 0
+        label: Identidade
+      - id: 1
+        label: Vinculacao
+      - id: 2
+        label: Enderecos
+      - id: 4
+        label: +Informacoes
+      - id: 5
+        label: Permissoes (employees only)
+
+    fields:
+      # --- Tab 0: Identity ---
+      - name: Full Name
+        field_id: fullName
+        type: text
+        required: true
+        validation: "non-empty trim"
+        options: null
+
+      - name: Social Name
+        field_id: socialName
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Email
+        field_id: email
+        type: email
+        required: true
+        validation: "regex: /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/"
+        options: null
+
+      - name: Phone
+        field_id: phone
+        type: text
+        required: false
+        validation: null
+        options: null
+        formatting: "formatPhoneBR when countryCode === 'BR'"
+
+      - name: Country Code
+        field_id: countryCode
+        type: text
+        required: false
+        validation: null
+        options: null
+        default: BR
+
+      - name: Birth Date
+        field_id: birthDate
+        type: date
+        required: false
+        validation: null
+        options: null
+
+      - name: Gender
+        field_id: gender
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: masc
+            label: Masculino
+          - value: fem
+            label: Feminino
+          - value: nao-binario
+            label: Nao Binario
+          - value: nao-informado
+            label: Prefere nao informar
+          - value: outro
+            label: Outro
+
+      - name: User Type
+        field_id: userType
+        type: toggle_pill
+        required: true
+        validation: null
+        options:
+          - employee
+          - student
+
+      - name: Status
+        field_id: status
+        type: select
+        required: true
+        validation: null
+        options:
+          employee:
+            - atual
+            - ex-colaborador
+          student:
+            - ingresso
+            - egresso
+            - evadido
+            - trancado
+
+      - name: Primary Document Type
+        field_id: primaryDocument.type
+        type: select
+        required: true
+        validation: null
+        options:
+          - CPF
+          - CNPJ
+          - RG
+          - PASSAPORTE
+        note: "Hidden when countryCode === 'BR' (defaults to CPF)"
+
+      - name: Primary Document Value
+        field_id: primaryDocument.value
+        type: text
+        required: true
+        validation: "CPF: 11 digits / CNPJ: 14 digits"
+        options: null
+        formatting: "formatCpf / formatCnpj auto-mask"
+
+      # --- Tab 0: Other Documents (dynamic array) ---
+      - name: Additional Document Type
+        field_id: "documents[].type"
+        type: select
+        required: false
+        validation: null
+        options:
+          - CNPJ
+          - RG
+          - PASSAPORTE
+
+      - name: Additional Document Value
+        field_id: "documents[].value"
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Additional Document Country
+        field_id: "documents[].countryCode"
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Additional Document Primary
+        field_id: "documents[].isPrimary"
+        type: checkbox
+        required: false
+        validation: null
+        options: null
+
+      # --- Tab 1: Affiliation (Employee) ---
+      - name: Company
+        field_id: employeeProfile.companyId
+        type: select
+        required: true
+        validation: non-empty
+        options: "dynamic - fetched from useCompanies()"
+        condition: "userType === 'employee'"
+
+      - name: Position / Role Title
+        field_id: employeeProfile.roleTitle
+        type: text
+        required: true
+        validation: non-empty
+        options: null
+        condition: "userType === 'employee'"
+
+      - name: System Role
+        field_id: selectedRoleId
+        type: select
+        required: false
+        validation: null
+        options: "dynamic - fetched from apiClient.listRoles()"
+        condition: "userType === 'employee'"
+
+      # --- Tab 1: Affiliation (Student) ---
+      - name: Institution
+        field_id: studentProfile.institutionId
+        type: select
+        required: true
+        validation: non-empty
+        options: "dynamic - fetched from useCompanies()"
+        condition: "userType === 'student'"
+
+      - name: Course Name
+        field_id: studentProfile.courseName
+        type: text
+        required: true
+        validation: non-empty
+        options: null
+        condition: "userType === 'student'"
+
+      # --- Tab 2: Addresses (dynamic array) ---
+      - name: CEP (Postal Code)
+        field_id: "addresses[].postalCode"
+        type: text
+        required: false
+        validation: "8 digits for ViaCEP lookup"
+        options: null
+        formatting: formatCep
+        auto_fill: "ViaCEP - fills street, district, city, state, complement"
+
+      - name: Street
+        field_id: "addresses[].street"
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Number
+        field_id: "addresses[].number"
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: District
+        field_id: "addresses[].district"
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: State (UF)
+        field_id: "addresses[].state"
+        type: text
+        required: false
+        validation: "maxLength: 2"
+        options: null
+
+      - name: City
+        field_id: "addresses[].city"
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Complement
+        field_id: "addresses[].complement"
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      # --- Tab 4: +Informacoes (Custom Fields) ---
+      - name: Custom Field Set Selection
+        field_id: customFieldSetSlug
+        type: button_group
+        required: false
+        validation: null
+        options: "dynamic - fetched from apiClient.listUserCFSets()"
+        description: "Applies preset CF set sections"
+
+      - name: Custom Section Entry Key
+        field_id: "customSections[].entries[].key"
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Custom Section Entry Value
+        field_id: "customSections[].entries[].value"
+        type: "dynamic (text | select | checkbox | date | number)"
+        required: false
+        validation: null
+        options: "dynamic - based on cfDefsByKey dataType"
+
+      # --- Tab 5: Permissions (employee only) ---
+      - name: Permissions
+        field_id: permissions
+        type: component
+        required: false
+        validation: null
+        options: null
+        component: PermissionsConfigurator
+        description: "Global and per-unit permissions configuration"
+
+    modals: []
+
+    actions:
+      - name: Next Tab
+        type: navigation_internal
+        effect: "Advance to next wizard tab"
+        reversible: true
+        confirmation_required: false
+
+      - name: Previous Tab
+        type: navigation_internal
+        effect: "Go back to previous wizard tab"
+        reversible: true
+        confirmation_required: false
+
+      - name: Submit / Create User
+        type: mutation
+        effect: "apiClient.createUser(body) + optional apiClient.assignRoleToUser()"
+        reversible: false
+        confirmation_required: false
+        validation: "Validates all required fields per tab before advancing"
+
+      - name: Add Document
+        type: ui_action
+        effect: "Adds new empty document to documents array"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remove Document
+        type: ui_action
+        effect: "Removes document from documents array by index"
+        reversible: false
+        confirmation_required: false
+
+      - name: Add Address
+        type: ui_action
+        effect: "Adds new empty address to addresses array"
+        reversible: true
+        confirmation_required: false
+
+      - name: CEP Lookup
+        type: api_call
+        effect: "lookupCep(digits) via ViaCEP - auto-fills address fields"
+        reversible: false
+        confirmation_required: false
+
+      - name: Photo Upload
+        type: file_upload
+        effect: "Upload photo to S3 via apiClient.uploadUserPhoto()"
+        reversible: true
+        confirmation_required: false
+        validation: "Max 5MB; formats: PNG, JPG, WebP"
+
+  # --------------------------------------------------------------------------
+
+  StudentCreatePage:
+    file: routes/UserCreate/StudentCreate.tsx
+    component: StudentCreateRoute
+    description: >
+      Dedicated student creation wizard with 3 tabs (Identidade, Enderecos,
+      +Informacoes). Includes photo upload, social media, guardian info,
+      custom fields with CF Manager modal. Draft persisted to localStorage.
+
+    tabs:
+      - id: 0
+        label: Identidade
+      - id: 1
+        label: Enderecos
+      - id: 2
+        label: +Informacoes
+
+    fields:
+      # --- Tab 0: Identidade ---
+      - name: Full Name
+        field_id: fullName
+        type: text
+        required: true
+        validation: "non-empty trim"
+        options: null
+
+      - name: Social Name
+        field_id: socialName
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Email
+        field_id: email
+        type: email
+        required: true
+        validation: "regex: /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/"
+        options: null
+
+      - name: Phone
+        field_id: phone
+        type: text
+        required: true
+        validation: non-empty
+        options: null
+        formatting: "formatPhoneBR when countryCode === 'BR'"
+
+      - name: Country Code
+        field_id: countryCode
+        type: text
+        required: false
+        validation: "maxLength: 2"
+        options: null
+        default: BR
+
+      - name: Birth Date
+        field_id: birthDate
+        type: date
+        required: false
+        validation: null
+        options: null
+
+      - name: Gender
+        field_id: gender
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: masc
+            label: Masculino
+          - value: fem
+            label: Feminino
+          - value: nao-binario
+            label: Nao Binario
+          - value: nao-informado
+            label: Prefere nao informar
+          - value: outro
+            label: Outro
+        default: other
+
+      - name: Status
+        field_id: status
+        type: select
+        required: false
+        validation: null
+        options:
+          - ingresso
+          - egresso
+          - evadido
+        default: ingresso
+
+      - name: Primary Document Type
+        field_id: primaryDocument.type
+        type: select
+        required: true
+        validation: null
+        options:
+          - CPF
+          - CNPJ
+          - RG
+          - PASSAPORTE
+
+      - name: Primary Document Value
+        field_id: primaryDocument.value
+        type: text
+        required: true
+        validation: "CPF: 11 digits / CNPJ: 14 digits"
+        options: null
+        formatting: "formatCpf / formatCnpj auto-mask"
+
+      # --- Tab 0: Social Media ---
+      - name: LinkedIn URL
+        field_id: social.linkedin
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Instagram URL
+        field_id: social.instagram
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Facebook URL
+        field_id: social.facebook
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      # --- Tab 0: Vinculo (Student Profile) ---
+      - name: Institution
+        field_id: studentProfile.institutionId
+        type: select
+        required: true
+        validation: non-empty
+        options: "dynamic - fetched from useCompanies()"
+
+      - name: Course Name
+        field_id: studentProfile.courseName
+        type: text
+        required: true
+        validation: non-empty
+        options: null
+
+      # --- Tab 0: Guardian Information ---
+      - name: Guardian Full Name
+        field_id: guardian.fullName
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Guardian Relationship
+        field_id: guardian.relationship
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Guardian Phone
+        field_id: guardian.phone
+        type: text
+        required: false
+        validation: null
+        options: null
+
+      - name: Guardian Email
+        field_id: guardian.email
+        type: email
+        required: false
+        validation: null
+        options: null
+
+      # --- Tab 1: Addresses (same structure as UserCreate) ---
+      - name: CEP
+        field_id: "addresses[].postalCode"
+        type: text
+        required: false
+        validation: "8 digits for ViaCEP"
+        formatting: formatCep
+        auto_fill: "ViaCEP lookup"
+
+      - name: Street
+        field_id: "addresses[].street"
+        type: text
+        required: false
+
+      - name: Number
+        field_id: "addresses[].number"
+        type: text
+        required: false
+
+      - name: District
+        field_id: "addresses[].district"
+        type: text
+        required: false
+
+      - name: State (UF)
+        field_id: "addresses[].state"
+        type: text
+        required: false
+        validation: "maxLength: 2"
+
+      - name: City
+        field_id: "addresses[].city"
+        type: text
+        required: false
+
+      - name: Complement
+        field_id: "addresses[].complement"
+        type: text
+        required: false
+
+      # --- Tab 2: Custom Fields ---
+      - name: CF Set Selection
+        field_id: cfSets
+        type: button_group
+        required: false
+        options: "dynamic - apiClient.listUserCFSets()"
+
+      - name: Custom Field Entry Value
+        field_id: "customSections[].entries[].value"
+        type: "dynamic (text | select | checkbox | date | number)"
+        required: false
+        options: "based on cfDefsByKey metadata"
+
+    modals:
+      - name: CF Manager Modal
+        trigger: "+ Nova Secao button in Tab 2"
+        purpose: "Create and manage custom field definitions and sets"
+        component: CFManagerModal
+        props:
+          scope: global
+          entity: user
+        fields:
+          - description: "Internal to CFManagerModal component"
+
+    actions:
+      - name: Navigate Back
+        type: navigation
+        effect: "localStorage.removeItem(STORAGE_KEY); navigate('/users')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Next Tab
+        type: navigation_internal
+        effect: "Advance to next tab"
+        reversible: true
+        confirmation_required: false
+
+      - name: Previous Tab
+        type: navigation_internal
+        effect: "Go to previous tab"
+        reversible: true
+        confirmation_required: false
+
+      - name: Submit (Finalizar)
+        type: mutation
+        effect: "Upload photo to S3 + apiClient.createUser(body)"
+        reversible: false
+        confirmation_required: false
+
+      - name: Add Address
+        type: ui_action
+        effect: "Add new empty address"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remove Address
+        type: ui_action
+        effect: "Remove address by index"
+        reversible: false
+        confirmation_required: false
+
+      - name: CEP Lookup
+        type: api_call
+        effect: "lookupCep() via ViaCEP"
+        reversible: false
+        confirmation_required: false
+
+      - name: Photo Upload
+        type: file_upload
+        effect: "Upload via apiClient.uploadUserPhoto() then PUT to S3"
+        validation: "Max 5MB; formats: PNG, JPG, WebP"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remove Photo
+        type: ui_action
+        effect: "Clear pending photo file and preview"
+        reversible: false
+        confirmation_required: false
+
+      - name: Apply CF Set
+        type: api_call
+        effect: "apiClient.getUserCFSet(setId) - adds sections from preset"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remove CF Section
+        type: ui_action
+        effect: "Remove custom field section"
+        reversible: false
+        confirmation_required: false
+        icon: Trash2
+
+  # --------------------------------------------------------------------------
+
+  EmployeeCreatePage:
+    file: routes/UserCreate/EmployeeCreate.tsx
+    component: EmployeeCreateRoute
+    description: >
+      Dedicated employee creation wizard with 4 tabs (Identidade, Enderecos,
+      +Informacoes, Permissoes). Includes photo upload, social media, employee
+      profile (company/position), and permissions configurator.
+
+    tabs:
+      - id: 0
+        label: Identidade
+      - id: 1
+        label: Enderecos
+      - id: 2
+        label: +Informacoes
+      - id: 3
+        label: Permissoes
+
+    fields:
+      # --- Tab 0: Identidade ---
+      - name: Full Name
+        field_id: fullName
+        type: text
+        required: true
+        validation: "non-empty trim"
+
+      - name: Social Name
+        field_id: socialName
+        type: text
+        required: false
+
+      - name: Email
+        field_id: email
+        type: email
+        required: true
+        validation: "regex: /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/"
+
+      - name: Phone
+        field_id: phone
+        type: text
+        required: true
+        validation: non-empty
+        formatting: "formatPhoneBR when countryCode === 'BR'"
+
+      - name: Country Code
+        field_id: countryCode
+        type: text
+        required: false
+        validation: "maxLength: 2"
+        default: BR
+
+      - name: Birth Date
+        field_id: birthDate
+        type: date
+        required: false
+
+      - name: Gender
+        field_id: gender
+        type: select
+        required: false
+        options:
+          - value: fem
+            label: Feminino
+          - value: masc
+            label: Masculino
+          - value: nao-binario
+            label: Nao Binario
+          - value: nao-informado
+            label: Prefere nao informar
+          - value: outro
+            label: Outro
+        default: nao-informado
+
+      - name: Status
+        field_id: status
+        type: select
+        required: false
+        options:
+          - atual
+          - ex-colaborador
+        default: atual
+
+      - name: Primary Document Type
+        field_id: primaryDocument.type
+        type: select
+        required: true
+        options:
+          - CPF
+          - CNPJ
+          - RG
+          - PASSAPORTE
+
+      - name: Primary Document Value
+        field_id: primaryDocument.value
+        type: text
+        required: true
+        validation: "CPF: 11 digits / CNPJ: 14 digits"
+        formatting: "formatCpf / formatCnpj"
+
+      # --- Tab 0: Vinculo (Employee Profile) ---
+      - name: Company
+        field_id: employeeProfile.companyId
+        type: select
+        required: true
+        validation: non-empty
+        options: "dynamic - useCompanies()"
+
+      - name: Position / Role Title
+        field_id: employeeProfile.roleTitle
+        type: text
+        required: true
+        validation: non-empty
+
+      - name: Position Description
+        field_id: employeeProfile.roleDescription
+        type: text
+        required: false
+
+      # --- Tab 0: Social Media ---
+      - name: LinkedIn URL
+        field_id: social.linkedin
+        type: text
+        required: false
+
+      - name: Instagram URL
+        field_id: social.instagram
+        type: text
+        required: false
+
+      - name: Facebook URL
+        field_id: social.facebook
+        type: text
+        required: false
+
+      # --- Tab 1: Addresses (same as StudentCreate) ---
+      - name: CEP
+        field_id: "addresses[].postalCode"
+        type: text
+        required: false
+        formatting: formatCep
+        auto_fill: "ViaCEP"
+
+      - name: Street
+        field_id: "addresses[].street"
+        type: text
+        required: false
+
+      - name: Number
+        field_id: "addresses[].number"
+        type: text
+        required: false
+
+      - name: District
+        field_id: "addresses[].district"
+        type: text
+        required: false
+
+      - name: State (UF)
+        field_id: "addresses[].state"
+        type: text
+        required: false
+        validation: "maxLength: 2"
+
+      - name: City
+        field_id: "addresses[].city"
+        type: text
+        required: false
+
+      - name: Complement
+        field_id: "addresses[].complement"
+        type: text
+        required: false
+
+      # --- Tab 2: Custom Fields ---
+      - name: CF Set Selection
+        field_id: cfSets
+        type: button_group
+        required: false
+        options: "dynamic - apiClient.listUserCFSets()"
+
+      - name: Custom Field Entry Value
+        field_id: "customSections[].entries[].value"
+        type: "dynamic (text | select | checkbox | date | number)"
+        required: false
+
+      # --- Tab 3: Permissions ---
+      - name: Permissions
+        field_id: permissions
+        type: component
+        required: false
+        component: PermissionsConfigurator
+
+    modals:
+      - name: CF Manager Modal
+        trigger: "+ Nova Secao button"
+        purpose: "Manage custom field definitions and sets"
+        component: CFManagerModal
+        props:
+          scope: global
+          entity: user
+
+    actions:
+      - name: Navigate Back
+        type: navigation
+        effect: "localStorage.removeItem(STORAGE_KEY); navigate('/users')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Next Tab / Continue
+        type: navigation_internal
+        effect: "Advance to next tab"
+        reversible: true
+        confirmation_required: false
+
+      - name: Previous Tab
+        type: navigation_internal
+        effect: "Go to previous tab"
+        reversible: true
+        confirmation_required: false
+
+      - name: Submit (Finalizar)
+        type: mutation
+        effect: "Upload photo to S3 + apiClient.createUser(body)"
+        reversible: false
+        confirmation_required: false
+
+      - name: Photo Upload
+        type: file_upload
+        effect: "S3 upload via apiClient.uploadUserPhoto()"
+        validation: "Max 5MB; PNG, JPG, WebP"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remove Photo
+        type: ui_action
+        effect: "Clear pending photo and preview"
+        reversible: false
+        confirmation_required: false
+
+      - name: Add Address
+        type: ui_action
+        effect: "Add empty address to array"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remove Address
+        type: ui_action
+        effect: "Remove address by index"
+        reversible: false
+        confirmation_required: false
+
+      - name: CEP Lookup
+        type: api_call
+        effect: "lookupCep() via ViaCEP"
+        reversible: false
+        confirmation_required: false
+
+  # --------------------------------------------------------------------------
+
+  UserDetailPage:
+    file: routes/UserDetail/UserDetail.tsx
+    component: UserDetailRoute
+    description: >
+      User detail page with per-block inline editing. Shows user identity,
+      addresses, documents, custom fields, social media, guardian info (students),
+      and employee/student profile. Uses block-based edit/save/cancel pattern.
+
+    tabs:
+      - label: Identidade
+      - label: Enderecos
+      - label: Vinculo
+      - label: +Informacoes
+      - label: Permissoes (employees only)
+
+    fields:
+      # --- Identity Block ---
+      - name: Full Name
+        field_id: fullName
+        type: text
+        required: true
+        editable: true (inline)
+
+      - name: Social Name
+        field_id: socialName
+        type: text
+        required: false
+        editable: true
+
+      - name: Email
+        field_id: email
+        type: email
+        required: true
+        editable: true
+
+      - name: Phone
+        field_id: phone
+        type: text
+        required: false
+        editable: true
+        formatting: formatPhoneBR
+
+      - name: Birth Date
+        field_id: birthDate
+        type: date
+        required: false
+        editable: true
+
+      - name: Gender
+        field_id: gender
+        type: select
+        required: false
+        editable: true
+        options:
+          - masc
+          - fem
+          - nao-binario
+          - nao-informado
+          - outro
+
+      - name: Status
+        field_id: status
+        type: select
+        required: false
+        editable: true
+
+      - name: Primary Document
+        field_id: primaryDocument
+        type: composite (type + value)
+        required: true
+        editable: true
+
+      # --- Address Block ---
+      - name: Address Fields
+        field_id: "addresses[]"
+        type: composite
+        fields:
+          - postalCode (CEP with ViaCEP auto-fill)
+          - street
+          - number
+          - district
+          - state
+          - city
+          - complement
+        editable: true
+
+      # --- Social Media Block ---
+      - name: LinkedIn
+        field_id: social.linkedin
+        type: text
+        required: false
+        editable: true
+
+      - name: Instagram
+        field_id: social.instagram
+        type: text
+        required: false
+        editable: true
+
+      - name: Facebook
+        field_id: social.facebook
+        type: text
+        required: false
+        editable: true
+
+      # --- Guardian Block (students) ---
+      - name: Guardian Full Name
+        field_id: guardian.fullName
+        type: text
+        required: false
+        editable: true
+
+      - name: Guardian Relationship
+        field_id: guardian.relationship
+        type: text
+        required: false
+        editable: true
+
+      - name: Guardian Phone
+        field_id: guardian.phone
+        type: text
+        required: false
+        editable: true
+
+      - name: Guardian Email
+        field_id: guardian.email
+        type: email
+        required: false
+        editable: true
+
+      # --- Custom Fields Block ---
+      - name: Custom Field Sections
+        field_id: customFields
+        type: "dynamic sections with key-value entries"
+        required: false
+        editable: true
+
+      # --- Permissions Block ---
+      - name: Permissions
+        field_id: permissions
+        type: component
+        component: PermissionsConfigurator
+        editable: true
+        condition: "userType === 'employee'"
+
+    modals:
+      - name: CF Manager Modal
+        trigger: "+ Nova Secao button"
+        purpose: "Manage custom field definitions"
+        component: CFManagerModal
+
+    actions:
+      - name: Navigate Back
+        type: navigation
+        effect: "navigate('/users')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Edit Block
+        type: ui_action
+        effect: "Enable inline editing for a specific section"
+        reversible: true
+        confirmation_required: false
+        icon: Pencil
+
+      - name: Save Block
+        type: mutation
+        effect: "apiClient.updateUser() for that specific block"
+        reversible: false
+        confirmation_required: false
+        icon: Save
+
+      - name: Cancel Block Edit
+        type: ui_action
+        effect: "Revert form to server state"
+        reversible: false
+        confirmation_required: false
+        icon: X
+
+      - name: Photo Upload / Update
+        type: file_upload
+        effect: "S3 upload and update user photoUrl"
+        validation: "Max 5MB; PNG, JPG, WebP"
+        reversible: true
+        confirmation_required: false
+
+      - name: CEP Lookup
+        type: api_call
+        effect: "lookupCep() via ViaCEP"
+        reversible: false
+        confirmation_required: false
+
+  # --------------------------------------------------------------------------
+
+  BatchStudentsPage:
+    file: routes/BatchStudentUpload/BatchStudentUpload.tsx
+    component: BatchStudentUploadRoute
+    description: >
+      Bulk student import via Excel file upload (.xlsx/.xls).
+      Provides template download, drag-and-drop file upload,
+      and detailed results with success/error per row.
+
+    fields:
+      - name: File Upload
+        field_id: file
+        type: file
+        required: true
+        validation: "Only .xlsx or .xls files"
+        options: null
+        description: "Excel file with student data"
+        accept: ".xlsx,.xls"
+
+    modals:
+      - name: Import Results Modal
+        trigger: "After batch upload completes"
+        purpose: "Show per-row success/error results"
+        component: Dialog
+        fields:
+          - name: Row Number
+            field_id: row
+            type: display
+          - name: Full Name
+            field_id: fullName
+            type: display
+          - name: Email
+            field_id: email
+            type: display
+          - name: Success Status
+            field_id: success
+            type: display (CheckCircle / XCircle icon)
+          - name: Error Message
+            field_id: error
+            type: display
+            condition: "!success"
+
+    actions:
+      - name: Download Template
+        type: download
+        effect: "GET /api/users/batch-students/template"
+        reversible: false
+        confirmation_required: false
+        icon: Download
+
+      - name: Upload and Process
+        type: mutation
+        effect: "POST /api/users/batch-students with base64 file"
+        reversible: false
+        confirmation_required: false
+        icon: Upload
+
+      - name: Clear File
+        type: ui_action
+        effect: "Reset file and result state"
+        reversible: false
+        confirmation_required: false
+
+      - name: View Details
+        type: ui_action
+        effect: "Open results modal (setShowResultModal(true))"
+        reversible: true
+        confirmation_required: false
+
+      - name: Navigate Back
+        type: navigation
+        effect: "navigate('/users')"
+        reversible: false
+        confirmation_required: false
+
+    batch_required_fields:
+      - Nome Completo
+      - E-mail
+      - CPF
+      - ID da Instituicao
+
+    batch_optional_fields:
+      - Telefone
+      - Data de Nascimento
+      - Endereco completo
+
+  # ==========================================================================
+  # COMPANIES MODULE
+  # ==========================================================================
+
+  CompanyListPage:
+    file: routes/CompanyList/CompanyList.tsx
+    component: CompanyListRoute
+    description: >
+      Lists all companies/institutions with search, group filter
+      (internal/external), and delete. Card-based layout.
+
+    fields:
+      - name: Search
+        field_id: searchTerm
+        type: text
+        required: false
+        validation: null
+        description: "Client-side filter by company name or CNPJ"
+
+      - name: Group Filter
+        field_id: grupoFilter
+        type: toggle_pill
+        required: false
+        options:
+          - internal
+          - external
+        default: internal
+
+    modals: []
+
+    actions:
+      - name: New Company
+        type: navigation
+        effect: "navigate('/companies/new?groupType={grupoFilter}')"
+        reversible: false
+        confirmation_required: false
+
+      - name: View Company Details
+        type: navigation
+        effect: "navigate('/companies/{id}')"
+        reversible: false
+        confirmation_required: false
+        trigger: Card click
+
+      - name: Delete Company
+        type: mutation
+        effect: "apiClient.deleteCompany({ id: companyId })"
+        reversible: false
+        confirmation_required: true
+        confirmation_message: >
+          Tem certeza que deseja deletar "{nome_fantasia}"?
+          Esta acao ira remover a empresa e todos os seus dados relacionados
+          (usuarios associados, permissoes, etc.).
+          Esta acao nao pode ser desfeita.
+        icon: Trash2
+
+  # --------------------------------------------------------------------------
+
+  CompanyCreatePage:
+    file: routes/CompanyCreate/CompanyCreate.tsx
+    component: CompanyCreateRoute
+    description: >
+      Company/institution creation wizard with 7 tabs. Supports CNPJ validation,
+      address management with CEP auto-fill, logo upload, resources, integrations,
+      custom fields, and bootstrap tenant flow.
+
+    tabs:
+      - id: 0
+        label: Identidade
+      - id: 1
+        label: Localidade
+      - id: 2
+        label: +Informacoes
+      - id: 3
+        label: Id Visual
+      - id: 4
+        label: Recursos
+      - id: 5
+        label: Integracao (only if isWhitelabel)
+      - id: 6
+        label: Resumo
+
+    fields:
+      # --- Tab 0: Identidade - Dados Principais ---
+      - name: Country Code
+        field_id: countryCode
+        type: text
+        required: false
+        validation: "maxLength: 2"
+        default: BR
+
+      - name: CNPJ
+        field_id: "documents[0].value"
+        type: text
+        required: true
+        validation: "14 digits after mask"
+        formatting: maskCNPJ
+
+      - name: Institutional Email
+        field_id: contactEmail
+        type: email
+        required: true
+        validation: "regex: /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/"
+
+      - name: Phone
+        field_id: contactPhone
+        type: text
+        required: true
+        validation: non-empty
+        formatting: maskPhone
+
+      # --- Tab 0: Responsavel Legal ---
+      - name: Responsible Name
+        field_id: responsibleName
+        type: text
+        required: false
+        description: "Auto-filled from authenticated user if empty"
+
+      - name: Responsible CPF
+        field_id: responsibleCpf
+        type: text
+        required: false
+        formatting: maskCPF
+
+      - name: Responsible Email
+        field_id: responsibleEmail
+        type: email
+        required: false
+
+      - name: Responsible Phone
+        field_id: responsiblePhone
+        type: text
+        required: false
+        formatting: maskPhone
+
+      # --- Tab 0: Identificacao ---
+      - name: Legal Name (Razao Social)
+        field_id: legalName
+        type: text
+        required: true
+        validation: non-empty
+
+      - name: Display Name (Nome Fantasia)
+        field_id: displayName
+        type: text
+        required: false
+
+      - name: Institution Type
+        field_id: institutionalType
+        type: select
+        required: true
+        validation: non-empty
+        options:
+          - value: universidade
+            label: Universidade
+          - value: faculdade
+            label: Faculdade
+          - value: escola
+            label: Escola
+          - value: centro
+            label: Centro de Ensino
+
+      - name: Teaching Type
+        field_id: teachingType
+        type: select
+        required: false
+        options:
+          - value: infantil
+            label: Educacao Infantil
+          - value: fundamental
+            label: Ensino Fundamental
+          - value: medio
+            label: Ensino Medio
+          - value: tecnico
+            label: Ensino Tecnico
+          - value: superior
+            label: Ensino Superior
+          - value: pos
+            label: Pos-Graduacao
+          - value: ead
+            label: EAD
+          - value: livre
+            label: Curso Livre
+
+      - name: Institution Description
+        field_id: institutionDescription
+        type: textarea
+        required: false
+
+      - name: Parent Company
+        field_id: parentId
+        type: select
+        required: "true when isWhitelabel is false"
+        options: "dynamic - from useCompanies()"
+        validation: "Required when not a tenant"
+
+      - name: Is Whitelabel / Tenant
+        field_id: isWhitelabel
+        type: checkbox
+        required: false
+        default: false
+        description: "Marks company as tenant root"
+
+      - name: Custom Domain
+        field_id: customDomain
+        type: text
+        required: false
+        condition: "isWhitelabel === true"
+
+      # --- Tab 1: Localidade (Addresses array) ---
+      - name: CEP
+        field_id: "addresses[].postalCode"
+        type: text
+        required: false
+        formatting: maskCEP
+        auto_fill: "ViaCEP lookup"
+
+      - name: Street
+        field_id: "addresses[].street"
+        type: text
+        required: true
+        validation: "At least one address must have a street"
+
+      - name: Number
+        field_id: "addresses[].number"
+        type: text
+        required: false
+
+      - name: District
+        field_id: "addresses[].district"
+        type: text
+        required: false
+
+      - name: State (UF)
+        field_id: "addresses[].state"
+        type: text
+        required: false
+        validation: "maxLength: 2"
+
+      - name: City
+        field_id: "addresses[].city"
+        type: text
+        required: false
+
+      - name: Complement
+        field_id: "addresses[].complement"
+        type: text
+        required: false
+
+      # --- Tab 2: +Informacoes ---
+      - name: Digital Platforms - Instagram
+        field_id: digitalPlatforms.instagram
+        type: text
+        required: false
+
+      - name: Digital Platforms - Facebook
+        field_id: digitalPlatforms.facebook
+        type: text
+        required: false
+
+      - name: Digital Platforms - Website
+        field_id: digitalPlatforms.site
+        type: text
+        required: false
+
+      - name: Digital Platforms - LinkedIn
+        field_id: digitalPlatforms.linkedin
+        type: text
+        required: false
+
+      - name: Digital Platforms - YouTube
+        field_id: digitalPlatforms.youtube
+        type: text
+        required: false
+
+      - name: Bank Data - Banco
+        field_id: bankData.banco
+        type: text
+        required: false
+
+      - name: Bank Data - Agencia
+        field_id: bankData.agencia
+        type: text
+        required: false
+
+      - name: Bank Data - Conta
+        field_id: bankData.conta
+        type: text
+        required: false
+
+      - name: Bank Data - Tipo
+        field_id: bankData.tipo
+        type: text
+        required: false
+
+      - name: CF Set Selection
+        field_id: cfSections
+        type: button_group
+        required: false
+        options: "dynamic - apiClient.listCompanyCFSets('global')"
+
+      - name: Custom Field Entry Value
+        field_id: "cfSections[].entries[].value"
+        type: "dynamic (text | select | checkbox | date | number)"
+        required: false
+
+      # --- Tab 3: Id Visual ---
+      - name: Primary Color
+        field_id: branding.primaryColor
+        type: color
+        required: false
+        default: "#0EA5E9"
+
+      - name: Secondary Color
+        field_id: branding.secondaryColor
+        type: color
+        required: false
+        default: "#8B5CF6"
+
+      - name: Logo
+        field_id: branding.logoUrl
+        type: file_upload
+        required: false
+        validation: "Max 5MB; PNG, JPEG, WebP, SVG"
+        component: ProfilePhotoCard
+
+      # --- Tab 4: Recursos (dynamic array) ---
+      - name: Resource Type
+        field_id: "resources[].tipo"
+        type: select
+        required: false
+        options:
+          - sala
+          - laboratorio
+          - auditorio
+          - equipamento
+          - veiculo
+          - outro
+
+      - name: Resource Name
+        field_id: "resources[].nome"
+        type: text
+        required: false
+
+      - name: Resource Description
+        field_id: "resources[].descricao"
+        type: text
+        required: false
+
+      - name: Resource Capacity
+        field_id: "resources[].capacidade"
+        type: number
+        required: false
+
+      - name: Resource Building Location
+        field_id: "resources[].buildingLocation"
+        type: text
+        required: false
+
+      - name: Resource Room Location
+        field_id: "resources[].roomLocation"
+        type: text
+        required: false
+
+      - name: Resource Status
+        field_id: "resources[].status"
+        type: select
+        required: false
+        options:
+          - disponivel
+          - em_uso
+          - manutencao
+          - indisponivel
+        default: disponivel
+
+      - name: Resource Quantity
+        field_id: "resources[].quantidade"
+        type: number
+        required: false
+        default: 1
+
+      # --- Tab 5: Integracao ---
+      - name: Integrations
+        field_id: integrations
+        type: component
+        component: IntegrationsTab
+        description: "See IntegrationsTab sub-component below"
+
+    modals:
+      - name: CF Manager Modal
+        trigger: "+ Nova Secao button in Tab 2"
+        purpose: "Manage company custom field definitions and sets"
+        component: CFManagerModal
+        props:
+          scope: global
+          entity: company
+
+    actions:
+      - name: Navigate Back
+        type: navigation
+        effect: "localStorage.removeItem(STORAGE_KEY); navigate('/companies')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Next Tab
+        type: navigation_internal
+        effect: "Advance to next tab"
+        reversible: true
+        confirmation_required: false
+
+      - name: Previous Tab
+        type: navigation_internal
+        effect: "Go to previous tab"
+        reversible: true
+        confirmation_required: false
+
+      - name: Submit (Finalizar)
+        type: mutation
+        effect: >
+          createCompany.mutateAsync() + create resources +
+          upload logo to S3 + optional bootstrap tenant
+        reversible: false
+        confirmation_required: false
+
+      - name: Add Address
+        type: ui_action
+        effect: "Add empty address"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remove Address
+        type: ui_action
+        effect: "Remove address by id"
+        reversible: false
+        confirmation_required: false
+
+      - name: Add Document
+        type: ui_action
+        effect: "Add new document (CNPJ default)"
+        reversible: true
+        confirmation_required: false
+
+      - name: Add Resource
+        type: ui_action
+        effect: "Add empty resource"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remove Resource
+        type: ui_action
+        effect: "Remove resource by id"
+        reversible: false
+        confirmation_required: false
+
+      - name: CEP Lookup
+        type: api_call
+        effect: "lookupCep() via ViaCEP"
+        reversible: false
+        confirmation_required: false
+
+      - name: Logo Upload
+        type: file_upload
+        effect: "S3 upload via apiClient.uploadCompanyLogo()"
+        validation: "Max 5MB; PNG, JPEG, WebP, SVG"
+        reversible: true
+        confirmation_required: false
+
+  # --------------------------------------------------------------------------
+
+  IntegrationsTab:
+    file: routes/CompanyCreate/components/IntegrationsTab/IntegrationsTab.tsx
+    component: IntegrationsTab
+    description: >
+      Reusable integration management component used in both CompanyCreate (draft mode)
+      and CompanyDetail (API mode). Supports Zoom and SmartPlayer integrations.
+
+    fields:
+      # --- Integration Modal Fields ---
+      - name: Integration Type
+        field_id: formData.type
+        type: select
+        required: true
+        options:
+          - value: zoom
+            label: Zoom
+          - value: smartplayer
+            label: SmartPlayer
+
+      # --- Zoom Fields ---
+      - name: Zoom Account ID
+        field_id: formData.zoom.accountId
+        type: text
+        required: false
+        condition: "type === 'zoom'"
+
+      - name: Zoom Client ID
+        field_id: formData.zoom.clientId
+        type: text
+        required: false
+        condition: "type === 'zoom'"
+
+      - name: Zoom Client Secret
+        field_id: formData.zoom.clientSecret
+        type: password
+        required: false
+        condition: "type === 'zoom'"
+
+      - name: Zoom Secret Token
+        field_id: formData.zoom.secretToken
+        type: password
+        required: false
+        condition: "type === 'zoom'"
+        description: "Token for webhook validation"
+
+      - name: Zoom Webhook URL
+        field_id: webhookUrl
+        type: text (readonly)
+        required: false
+        condition: "type === 'zoom' && companyId exists"
+        description: "Auto-generated webhook URL to paste into Zoom config"
+
+      # --- SmartPlayer Fields ---
+      - name: SmartPlayer Client ID
+        field_id: formData.smartplayer.clientId
+        type: text
+        required: true
+        condition: "type === 'smartplayer'"
+
+      - name: SmartPlayer Client Secret
+        field_id: formData.smartplayer.clientSecret
+        type: password
+        required: true
+        condition: "type === 'smartplayer'"
+
+      - name: SmartPlayer User Code
+        field_id: formData.smartplayer.userCode
+        type: text
+        required: true
+        condition: "type === 'smartplayer'"
+
+      - name: SmartPlayer Base URL
+        field_id: formData.smartplayer.baseUrl
+        type: text
+        required: false
+        condition: "type === 'smartplayer'"
+
+      - name: SmartPlayer Admin URL
+        field_id: formData.smartplayer.adminUrl
+        type: text
+        required: false
+        condition: "type === 'smartplayer'"
+
+      - name: SmartPlayer Player URL
+        field_id: formData.smartplayer.playerUrl
+        type: text
+        required: false
+        condition: "type === 'smartplayer'"
+
+    modals:
+      - name: Integration Modal
+        trigger: "Adicionar Integracao button or Edit icon on existing"
+        purpose: "Add or edit an integration (Zoom or SmartPlayer)"
+        component: Dialog
+        fields: "All integration fields listed above"
+
+    actions:
+      - name: Add Integration
+        type: ui_action
+        effect: "Open modal for new integration"
+        reversible: true
+        confirmation_required: false
+        icon: Plus
+
+      - name: Edit Integration
+        type: ui_action
+        effect: "Open modal pre-filled with existing integration"
+        reversible: true
+        confirmation_required: false
+        icon: SquarePen
+
+      - name: Remove Integration
+        type: mutation_or_ui
+        effect: "API delete or draft array removal"
+        reversible: false
+        confirmation_required: false
+        icon: Trash2
+
+      - name: Save Integration
+        type: mutation_or_ui
+        effect: "API save or draft array update"
+        reversible: false
+        confirmation_required: false
+
+      - name: Copy Webhook URL
+        type: clipboard
+        effect: "navigator.clipboard.writeText(webhookUrl)"
+        reversible: false
+        confirmation_required: false
+        icon: Copy
+
+  # --------------------------------------------------------------------------
+
+  CompanyDetailPage:
+    file: routes/CompanyDetail/CompanyDetail.tsx
+    component: CompanyDetailRoute
+    description: >
+      Company detail page with per-block inline editing (identity, contact,
+      addresses, social, bank data, visual identity, resources, events,
+      integrations). Uses edit/save/cancel pattern per section.
+
+    tabs:
+      - id: 0
+        label: Identidade
+      - id: 1
+        label: Localidade
+      - id: 2
+        label: Colaboradores vinculados
+      - id: 3
+        label: +Informacoes
+      - id: 4
+        label: Id Visual
+      - id: 5
+        label: Recursos
+      - id: 6
+        label: Eventos
+      - id: 7
+        label: Integracoes
+
+    editing_blocks:
+      - identity
+      - contact
+      - responsible
+      - users
+      - addresses
+      - generalInfo
+      - social
+      - bankData
+      - customFields
+      - visualId
+      - resources
+
+    fields:
+      # --- Tab 0: Dados Principais (contact block) ---
+      - name: Country Code
+        field_id: countryCode
+        type: display (readonly)
+
+      - name: CNPJ
+        field_id: registrationNumber
+        type: display (readonly)
+        formatting: formatCnpj
+
+      - name: Email
+        field_id: email
+        type: email
+        editable: true (contact block)
+
+      - name: Phone
+        field_id: phone
+        type: text
+        editable: true (contact block)
+        formatting: formatPhoneBR
+
+      # --- Tab 0: Identificacao (identity block) ---
+      - name: Legal Name (Razao Social)
+        field_id: legalName
+        type: text
+        editable: true
+
+      - name: Display Name (Nome Fantasia)
+        field_id: displayName
+        type: text
+        editable: true
+
+      - name: Institution Type
+        field_id: institutionalType
+        type: select
+        editable: true
+        options:
+          - value: escola
+            label: Escola
+          - value: universidade
+            label: Universidade
+          - value: centro_formacao
+            label: Centro de Formacao
+          - value: ong
+            label: ONG
+          - value: empresa
+            label: Empresa
+          - value: outro
+            label: Outro
+
+      - name: Teaching Type
+        field_id: teachingType
+        type: select
+        editable: true
+        options:
+          - value: presencial
+            label: Presencial
+          - value: ead
+            label: EAD
+          - value: hibrido
+            label: Hibrido
+
+      - name: Institution Description
+        field_id: description
+        type: textarea
+        editable: true
+
+      # --- Tab 0: Bank Data (bankData block) ---
+      - name: Bank Name
+        field_id: bankName
+        type: text
+        editable: true
+
+      - name: Bank Agency
+        field_id: bankAgency
+        type: text
+        editable: true
+
+      - name: Bank Account
+        field_id: bankAccount
+        type: text
+        editable: true
+
+      - name: Bank Account Type
+        field_id: bankAccountType
+        type: text
+        editable: true
+
+      # --- Tab 1: Addresses (addresses block) ---
+      - name: CEP
+        field_id: "addresses[].postalCode"
+        type: text
+        editable: true
+        formatting: formatCep
+        auto_fill: "ViaCEP"
+
+      - name: Street
+        field_id: "addresses[].street"
+        type: text
+        editable: true
+
+      - name: Number
+        field_id: "addresses[].number"
+        type: text
+        editable: true
+
+      - name: District
+        field_id: "addresses[].district"
+        type: text
+        editable: true
+
+      - name: State
+        field_id: "addresses[].state"
+        type: text
+        editable: true
+
+      - name: City
+        field_id: "addresses[].city"
+        type: text
+        editable: true
+
+      - name: Complement
+        field_id: "addresses[].complement"
+        type: text
+        editable: true
+
+      # --- Tab 2: Colaboradores vinculados ---
+      - name: User ID to Assign
+        field_id: userId
+        type: text
+        required: true
+        description: "ID of user to associate with the company"
+
+      # --- Tab 3: +Informacoes (social block) ---
+      - name: Website
+        field_id: website
+        type: text
+        editable: true
+
+      - name: LinkedIn URL
+        field_id: linkedinUrl
+        type: text
+        editable: true
+
+      - name: Instagram URL
+        field_id: instagramUrl
+        type: text
+        editable: true
+
+      - name: Facebook URL
+        field_id: facebookUrl
+        type: text
+        editable: true
+
+      - name: YouTube URL
+        field_id: youtubeUrl
+        type: text
+        editable: true
+
+      # --- Tab 3: Custom Fields ---
+      - name: CF Set Selection
+        field_id: cfSets
+        type: button_group
+        options: "dynamic - apiClient.listCompanyCFSets('global')"
+
+      - name: Custom Field Entry Value
+        field_id: "cfSections[].entries[].value"
+        type: "dynamic (text | select | checkbox | date | number)"
+
+      # --- Tab 4: Visual Identity (visualId block) ---
+      - name: Logo URL
+        field_id: logoUrl
+        type: file_upload
+        editable: true
+        validation: "Max 5MB; PNG, JPEG, WebP, SVG"
+
+      - name: Primary Color
+        field_id: primaryColor
+        type: color
+        editable: true
+        default: "#000000"
+
+      - name: Secondary Color
+        field_id: secondaryColor
+        type: color
+        editable: true
+        default: "#ffffff"
+
+      # --- Tab 7: Integracoes ---
+      - name: Integrations
+        field_id: integrations
+        type: component
+        component: IntegrationsTab (API mode)
+
+    modals:
+      - name: CF Manager Modal
+        trigger: "+ Nova Secao button"
+        purpose: "Manage company custom field definitions"
+        component: CFManagerModal
+
+    actions:
+      - name: Navigate Back
+        type: navigation
+        effect: "navigate('/companies')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Toggle Active Status
+        type: mutation
+        effect: "complementaryMutation.mutate({ companyId, isActive: newStatus })"
+        reversible: true
+        confirmation_required: false
+        description: "Toggle switch in header"
+
+      - name: Edit Block
+        type: ui_action
+        effect: "Enable inline editing for a section"
+        reversible: true
+        confirmation_required: false
+        icon: Pencil
+
+      - name: Save Contact
+        type: mutation
+        effect: "apiClient.upsertCompanyComplementaryInfo({ contactEmail, contactPhoneE164 })"
+        reversible: false
+        confirmation_required: false
+        icon: Save
+
+      - name: Save Identity
+        type: mutation
+        effect: "apiClient.updateCompany() + apiClient.upsertCompanyComplementaryInfo()"
+        reversible: false
+        confirmation_required: false
+        icon: Save
+
+      - name: Save Social
+        type: mutation
+        effect: "apiClient.upsertCompanyComplementaryInfo({ digitalPlatforms })"
+        reversible: false
+        confirmation_required: false
+
+      - name: Save Bank Data
+        type: mutation
+        effect: "apiClient.upsertCompanyComplementaryInfo({ bankData })"
+        reversible: false
+        confirmation_required: false
+
+      - name: Save Visual Identity
+        type: mutation
+        effect: "apiClient.upsertCompanyComplementaryInfo({ logoUrl, primaryColors })"
+        reversible: false
+        confirmation_required: false
+
+      - name: Save Addresses
+        type: mutation
+        effect: "Delete all existing + create new via apiClient.updateCompanyAddress()"
+        reversible: false
+        confirmation_required: false
+
+      - name: Cancel Block Edit
+        type: ui_action
+        effect: "Revert to server state"
+        reversible: false
+        confirmation_required: false
+        icon: X
+
+      - name: Assign User to Company
+        type: mutation
+        effect: "assign.mutateAsync({ userId, companyId })"
+        reversible: false
+        confirmation_required: false
+
+      - name: Logo Upload
+        type: file_upload
+        effect: "S3 upload via apiClient.uploadCompanyLogo() + save URL"
+        validation: "Max 5MB; PNG, JPEG, WebP, SVG"
+        reversible: true
+        confirmation_required: false
+
+      - name: Cancel Logo Edit
+        type: ui_action
+        effect: "Reset logo preview to original"
+        reversible: false
+        confirmation_required: false
+
+      - name: CEP Lookup
+        type: api_call
+        effect: "lookupCep() via ViaCEP"
+        reversible: false
+        confirmation_required: false
+
+      - name: Create Resource
+        type: mutation
+        effect: "createResourceMutation.mutateAsync()"
+        reversible: false
+        confirmation_required: false
+
+      - name: Delete Resource
+        type: mutation
+        effect: "deleteResourceMutation.mutateAsync()"
+        reversible: false
+        confirmation_required: false
+
+      - name: Delete Event
+        type: mutation
+        effect: "deleteEventMutation.mutateAsync()"
+        reversible: false
+        confirmation_required: false
+
+      - name: Create Integration
+        type: mutation
+        effect: "apiClient.createCompanyIntegration()"
+        reversible: false
+        confirmation_required: false
+
+      - name: Update Integration
+        type: mutation
+        effect: "apiClient.updateCompanyIntegration()"
+        reversible: false
+        confirmation_required: false
+
+      - name: Delete Integration
+        type: mutation
+        effect: "apiClient.deleteCompanyIntegration()"
+        reversible: false
+        confirmation_required: false
+
+# ==============================================================================
+# SHARED PATTERNS
+# ==============================================================================
+
+shared_patterns:
+
+  address_form:
+    description: >
+      Address form with CEP auto-fill via ViaCEP. Used in UserCreate,
+      StudentCreate, EmployeeCreate, CompanyCreate, CompanyDetail.
+    fields:
+      - postalCode (CEP) with formatCep mask + lookup button
+      - street (Logradouro)
+      - number (Numero)
+      - district (Bairro)
+      - state (UF, maxLength 2)
+      - city (Municipio)
+      - complement (Complemento)
+    auto_fill_source: "ViaCEP API (lookupCep from shared/format.ts)"
+    auto_fill_fields:
+      logradouro: street
+      bairro: district
+      localidade: city
+      uf: state
+      complemento: complement
+
+  photo_upload:
+    description: >
+      Profile photo / logo upload flow used in StudentCreate, EmployeeCreate,
+      UserCreate, CompanyCreate, CompanyDetail.
+    flow:
+      1: "User selects file via ProfilePhotoCard component"
+      2: "Client-side validation (max 5MB, PNG/JPG/WebP)"
+      3: "File stored as pendingPhotoFile, preview via FileReader.readAsDataURL"
+      4: "On form submit, get presigned URL from backend"
+      5: "PUT file directly to S3"
+      6: "Store returned fileUrl in user/company record"
+    validation:
+      max_size: 5MB
+      accepted_formats:
+        - image/png
+        - image/jpeg
+        - image/jpg
+        - image/webp
+        - image/svg+xml (logo only)
+
+  custom_fields:
+    description: >
+      Custom field sections system using CF Sets and Definitions.
+      Used in UserCreate, StudentCreate, EmployeeCreate, CompanyCreate,
+      CompanyDetail, UserDetail.
+    components:
+      - CF Sets: predefined groups of fields from API
+      - CF Definitions: metadata for each field (dataType, options, required)
+      - CFManagerModal: modal for creating new definitions/sets
+    field_types_supported:
+      - text (default fallback)
+      - select (renders dropdown from options)
+      - checkbox (renders checkbox)
+      - date (renders date input)
+      - number (renders number input)
+    data_structure: >
+      customFields: { sectionTitle: { key1: value1, key2: value2 } }
+
+  draft_persistence:
+    description: >
+      Form state is persisted to localStorage for recovery.
+    storage_keys:
+      - userCreateDraftV2 (UserCreate)
+      - studentCreateDraftV2 (StudentCreate)
+      - employeeCreateDraftV2 (EmployeeCreate)
+      - companyCreateDraftV2 (CompanyCreate)
+    behavior: "Auto-save on state change, cleared on successful submit"
+
+  document_formatting:
+    masks:
+      CPF: "000.000.000-00 (formatCpf)"
+      CNPJ: "00.000.000/0000-00 (formatCnpj / maskCNPJ)"
+      CEP: "00000-000 (formatCep / maskCEP)"
+      Phone: "(00) 00000-0000 (formatPhoneBR / maskPhone)"

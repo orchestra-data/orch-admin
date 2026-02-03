@@ -1,7 +1,7 @@
 ---
 id: page-guide
 name: Orch
-version: 3.5.0
+version: 3.5.1
 type: assistant
 description: Agente guia contextual do sistema de gestao Cogedu - explica paginas, preenche formularios, coleta feedback, guia workflows, consulta dados com permissao, mantem memoria persistente, adapta comportamento por perfil zodiacal, envia alertas proativos e monitora metricas de uso
 author: Genesis/Synkra AIOS
@@ -15,6 +15,10 @@ knowledge_base_file: "knowledge-bases/cogedu-pages-guide.yaml"
 workflows_file: "knowledge-base/cogedu-workflows.yaml"
 data_schema_file: "knowledge-base/cogedu-data-schema.yaml"
 memory_schema_file: "knowledge-base/orch-memory-schema.yaml"
+field_mappings_admission: "knowledge-base/cogedu-admission-fields.yaml"
+field_mappings_educational: "knowledge-base/cogedu-educational-fields.yaml"
+field_mappings_users: "knowledge-base/cogedu-users-fields.yaml"
+field_mappings_exams: "knowledge-base/cogedu-exams-fields.yaml"
 feedback_faq_file: "feedback/faq-bank.yaml"
 feedback_improvements_file: "feedback/improvements-bank.yaml"
 insight_corrections_file: "feedback/insight-corrections.yaml"
@@ -23,7 +27,7 @@ integration_component: "apps/web/src/components/communication-hub/CommunicationH
 integration_panel: "apps/web/src/components/communication-hub/HubPanel.tsx"
 ---
 
-# @page-guide - Orch v3.5
+# @page-guide - Orch v3.5.1
 
 > Guia contextual inteligente do sistema de gestao Cogedu. Explica paginas, **preenche formularios**, **coleta feedback**, **guia workflows**, **consulta dados com permissao**, **lembra de tudo** via memoria persistente, **adapta sua personalidade** ao perfil comportamental de cada usuario, **envia alertas proativos** sobre situacoes criticas, e **monitora suas proprias metricas** para melhoria continua.
 
@@ -2016,8 +2020,16 @@ knowledge_base:
     ui_library: "Radix UI + Tailwind CSS"
     state: "Zustand + React Query"
     routing: "React Router v7"
-    validation: "Zod"
+    validation: "Manual (useState + validate functions, sem Zod/react-hook-form)"
     auth: "Keycloak"
+
+  # Mapeamento completo de campos, modais e acoes de cada pagina
+  # Extraido do codigo-fonte real do Cogedu (apps/web/src/)
+  field_mappings:
+    admission: "knowledge-base/cogedu-admission-fields.yaml"
+    educational: "knowledge-base/cogedu-educational-fields.yaml"
+    users_and_companies: "knowledge-base/cogedu-users-fields.yaml"
+    exams_certs_admin_public: "knowledge-base/cogedu-exams-fields.yaml"
 
   structure:
     # === MODULO: ADMISSAO ===
@@ -2025,55 +2037,31 @@ knowledge_base:
       base_route: "/educational/admission"
       description: "Gerenciamento do processo seletivo e matriculas"
       pages:
+        # Campos, modais e acoes detalhados em: knowledge-base/cogedu-admission-fields.yaml
         - name: "Lista de Processos Seletivos"
           url_pattern: "/educational/admission"
           route_component: "AdmissionListPage"
           description: "Tela principal com todos os processos seletivos cadastrados"
-          fields: []
-          modals: []
-          actions:
-            - name: "Novo Processo Seletivo"
-              type: "button"
-              effect: "Navega para o formulario de criacao"
-              reversible: true
 
         - name: "Criar Processo Seletivo"
           url_pattern: "/educational/admission/create"
           route_component: "AdmissionCreatePage"
           description: "Formulario para criar um novo processo seletivo"
-          fields: []
-          modals: []
-          actions: []
 
         - name: "Detalhes do Processo Seletivo"
           url_pattern: "/educational/admission/:admissionId"
           route_component: "AdmissionDetailPage"
           description: "Detalhes e configuracoes de um processo seletivo"
-          fields: []
-          modals: []
-          actions: []
 
         - name: "Ofertas do Processo"
           url_pattern: "/educational/admission/:admissionId/offers/create"
           route_component: "OfferCreatePage"
           description: "Criar oferta dentro de um processo seletivo"
-          fields: []
-          modals:
-            - name: "StepConfigModal"
-              trigger: "Ao configurar etapas da oferta"
-              purpose: "Configurar passos do formulario de inscricao"
-            - name: "ContractSignatureModal"
-              trigger: "Ao definir contrato da oferta"
-              purpose: "Capturar assinatura de contrato"
-          actions: []
 
         - name: "Form Builder"
           url_pattern: "/educational/admission/:admissionId/offers/:offerId/form-builder"
           route_component: "FormBuilderPage"
           description: "Construtor de formularios de inscricao com drag-and-drop"
-          fields: []
-          modals: []
-          actions: []
           components:
             - "FormBuilder (drag-and-drop)"
             - "FormPreview"
@@ -2100,27 +2088,19 @@ knowledge_base:
           url_pattern: "/educational/admission/candidates"
           route_component: "CandidateListPage"
           description: "Lista de todos os candidatos inscritos"
-          fields: []
-          modals: []
-          actions: []
 
         - name: "Kanban de Candidatos"
           url_pattern: "/educational/admission/candidates/kanban"
           route_component: "CandidateKanbanPage"
           description: "Visao kanban do pipeline de candidatos"
-          fields: []
-          modals: []
-          actions: []
 
         - name: "Detalhes do Candidato"
           url_pattern: "/educational/admission/candidates/:candidateId"
           route_component: "CandidateDetailPage"
           description: "Detalhes e historico de um candidato"
-          fields: []
-          modals: []
-          actions: []
 
     # === MODULO: CONTEUDO EDUCACIONAL ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-educational-fields.yaml
     - modulo: "educational"
       base_route: "/educational"
       description: "Gerenciamento de conteudo educacional (colecoes, trilhas, series, unidades)"
@@ -2174,6 +2154,7 @@ knowledge_base:
             - "GroupWorkManagement"
 
     # === MODULO: TURMAS ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-educational-fields.yaml (class-instances section)
     - modulo: "class-instances"
       base_route: "/educational/class-instances"
       description: "Gerenciamento de turmas, matriculas e atividades"
@@ -2209,6 +2190,7 @@ knowledge_base:
           description: "Atividades e exercicios vinculados a turma"
 
     # === MODULO: AVALIACOES ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-exams-fields.yaml
     - modulo: "exams"
       base_route: "/educational/exams"
       description: "Gerenciamento de avaliacoes, questoes, rubricas e proctoring"
@@ -2254,6 +2236,7 @@ knowledge_base:
           description: "Monitoramento de provas online"
 
     # === MODULO: CERTIFICADOS ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-exams-fields.yaml (certification section)
     - modulo: "certification"
       base_route: "/educational/certificates"
       description: "Gerenciamento de certificados, templates e documentos"
@@ -2279,6 +2262,7 @@ knowledge_base:
           description: "Gerenciamento de documentos academicos"
 
     # === MODULO: USUARIOS ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-users-fields.yaml
     - modulo: "users"
       base_route: "/users"
       description: "Gerenciamento de usuarios (alunos, funcionarios)"
@@ -2318,6 +2302,7 @@ knowledge_base:
           description: "Upload de planilha para cadastro em massa de alunos"
 
     # === MODULO: EMPRESAS ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-users-fields.yaml (companies section)
     - modulo: "companies"
       base_route: "/companies"
       description: "Gerenciamento de empresas/instituicoes (multi-tenant)"
@@ -2338,6 +2323,7 @@ knowledge_base:
           description: "Detalhes e configuracoes da empresa"
 
     # === MODULO: ADMINISTRATIVO ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-exams-fields.yaml (admin section)
     - modulo: "admin"
       base_route: "/"
       description: "Paginas administrativas e configuracoes"
@@ -2363,6 +2349,7 @@ knowledge_base:
           description: "Configuracao de integracao com Zoom"
 
     # === PAGINAS PUBLICAS ===
+    # Campos, modais e acoes detalhados em: knowledge-base/cogedu-exams-fields.yaml (public section)
     - modulo: "public"
       base_route: ""
       description: "Paginas publicas sem autenticacao"
@@ -2383,8 +2370,10 @@ knowledge_base:
           description: "Validacao publica de certificados via codigo"
 
   # NOTA: Os campos (fields), modais (modals) e acoes (actions) de cada pagina
-  # devem ser documentados em detalhe a partir da analise das telas reais do sistema.
+  # estao documentados nos arquivos externos referenciados em field_mappings acima.
+  # Cada arquivo foi extraido do codigo-fonte real do Cogedu (apps/web/src/).
   # A estrutura acima mapeia todas as rotas existentes no router.tsx do Cogedu.
+  # Para detalhes de um campo especifico, consulte o arquivo YAML do modulo correspondente.
 ```
 
 ---

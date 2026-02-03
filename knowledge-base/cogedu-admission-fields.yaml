@@ -1,0 +1,1799 @@
+# =============================================================================
+# Cogedu Admission Module - Complete Field Mapping
+# Generated from source code analysis
+# =============================================================================
+
+pages:
+
+  # ===========================================================================
+  # 1. AdmissionListPage (AdmissionsListRoute.tsx)
+  # ===========================================================================
+  - page_id: admission_list
+    page_name: AdmissionListPage
+    route: /educational/admission
+    source_file: routes/admission/AdmissionsList/AdmissionsListRoute.tsx
+
+    fields:
+      - name: Busca
+        field_id: searchTerm
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "SearchBar - busca por nome, codigo ou descricao da admissao"
+
+      - name: Filtro de Status
+        field_id: statusFilter
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: "all"
+            label: "Todos"
+          - value: "draft"
+            label: "Rascunho"
+          - value: "active"
+            label: "Ativas"
+          - value: "closed"
+            label: "Encerradas"
+        description: "Filtra admissoes por status"
+
+    modals: []
+
+    actions:
+      - name: Nova Admissao
+        type: navigation
+        effect: "Navega para /educational/admission/new"
+        reversible: true
+        confirmation_required: false
+
+      - name: Abrir Admissao
+        type: navigation
+        effect: "Navega para /educational/admission/{id}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Criar Admissao (empty state)
+        type: navigation
+        effect: "Navega para /educational/admission/new"
+        reversible: true
+        confirmation_required: false
+
+  # ===========================================================================
+  # 2. AdmissionCreatePage (AdmissionCreateRoute.tsx)
+  # ===========================================================================
+  - page_id: admission_create
+    page_name: AdmissionCreatePage
+    route: /educational/admission/new
+    source_file: routes/admission/AdmissionCreate/AdmissionCreateRoute.tsx
+
+    fields:
+      - name: Empresa
+        field_id: selectedCompanyId
+        type: select
+        required: true
+        validation: "Selecione uma empresa"
+        options: "Dinamico - lista de empresas da API (useCompanies)"
+        description: "Dropdown de empresas cadastradas"
+
+      - name: Codigo (preview)
+        field_id: codePreview
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Campo desabilitado - codigo gerado automaticamente (ADM-{NOME}-{ANO}-{RANDOM})"
+
+      - name: Modo de Matricula
+        field_id: enrollmentMode
+        type: custom_component
+        required: true
+        validation: null
+        options:
+          - value: "single_inherited"
+            label: "Turma Unica (herdada)"
+          - value: "multiple_choice"
+            label: "Escolha Multipla"
+        description: "EnrollmentModeSelector - define se candidatos vao para uma turma ou escolhem entre varias"
+
+      - name: Turma (modo single_inherited)
+        field_id: selectedClassInstanceId
+        type: select
+        required: true  # quando enrollmentMode === 'single_inherited'
+        validation: "Selecione uma turma"
+        options: "Dinamico - lista de turmas da empresa selecionada (useClassInstances)"
+        description: "Dropdown de turmas. Desabilitado ate selecionar empresa."
+
+      - name: Turmas Disponiveis (modo multiple_choice)
+        field_id: multipleChoiceClassInstances
+        type: multi_select
+        required: true  # quando enrollmentMode === 'multiple_choice'
+        validation: "Selecione pelo menos 2 turmas para o modo de escolha multipla"
+        options: "Dinamico - lista de turmas da empresa selecionada (useClassInstances)"
+        description: "Selecao de multiplas turmas com ordenacao. Tipo ClassInstanceLink[]."
+
+      - name: Nome
+        field_id: name
+        type: text
+        required: true
+        validation: "Nome e obrigatorio"
+        options: null
+        description: "Nome do processo seletivo (ex: Processo Seletivo 2025.1)"
+
+      - name: Descricao
+        field_id: description
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Descricao do processo de admissao"
+
+      - name: Inicio das Inscricoes
+        field_id: registrationStartDate
+        type: datetime-local
+        required: false
+        validation: null
+        options: null
+        description: "Data e hora de inicio das inscricoes"
+
+      - name: Termino das Inscricoes
+        field_id: registrationEndDate
+        type: datetime-local
+        required: false
+        validation: "Data de termino deve ser posterior a data de inicio"
+        options: null
+        description: "Data e hora de termino das inscricoes"
+
+      - name: Divulgacao do Resultado
+        field_id: resultReleaseDate
+        type: datetime-local
+        required: false
+        validation: "Data de divulgacao deve ser posterior ao termino das inscricoes"
+        options: null
+        description: "Data e hora de divulgacao do resultado"
+
+      - name: Permitir multiplas candidaturas
+        field_id: allowMultipleApplications
+        type: checkbox
+        required: false
+        validation: null
+        options: null
+        description: "Permite que um candidato se inscreva em multiplos processos desta admissao"
+
+      - name: Requer pagamento
+        field_id: requirePayment
+        type: checkbox
+        required: false
+        validation: null
+        options: null
+        description: "Exige que o candidato realize o pagamento da taxa de inscricao"
+
+    modals: []
+
+    actions:
+      - name: Voltar
+        type: navigation
+        effect: "Navega para /educational/admission"
+        reversible: true
+        confirmation_required: false
+
+      - name: Cancelar
+        type: navigation
+        effect: "Navega para /educational/admission"
+        reversible: true
+        confirmation_required: false
+
+      - name: Criar Admissao
+        type: submit
+        effect: "Cria admissao via createAdmission.mutateAsync e navega para /educational/admission/{id}"
+        reversible: false
+        confirmation_required: false
+
+      - name: Remover Turma (multiple_choice)
+        type: action
+        effect: "Remove turma da lista de multipleChoiceClassInstances"
+        reversible: true
+        confirmation_required: false
+
+  # ===========================================================================
+  # 3. AdmissionDetailPage (AdmissionDetailRoute.tsx)
+  # ===========================================================================
+  - page_id: admission_detail
+    page_name: AdmissionDetailPage
+    route: /educational/admission/:id
+    source_file: routes/admission/AdmissionDetail/AdmissionDetailRoute.tsx
+
+    fields: []
+    # Pagina somente de visualizacao - nao possui campos editaveis
+    # Exibe: name, status, description, code, companyName, registrationStartDate,
+    # registrationEndDate, resultReleaseDate, createdAt, totalCandidates,
+    # totalApproved, totalRejected, approvalRate, allowMultipleApplications,
+    # requirePayment, ofertas vinculadas
+
+    modals: []
+    # Exclusao usa window.confirm nativo (nao um modal customizado)
+
+    actions:
+      - name: Voltar
+        type: navigation
+        effect: "Navega para /educational/admission"
+        reversible: true
+        confirmation_required: false
+
+      - name: Publicar
+        type: mutation
+        effect: "Publica admissao via publishAdmission.mutateAsync (muda status de draft para active)"
+        reversible: false
+        confirmation_required: false
+        condition: "Visivel somente quando admission.status === 'draft'"
+
+      - name: Editar
+        type: navigation
+        effect: "Navega para /educational/admission/{id}/edit"
+        reversible: true
+        confirmation_required: false
+
+      - name: Excluir
+        type: mutation
+        effect: "Exclui admissao via deleteAdmission.mutateAsync e navega para /educational/admission"
+        reversible: false
+        confirmation_required: true
+        confirmation_type: "window.confirm - 'Tem certeza que deseja excluir esta admissao?'"
+
+      - name: Adicionar Oferta
+        type: navigation
+        effect: "Navega para /educational/admission/{id}/offers/new"
+        reversible: true
+        confirmation_required: false
+
+      - name: Abrir Oferta
+        type: navigation
+        effect: "Navega para /educational/admission/offers/{offerId}"
+        reversible: true
+        confirmation_required: false
+
+  # ===========================================================================
+  # 3b. AdmissionEditPage (AdmissionEditRoute.tsx)
+  # ===========================================================================
+  - page_id: admission_edit
+    page_name: AdmissionEditPage
+    route: /educational/admission/:id/edit
+    source_file: routes/admission/AdmissionEdit/AdmissionEditRoute.tsx
+
+    fields:
+      - name: Nome
+        field_id: name
+        type: text
+        required: true
+        validation: "Nome e obrigatorio"
+        options: null
+        description: "Nome do processo seletivo"
+
+      - name: Descricao
+        field_id: description
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Descricao do processo de admissao"
+
+      - name: Inicio das Inscricoes
+        field_id: registrationStartDate
+        type: datetime-local
+        required: false
+        validation: null
+        options: null
+        description: "Data e hora de inicio das inscricoes"
+
+      - name: Termino das Inscricoes
+        field_id: registrationEndDate
+        type: datetime-local
+        required: false
+        validation: "Data de termino deve ser posterior a data de inicio"
+        options: null
+        description: "Data e hora de termino das inscricoes"
+
+      - name: Divulgacao do Resultado
+        field_id: resultReleaseDate
+        type: datetime-local
+        required: false
+        validation: "Data de divulgacao deve ser posterior ao termino das inscricoes"
+        options: null
+        description: "Data e hora de divulgacao do resultado"
+
+      - name: Permitir multiplas candidaturas
+        field_id: allowMultipleApplications
+        type: checkbox
+        required: false
+        validation: null
+        options: null
+        description: "Permite que um candidato se inscreva em multiplos processos desta admissao"
+
+      - name: Requer pagamento
+        field_id: requirePayment
+        type: checkbox
+        required: false
+        validation: null
+        options: null
+        description: "Exige que o candidato realize o pagamento da taxa de inscricao"
+
+      - name: Turmas Vinculadas (LinkedClassInstancesManager)
+        field_id: linkedClassInstances
+        type: custom_component
+        required: false
+        validation: null
+        options: null
+        description: "Componente para gerenciar turmas vinculadas (apenas no modo multiple_choice). Suporta adicionar, remover e reordenar turmas. Desabilitado quando admissao esta publicada."
+        condition: "Visivel apenas quando enrollmentMode === 'multiple_choice'"
+
+    modals: []
+
+    actions:
+      - name: Voltar
+        type: navigation
+        effect: "Navega para /educational/admission/{id}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Cancelar
+        type: navigation
+        effect: "Navega para /educational/admission/{id}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Salvar Alteracoes
+        type: submit
+        effect: "Atualiza admissao via updateAdmission.mutateAsync e navega para /educational/admission/{id}"
+        reversible: false
+        confirmation_required: false
+
+      - name: Adicionar Turma (multiple_choice)
+        type: mutation
+        effect: "Adiciona turma vinculada via addClassInstance.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remover Turma (multiple_choice)
+        type: mutation
+        effect: "Remove turma vinculada via removeClassInstance.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Reordenar Turmas (multiple_choice)
+        type: mutation
+        effect: "Reordena turmas vinculadas via reorderClassInstances.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+  # ===========================================================================
+  # 4. OfferCreatePage (OfferCreateRoute.tsx)
+  # ===========================================================================
+  - page_id: offer_create
+    page_name: OfferCreatePage
+    route: /educational/admission/:admissionId/offers/new
+    source_file: routes/admission/OfferCreate/OfferCreateRoute.tsx
+
+    fields:
+      - name: Nome da Oferta
+        field_id: name
+        type: text
+        required: true
+        validation: "Nome e obrigatorio"
+        options: null
+        description: "Nome da oferta (ex: Oferta 2025.1 - Graduacao)"
+
+      - name: Descricao
+        field_id: description
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Descricao da oferta"
+
+      - name: Tipo de Oferta
+        field_id: offerType
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Tipo da oferta (ex: Regular, Vestibular, ENEM)"
+
+      - name: Turma (herdada da Admissao)
+        field_id: classInstanceId
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Campo desabilitado - turma herdada da admissao pai. Exibe nome e codigo da turma."
+        condition: "Visivel quando admission.enrollmentMode !== 'multiple_choice'"
+
+      - name: Turmas Vinculadas (Multipla Escolha)
+        field_id: linkedClassInstances
+        type: display_only
+        required: false
+        validation: null
+        options: null
+        description: "Exibe lista read-only de turmas vinculadas da admissao pai."
+        condition: "Visivel quando admission.enrollmentMode === 'multiple_choice'"
+
+      - name: Taxa de Inscricao
+        field_id: admissionFee
+        type: number
+        required: false
+        validation: null
+        options:
+          step: 0.01
+          min: 0
+        description: "Valor em Reais (R$) da taxa de inscricao"
+
+      - name: Desconto
+        field_id: discountPercentage
+        type: number
+        required: false
+        validation: null
+        options:
+          step: 0.01
+          min: 0
+          max: 100
+        description: "Percentual de desconto (%)"
+
+      - name: Vagas Totais
+        field_id: vacancyTotal
+        type: number
+        required: false
+        validation: null
+        options:
+          min: 1
+        description: "Numero total de vagas"
+
+      - name: Vagas Reservadas
+        field_id: vacancyReserved
+        type: number
+        required: false
+        validation: null
+        options:
+          min: 0
+        description: "Numero de vagas reservadas"
+
+      - name: Etapas do Pipeline
+        field_id: selectedStages
+        type: checkbox_group
+        required: true
+        validation: "Minimo de 1 etapa obrigatoria"
+        options: "PIPELINE_STAGES_CONFIG - array de etapas do processo seletivo"
+        description: "Selecao de quais etapas do processo seletivo serao utilizadas nesta oferta. Todas selecionadas por padrao."
+
+      - name: Link Publico de Inscricao
+        field_id: publicLinkPreview
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Campo desabilitado - exibe URL publica gerada apos criacao da oferta ({origin}/apply/{offerId})"
+
+    modals: []
+
+    actions:
+      - name: Voltar
+        type: navigation
+        effect: "Navega para /educational/admission/{admissionId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Cancelar
+        type: navigation
+        effect: "Navega para /educational/admission/{admissionId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Criar Oferta
+        type: submit
+        effect: "Cria oferta via createOffer.mutateAsync. Gera formConfig padrao com etapa Dados Pessoais."
+        reversible: false
+        confirmation_required: false
+
+      - name: Copiar Link
+        type: action
+        effect: "Copia link publico para clipboard via navigator.clipboard.writeText"
+        reversible: false
+        confirmation_required: false
+        condition: "Visivel apos criacao da oferta (createdOfferId !== null)"
+
+      - name: Voltar para Admissao (pos-criacao)
+        type: navigation
+        effect: "Navega para /educational/admission/{admissionId}"
+        reversible: true
+        confirmation_required: false
+        condition: "Visivel apos criacao da oferta"
+
+      - name: Ver Oferta Criada (pos-criacao)
+        type: navigation
+        effect: "Navega para /educational/admission/offers/{createdOfferId}"
+        reversible: true
+        confirmation_required: false
+        condition: "Visivel apos criacao da oferta"
+
+  # ===========================================================================
+  # 4b. OfferDetailPage (OfferDetailRoute.tsx)
+  # ===========================================================================
+  - page_id: offer_detail
+    page_name: OfferDetailPage
+    route: /educational/admission/offers/:offerId
+    source_file: routes/admission/OfferDetail/OfferDetailRoute.tsx
+
+    fields: []
+    # Pagina somente de visualizacao - nao possui campos editaveis
+    # Exibe: name, isActive, description, offerType, classInstanceId, admissionFee,
+    # discountPercentage, vacancyConfig.total, vacancyConfig.reserved, createdAt,
+    # totalCandidates, formConfig units, publicUrl
+
+    modals:
+      - name: Confirmar Exclusao
+        trigger: "Botao 'Excluir'"
+        purpose: "Confirma exclusao da oferta"
+        fields: []
+        description: "AlertDialog com titulo 'Confirmar Exclusao' e descricao de aviso sobre candidatos vinculados."
+
+    actions:
+      - name: Voltar para Admissao
+        type: navigation
+        effect: "Navega para /educational/admission/{admissionId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Editar
+        type: navigation
+        effect: "Navega para /educational/admission/offers/{offerId}/edit"
+        reversible: true
+        confirmation_required: false
+
+      - name: Excluir
+        type: mutation
+        effect: "Abre AlertDialog de confirmacao, depois exclui oferta via deleteOffer.mutateAsync"
+        reversible: false
+        confirmation_required: true
+
+      - name: Copiar Link
+        type: action
+        effect: "Copia link publico para clipboard"
+        reversible: false
+        confirmation_required: false
+
+      - name: Editar Formulario
+        type: navigation
+        effect: "Navega para /educational/admission/offers/{offerId}/form-builder"
+        reversible: true
+        confirmation_required: false
+
+      - name: Ver Todos Candidatos
+        type: navigation
+        effect: "Navega para /educational/admission/candidates?offerId={offerId}"
+        reversible: true
+        confirmation_required: false
+
+  # ===========================================================================
+  # 4c. OfferEditPage (OfferEditRoute.tsx)
+  # ===========================================================================
+  - page_id: offer_edit
+    page_name: OfferEditPage
+    route: /educational/admission/offers/:offerId/edit
+    source_file: routes/admission/OfferEdit/OfferEditRoute.tsx
+
+    fields:
+      - name: Nome da Oferta
+        field_id: name
+        type: text
+        required: true
+        validation: "Nome e obrigatorio"
+        options: null
+        description: "Nome da oferta"
+
+      - name: Descricao
+        field_id: description
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Descricao da oferta"
+
+      - name: Tipo de Oferta
+        field_id: offerType
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Tipo da oferta"
+
+      - name: ID da Turma
+        field_id: classInstanceId
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "UUID da turma para matricula automatica (campo texto livre)"
+
+      - name: Taxa de Inscricao
+        field_id: admissionFee
+        type: number
+        required: false
+        validation: null
+        options:
+          step: 0.01
+          min: 0
+        description: "Valor em Reais (R$)"
+
+      - name: Desconto
+        field_id: discountPercentage
+        type: number
+        required: false
+        validation: null
+        options:
+          step: 0.01
+          min: 0
+          max: 100
+        description: "Percentual de desconto (%)"
+
+      - name: Vagas Totais
+        field_id: vacancyTotal
+        type: number
+        required: false
+        validation: null
+        options:
+          min: 1
+        description: "Numero total de vagas"
+
+      - name: Vagas Reservadas
+        field_id: vacancyReserved
+        type: number
+        required: false
+        validation: null
+        options:
+          min: 0
+        description: "Numero de vagas reservadas"
+
+    modals: []
+
+    actions:
+      - name: Voltar para Oferta
+        type: navigation
+        effect: "Navega para /educational/admission/offers/{offerId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Cancelar
+        type: navigation
+        effect: "Navega para /educational/admission/offers/{offerId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Salvar Alteracoes
+        type: submit
+        effect: "Atualiza oferta via updateOffer.mutateAsync e navega para detalhes da oferta"
+        reversible: false
+        confirmation_required: false
+
+  # ===========================================================================
+  # 5. FormBuilderPage (FormBuilderRoute.tsx + FormBuilder.tsx + StepConfig.tsx)
+  # ===========================================================================
+  - page_id: form_builder
+    page_name: FormBuilderPage
+    route: /educational/admission/offers/:offerId/form-builder
+    source_file: routes/admission/FormBuilderRoute/FormBuilderRoute.tsx
+    component_files:
+      - components/admission/FormBuilder/FormBuilder.tsx
+      - components/admission/FormBuilder/StepConfig.tsx
+
+    fields:
+      # -- FormBuilder fields (step group management) --
+      - name: Nome da Etapa (Step Group)
+        field_id: stepGroup.name
+        type: text
+        required: true
+        validation: null
+        options: null
+        description: "Nome do grupo de etapas (editavel via inline input ou painel lateral)"
+
+      # -- StepConfig - Parameters Tab (all component types) --
+      - name: Titulo do Componente
+        field_id: config.title
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Titulo exibido para o candidato nesta etapa"
+
+      - name: Descricao do Componente
+        field_id: config.description
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Instrucoes exibidas para o candidato"
+
+      # -- StepConfig - Campos type fields --
+      - name: "Campo Personalizado: Label"
+        field_id: customField.label
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Nome do campo personalizado"
+        condition: "Componente tipo 'campos'"
+
+      - name: "Campo Personalizado: Tipo"
+        field_id: customField.type
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: text
+            label: Texto
+          - value: number
+            label: Numero
+          - value: email
+            label: E-mail
+          - value: tel
+            label: Telefone
+          - value: date
+            label: Data
+          - value: select
+            label: "Selecao (Dropdown)"
+          - value: radio
+            label: "Selecao (Radio)"
+          - value: checkbox
+            label: "Multipla Escolha"
+          - value: textarea
+            label: "Area de texto"
+        description: "Tipo do campo personalizado"
+        condition: "Componente tipo 'campos'"
+
+      - name: "Campo Personalizado: Opcoes"
+        field_id: customField.options
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Opcoes separadas por virgula (para select/radio/checkbox)"
+        condition: "Componente tipo 'campos' e campo tipo select/radio/checkbox"
+
+      - name: "Campo Personalizado: Obrigatorio"
+        field_id: customField.required
+        type: switch
+        required: false
+        validation: null
+        options: null
+        description: "Define se o campo e obrigatorio"
+        condition: "Componente tipo 'campos'"
+
+      # -- StepConfig - Documentos type fields --
+      - name: "Documento: Nome"
+        field_id: document.name
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Nome do documento exigido (ex: RG, CPF)"
+        condition: "Componente tipo 'documentos'"
+
+      - name: "Documento: Descricao"
+        field_id: document.description
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Instrucoes para o documento"
+        condition: "Componente tipo 'documentos'"
+
+      - name: "Documento: Obrigatorio"
+        field_id: document.required
+        type: switch
+        required: false
+        validation: null
+        options: null
+        description: "Define se o documento e obrigatorio"
+        condition: "Componente tipo 'documentos'"
+
+      # -- StepConfig - Pagamento type fields --
+      - name: Valor
+        field_id: config.amount
+        type: number
+        required: false
+        validation: null
+        options: null
+        description: "Valor do pagamento"
+        condition: "Componente tipo 'pagamento' (em desenvolvimento)"
+
+      - name: "Provedor de Pagamento: Nome"
+        field_id: paymentProvider.name
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: Stripe
+            label: Stripe
+          - value: PayPal
+            label: PayPal
+          - value: "Mercado Pago"
+            label: Mercado Pago
+          - value: PagSeguro
+            label: PagSeguro
+          - value: Asaas
+            label: Asaas
+          - value: Outro
+            label: Outro
+        description: "Provedor de pagamento selecionado"
+        condition: "Componente tipo 'pagamento'"
+
+      - name: "Provedor de Pagamento: URL da API"
+        field_id: paymentProvider.apiUrl
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "URL da API do provedor de pagamento"
+        condition: "Componente tipo 'pagamento'"
+
+      - name: "Provedor de Pagamento: API Key"
+        field_id: paymentProvider.apiKey
+        type: password
+        required: false
+        validation: null
+        options: null
+        description: "Token/chave de autenticacao do provedor"
+        condition: "Componente tipo 'pagamento'"
+
+      - name: "Provedor de Pagamento: Metodos"
+        field_id: paymentProvider.methods
+        type: checkbox_group
+        required: false
+        validation: null
+        options:
+          - value: credit_card
+            label: Credito
+          - value: debit_card
+            label: Debito
+          - value: pix
+            label: PIX
+          - value: boleto
+            label: Boleto
+          - value: bank_transfer
+            label: Transferencia
+        description: "Metodos de pagamento aceitos pelo provedor"
+        condition: "Componente tipo 'pagamento'"
+
+      - name: "Provedor de Pagamento: Webhook URL"
+        field_id: paymentProvider.webhookUrl
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "URL de webhook para notificacoes de pagamento"
+        condition: "Componente tipo 'pagamento'"
+
+      # -- StepConfig - Avaliacao type fields --
+      - name: Modo de Avaliacao
+        field_id: config.evaluationMode
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: internal
+            label: "Avaliacao Interna (Modal)"
+          - value: external
+            label: "Link Externo"
+          - value: scheduled
+            label: "Avaliacao Agendada"
+        description: "Define como a avaliacao sera conduzida"
+        condition: "Componente tipo 'avaliacao'"
+
+      - name: ID da Avaliacao no Sistema Externo
+        field_id: config.externalEvaluationId
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "ID para referenciar avaliacao em sistema externo (ex: AVAL-2024-001)"
+        condition: "Componente tipo 'avaliacao' e evaluationMode === 'internal'"
+
+      - name: Duracao (minutos)
+        field_id: config.duration
+        type: number
+        required: false
+        validation: null
+        options: null
+        description: "Duracao da avaliacao em minutos"
+        condition: "Componente tipo 'avaliacao' e evaluationMode === 'internal'"
+
+      - name: Link Externo
+        field_id: config.externalLink
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "URL do link externo para avaliacao (ex: Google Meet)"
+        condition: "Componente tipo 'avaliacao' e evaluationMode === 'external'"
+
+      - name: Instrucoes de Agendamento
+        field_id: config.schedulingInstructions
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Instrucoes para o candidato agendar a avaliacao"
+        condition: "Componente tipo 'avaliacao' e evaluationMode === 'scheduled'"
+
+      - name: Link de Agendamento
+        field_id: config.schedulingLink
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "URL para agendamento (ex: Calendly)"
+        condition: "Componente tipo 'avaliacao' e evaluationMode === 'scheduled'"
+
+      - name: Permitir Pular Avaliacao
+        field_id: config.allowSkip
+        type: switch
+        required: false
+        validation: null
+        options: null
+        description: "Candidato pode continuar sem completar esta avaliacao"
+        condition: "Componente tipo 'avaliacao'"
+
+      # -- StepConfig - Contrato type fields --
+      - name: Template do Contrato
+        field_id: config.template
+        type: rich_text
+        required: false
+        validation: null
+        options: null
+        description: "Editor CKEditor 5 para template do contrato (ContractTemplateEditor)"
+        condition: "Componente tipo 'contrato'"
+
+      - name: Assinatura Digital
+        field_id: config.requireSignature
+        type: switch
+        required: false
+        validation: null
+        options: null
+        description: "Requer assinatura eletronica do candidato com verificacao OTP"
+        condition: "Componente tipo 'contrato'"
+
+      # -- StepConfig - Communication Tab (all component types) --
+      - name: Gatilho - Ao Iniciar Etapa
+        field_id: config.triggerOnStart
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Mensagem enviada quando o candidato inicia esta etapa"
+
+      - name: Gatilho - Ao Concluir Etapa
+        field_id: config.triggerOnComplete
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Mensagem enviada quando o candidato conclui esta etapa"
+
+      - name: Gatilho - Ao Aprovar
+        field_id: config.triggerOnApprove
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Mensagem enviada quando aprovado"
+        condition: "Componente tipo 'documentos' ou 'avaliacao'"
+
+      - name: Gatilho - Ao Rejeitar
+        field_id: config.triggerOnReject
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Mensagem enviada quando rejeitado"
+        condition: "Componente tipo 'documentos' ou 'avaliacao'"
+
+      - name: Ativar Webhook
+        field_id: config.enableWebhook
+        type: switch
+        required: false
+        validation: null
+        options: null
+        description: "Ativa envio de dados para ferramenta externa"
+
+      - name: URL do Webhook
+        field_id: config.webhookUrl
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "URL do endpoint webhook"
+        condition: "enableWebhook === true"
+
+      - name: Gatilho do Webhook
+        field_id: config.webhookTrigger
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: on_start
+            label: "Ao Iniciar Etapa"
+          - value: on_complete
+            label: "Ao Concluir Etapa"
+          - value: on_approve
+            label: "Ao Aprovar"
+          - value: on_reject
+            label: "Ao Rejeitar"
+        description: "Quando o webhook sera disparado"
+        condition: "enableWebhook === true"
+
+      - name: Metodo HTTP do Webhook
+        field_id: config.webhookMethod
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: POST
+            label: POST
+          - value: PUT
+            label: PUT
+          - value: PATCH
+            label: PATCH
+        description: "Metodo HTTP usado na chamada webhook"
+        condition: "enableWebhook === true"
+
+      - name: Headers Customizados (JSON)
+        field_id: config.webhookHeaders
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Headers HTTP customizados em formato JSON"
+        condition: "enableWebhook === true"
+
+      - name: Email do Avaliador
+        field_id: config.examinerEmail
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Email que recebera notificacoes sobre esta avaliacao"
+        condition: "Componente tipo 'avaliacao'"
+
+      - name: Etapa Obrigatoria
+        field_id: config.required
+        type: switch
+        required: false
+        validation: null
+        options: null
+        description: "Define se o candidato deve completar esta etapa"
+
+    modals: []
+
+    actions:
+      - name: Voltar para Oferta
+        type: navigation
+        effect: "Navega para /educational/admission/offers/{offerId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Salvar Formulario
+        type: submit
+        effect: "Salva formulario via updateOffer.mutateAsync (formConfig) e navega para detalhes da oferta"
+        reversible: false
+        confirmation_required: false
+
+      - name: Nova Etapa
+        type: action
+        effect: "Adiciona novo FormStepGroup vazio com nome 'Nova Etapa'"
+        reversible: true
+        confirmation_required: false
+
+      - name: Renomear Etapa
+        type: action
+        effect: "Ativa edicao inline do nome da etapa"
+        reversible: true
+        confirmation_required: false
+
+      - name: Duplicar Etapa
+        type: action
+        effect: "Cria copia da etapa com todos os componentes"
+        reversible: true
+        confirmation_required: false
+
+      - name: Excluir Etapa
+        type: action
+        effect: "Remove etapa e todos seus componentes (nao aplicavel a etapa fixa)"
+        reversible: false
+        confirmation_required: false
+
+      - name: Arrastar Componente
+        type: drag_and_drop
+        effect: "Adiciona componente do tipo arrastado ao grupo de destino"
+        reversible: true
+        confirmation_required: false
+        description: "Arrasta componente da paleta (Campos, Documentos, Pagamento, Avaliacao, Contrato) para uma etapa"
+
+      - name: Excluir Componente
+        type: action
+        effect: "Remove componente da etapa (nao aplicavel a componentes fixos)"
+        reversible: false
+        confirmation_required: false
+
+      - name: Adicionar Campo Personalizado
+        type: action
+        effect: "Adiciona novo CustomField ao componente tipo 'campos'"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remover Campo Personalizado
+        type: action
+        effect: "Remove CustomField do componente tipo 'campos'"
+        reversible: false
+        confirmation_required: false
+
+      - name: Adicionar Documento
+        type: action
+        effect: "Adiciona novo Document ao componente tipo 'documentos'"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remover Documento
+        type: action
+        effect: "Remove Document do componente tipo 'documentos'"
+        reversible: false
+        confirmation_required: false
+
+      - name: Adicionar Provedor de Pagamento
+        type: action
+        effect: "Adiciona novo PaymentProvider ao componente tipo 'pagamento'"
+        reversible: true
+        confirmation_required: false
+
+      - name: Remover Provedor de Pagamento
+        type: action
+        effect: "Remove PaymentProvider do componente tipo 'pagamento'"
+        reversible: false
+        confirmation_required: false
+
+    component_types_palette:
+      - id: campos
+        label: Campos
+        description: "Campos personalizados"
+        disabled: false
+
+      - id: documentos
+        label: Documentos
+        description: "Upload de documentos"
+        disabled: false
+
+      - id: pagamento
+        label: Pagamento
+        description: "Cobranca de taxa"
+        disabled: true
+        disabled_reason: "Em desenvolvimento"
+
+      - id: avaliacao
+        label: Avaliacao
+        description: "Prova ou teste"
+        disabled: false
+
+      - id: contrato
+        label: Contrato
+        description: "Assinatura de contrato"
+        disabled: false
+
+    fixed_step:
+      id: step-dados-pessoais
+      name: "Dados Pessoais"
+      description: "Etapa fixa e obrigatoria - nao pode ser modificada. Componente tipo 'dados-pessoais'."
+
+  # ===========================================================================
+  # 6. CandidateListPage (CandidatesListRoute.tsx)
+  # ===========================================================================
+  - page_id: candidate_list
+    page_name: CandidateListPage
+    route: /educational/admission/candidates
+    source_file: routes/admission/CandidatesList/CandidatesListRoute.tsx
+
+    fields:
+      - name: Busca
+        field_id: searchTerm
+        type: text
+        required: false
+        validation: null
+        options: null
+        description: "Busca por nome, email ou CPF do candidato"
+
+      - name: Filtro de Admissao
+        field_id: selectedAdmission
+        type: select
+        required: false
+        validation: null
+        options: "Dinamico - lista de admissoes (useAdmissions). Default 'all' para todos os processos."
+        description: "Filtra candidatos por processo de admissao"
+
+      - name: Filtro de Oferta
+        field_id: selectedOffer
+        type: select
+        required: false
+        validation: null
+        options: "Dinamico - lista de ofertas da admissao selecionada (useOffers). Desabilitado quando admissao = 'all'."
+        description: "Filtra candidatos por oferta"
+
+      - name: Filtro de Status
+        field_id: statusFilter
+        type: select
+        required: false
+        validation: null
+        options: "Dinamico - CANDIDATE_STATUS_CONFIG: em_andamento, aprovado, reprovado, cancelado"
+        description: "Filtra candidatos por status"
+
+      # -- Drawer fields --
+      - name: "Drawer: Etapa do Pipeline"
+        field_id: drawer.pipelineStage
+        type: select
+        required: false
+        validation: null
+        options: "PIPELINE_STAGES_CONFIG filtrado pelas etapas configuradas na oferta do candidato"
+        description: "Select para alterar etapa do pipeline do candidato selecionado. Atualiza via updatePipelineStage."
+
+      - name: "Drawer: Status"
+        field_id: drawer.status
+        type: select
+        required: false
+        validation: null
+        options: "CANDIDATE_STATUS_CONFIG: em_andamento, aprovado, reprovado, cancelado"
+        description: "Select para alterar status do candidato selecionado. Atualiza via updateStatus."
+
+      - name: "Drawer: Nova Nota"
+        field_id: newNote
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Textarea para adicionar nota interna ao candidato selecionado"
+
+    modals:
+      - name: Detalhes do Candidato (Sheet/Drawer)
+        trigger: "Clique em um card de candidato na lista"
+        purpose: "Exibir detalhes do candidato e permitir acoes rapidas"
+        fields:
+          - pipelineStage (select)
+          - status (select)
+          - newNote (textarea)
+        tabs:
+          - name: Linha do Tempo
+            description: "Historico do candidato (criacao, atualizacao, aprovacao, rejeicao)"
+          - name: Documentos
+            description: "Lista de documentos exigidos com status (aprovado/rejeitado/reenvio/pendente)"
+          - name: Notas
+            description: "Lista de notas internas com botao para adicionar nova nota"
+
+    actions:
+      - name: Voltar
+        type: navigation
+        effect: "Navega para /educational/admission"
+        reversible: true
+        confirmation_required: false
+
+      - name: Alternar para Vista Kanban
+        type: navigation
+        effect: "Navega para /educational/admission/candidates/kanban"
+        reversible: true
+        confirmation_required: false
+
+      - name: Abrir Candidato (card click)
+        type: action
+        effect: "Abre Sheet/Drawer lateral com detalhes do candidato"
+        reversible: true
+        confirmation_required: false
+
+      - name: Enviar Email
+        type: action
+        effect: "Botao de envio de email (nao implementado - apenas UI)"
+        reversible: false
+        confirmation_required: false
+
+      - name: Abrir Pagina do Candidato
+        type: navigation
+        effect: "Navega para /educational/admission/candidates/{candidateId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Alterar Etapa do Pipeline
+        type: mutation
+        effect: "Atualiza pipelineStage via updatePipelineStage.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Alterar Status
+        type: mutation
+        effect: "Atualiza status via updateStatus.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Adicionar Nota
+        type: mutation
+        effect: "Cria nota interna via createNote.mutateAsync (noteType: 'internal')"
+        reversible: false
+        confirmation_required: false
+
+  # ===========================================================================
+  # 7. CandidateKanbanPage (CandidatesKanbanRoute.tsx)
+  # ===========================================================================
+  - page_id: candidate_kanban
+    page_name: CandidateKanbanPage
+    route: /educational/admission/candidates/kanban
+    source_file: routes/admission/CandidatesKanban/CandidatesKanbanRoute.tsx
+
+    fields:
+      - name: Filtro de Admissao
+        field_id: selectedAdmission
+        type: select
+        required: false
+        validation: null
+        options: "Dinamico - lista de admissoes (useAdmissions). Default 'all'."
+        description: "Filtra candidatos no kanban por processo de admissao"
+
+      - name: Filtro de Oferta
+        field_id: selectedOffer
+        type: select
+        required: false
+        validation: null
+        options: "Dinamico - lista de ofertas da admissao selecionada (useOffers). Desabilitado quando admissao = 'all'."
+        description: "Filtra candidatos no kanban por oferta"
+
+      # -- Approval Dialog fields --
+      - name: "Aprovacao: Nota de Avaliacao"
+        field_id: approvalDialog.evaluationScore
+        type: number
+        required: true
+        validation: "min: 0, max: 10, step: 0.1"
+        options:
+          min: 0
+          max: 10
+          step: 0.1
+        description: "Nota de avaliacao do candidato (0 a 10)"
+
+      - name: "Aprovacao: Observacoes"
+        field_id: approvalDialog.evaluationNotes
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Observacoes sobre a avaliacao"
+
+      # -- Rejection Dialog fields --
+      - name: "Rejeicao: Motivo"
+        field_id: rejectionDialog.rejectionReason
+        type: textarea
+        required: true
+        validation: null
+        options: null
+        description: "Motivo da rejeicao (obrigatorio)"
+
+      - name: "Rejeicao: Nota de Avaliacao"
+        field_id: rejectionDialog.evaluationScore
+        type: number
+        required: false
+        validation: "min: 0, max: 10, step: 0.1"
+        options:
+          min: 0
+          max: 10
+          step: 0.1
+        description: "Nota de avaliacao do candidato rejeitado (opcional)"
+
+      # -- Drawer fields --
+      - name: "Drawer: Etapa do Pipeline"
+        field_id: drawer.pipelineStage
+        type: select
+        required: false
+        validation: null
+        options: "PIPELINE_STAGES_CONFIG"
+        description: "Select para alterar etapa do pipeline do candidato selecionado"
+
+      - name: "Drawer: Status"
+        field_id: drawer.status
+        type: select
+        required: false
+        validation: null
+        options: "CANDIDATE_STATUS_CONFIG: em_andamento, aprovado, reprovado, cancelado"
+        description: "Select para alterar status do candidato selecionado"
+
+      - name: "Drawer: Nova Nota"
+        field_id: newNote
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Textarea para adicionar nota interna ao candidato selecionado"
+
+    modals:
+      - name: Aprovacao do Candidato (AlertDialog)
+        trigger: "Botao 'Aprovar' no drawer do candidato"
+        purpose: "Coletar nota de avaliacao e observacoes para aprovar candidato"
+        fields:
+          - evaluationScore (number, 0-10, required)
+          - evaluationNotes (textarea, optional)
+
+      - name: Rejeicao do Candidato (AlertDialog)
+        trigger: "Botao 'Reprovar' no drawer do candidato"
+        purpose: "Coletar motivo e nota opcional para rejeitar candidato"
+        fields:
+          - rejectionReason (textarea, required)
+          - evaluationScore (number, 0-10, optional)
+
+      - name: Detalhes do Candidato (Sheet/Drawer)
+        trigger: "Clique em um card de candidato no kanban"
+        purpose: "Exibir detalhes e permitir acoes rapidas sobre o candidato"
+        fields:
+          - pipelineStage (select)
+          - status (select)
+          - newNote (textarea)
+        tabs:
+          - name: Linha do Tempo
+            description: "Historico do candidato"
+          - name: Documentos
+            description: "Status dos documentos exigidos"
+          - name: Notas
+            description: "Notas internas do candidato"
+
+    actions:
+      - name: Voltar para Candidatos
+        type: navigation
+        effect: "Navega para /educational/admission/candidates"
+        reversible: true
+        confirmation_required: false
+
+      - name: Alternar para Vista Lista
+        type: navigation
+        effect: "Navega para /educational/admission/candidates"
+        reversible: true
+        confirmation_required: false
+
+      - name: Atualizar
+        type: action
+        effect: "Refetch dos dados de candidatos"
+        reversible: true
+        confirmation_required: false
+
+      - name: Aprovar Candidato
+        type: mutation
+        effect: "Aprova candidato via approveCandidate.mutateAsync com evaluationScore e evaluationNotes"
+        reversible: false
+        confirmation_required: true
+        confirmation_type: AlertDialog
+
+      - name: Reprovar Candidato
+        type: mutation
+        effect: "Rejeita candidato via rejectCandidate.mutateAsync com rejectionReason e evaluationScore"
+        reversible: false
+        confirmation_required: true
+        confirmation_type: AlertDialog
+
+      - name: Enviar Email
+        type: action
+        effect: "Botao de envio de email (nao implementado - apenas UI)"
+        reversible: false
+        confirmation_required: false
+
+      - name: Abrir Pagina do Candidato
+        type: navigation
+        effect: "Navega para /educational/admission/candidates/{candidateId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Alterar Etapa do Pipeline (drawer)
+        type: mutation
+        effect: "Atualiza pipelineStage via updatePipelineStage.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Alterar Status (drawer)
+        type: mutation
+        effect: "Atualiza status via updateStatus.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Adicionar Nota (drawer)
+        type: mutation
+        effect: "Cria nota interna via createNote.mutateAsync"
+        reversible: false
+        confirmation_required: false
+
+  # ===========================================================================
+  # 8. CandidateDetailPage (CandidateDetailRoute.tsx)
+  # ===========================================================================
+  - page_id: candidate_detail
+    page_name: CandidateDetailPage
+    route: /educational/admission/candidates/:candidateId
+    source_file: routes/admission/CandidateDetail/CandidateDetailRoute.tsx
+
+    fields:
+      - name: Etapa do Pipeline
+        field_id: pipelineStage
+        type: select
+        required: false
+        validation: null
+        options: "PIPELINE_STAGES_CONFIG filtrado pelas etapas configuradas na oferta do candidato"
+        description: "Dropdown para alterar a etapa do pipeline do candidato"
+
+      - name: Status
+        field_id: status
+        type: select
+        required: false
+        validation: null
+        options:
+          - value: em_andamento
+            label: Em Andamento
+          - value: aprovado
+            label: Aprovado
+          - value: reprovado
+            label: Reprovado
+          - value: cancelado
+            label: Cancelado
+        description: "Dropdown para alterar o status do candidato (VALID_STATUS_OPTIONS)"
+
+      # -- Approval Dialog fields --
+      - name: "Aprovacao: Nota de Avaliacao"
+        field_id: approvalDialog.evaluationScore
+        type: number
+        required: true
+        validation: "min: 0, max: 100, step: 0.1"
+        options:
+          min: 0
+          max: 100
+          step: 0.1
+        description: "Nota de avaliacao (0 a 100). Diferente do Kanban que usa escala 0-10."
+
+      - name: "Aprovacao: Observacoes"
+        field_id: approvalDialog.evaluationNotes
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Observacoes sobre a avaliacao"
+
+      # -- Document Review Dialog fields --
+      - name: "Revisao de Documento: Observacoes"
+        field_id: documentReviewDialog.reviewNotes
+        type: textarea
+        required: true
+        validation: null
+        options: null
+        description: "Observacoes sobre a revisao do documento (obrigatoria para rejeicao/reenvio)"
+
+      # -- Notes section --
+      - name: Nova Nota
+        field_id: newNote
+        type: textarea
+        required: false
+        validation: null
+        options: null
+        description: "Textarea para adicionar nota interna ao candidato"
+
+    modals:
+      - name: Aprovacao do Candidato (AlertDialog)
+        trigger: "Botao 'Aprovar Candidato' (visivel quando pipelineStage === 'avaliacao')"
+        purpose: "Coletar nota de avaliacao (0-100) e observacoes para aprovar candidato"
+        fields:
+          - evaluationScore (number, 0-100, required)
+          - evaluationNotes (textarea, optional)
+
+      - name: Revisao de Documento (Dialog)
+        trigger: "Botao 'Rejeitar' ou 'Solicitar Reenvio' em um documento"
+        purpose: "Coletar observacoes para rejeitar ou solicitar reenvio de documento"
+        fields:
+          - reviewNotes (textarea, required)
+
+    actions:
+      - name: Voltar para Candidatos
+        type: navigation
+        effect: "Navega para /educational/admission/candidates"
+        reversible: true
+        confirmation_required: false
+
+      - name: Aprovar Candidato
+        type: mutation
+        effect: "Aprova candidato via approveCandidate.mutateAsync com evaluationScore e evaluationNotes"
+        reversible: false
+        confirmation_required: true
+        confirmation_type: AlertDialog
+        condition: "Visivel quando pipelineStage === 'avaliacao'"
+
+      - name: Alterar Etapa do Pipeline
+        type: mutation
+        effect: "Atualiza pipelineStage via updatePipelineStage.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Alterar Status
+        type: mutation
+        effect: "Atualiza status via updateStatus.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Ver Oferta
+        type: navigation
+        effect: "Navega para /educational/admission/offers/{processId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Ver Admissao
+        type: navigation
+        effect: "Navega para /educational/admission/{admissionId}"
+        reversible: true
+        confirmation_required: false
+
+      - name: Download Documento
+        type: mutation
+        effect: "Baixa documento via downloadDocument.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+      - name: Aprovar Documento
+        type: mutation
+        effect: "Aprova documento via updateDocumentStatus.mutateAsync (status: 'approved')"
+        reversible: false
+        confirmation_required: false
+
+      - name: Rejeitar Documento
+        type: mutation
+        effect: "Abre Dialog de revisao, depois rejeita documento via updateDocumentStatus.mutateAsync (status: 'rejected')"
+        reversible: false
+        confirmation_required: true
+        confirmation_type: Dialog
+
+      - name: Solicitar Reenvio de Documento
+        type: mutation
+        effect: "Abre Dialog de revisao, depois solicita reenvio via updateDocumentStatus.mutateAsync (status: 'requires_reupload')"
+        reversible: false
+        confirmation_required: true
+        confirmation_type: Dialog
+
+      - name: Adicionar Nota
+        type: mutation
+        effect: "Cria nota interna via createNote.mutateAsync"
+        reversible: false
+        confirmation_required: false
+
+      - name: Download Contrato Assinado (PDF)
+        type: mutation
+        effect: "Baixa contrato assinado via downloadContract.mutateAsync"
+        reversible: true
+        confirmation_required: false
+
+# =============================================================================
+# Reference Data: Shared Configurations
+# =============================================================================
+
+shared_configs:
+
+  PIPELINE_STAGES_CONFIG:
+    description: "Etapas do pipeline de admissao (definido em useAdmissions hook)"
+    stages:
+      - id: inscricao
+        title: Inscricao
+      - id: documentacao
+        title: Documentacao
+      - id: pagamento
+        title: Pagamento
+      - id: avaliacao
+        title: Avaliacao
+      - id: resultado
+        title: Resultado
+      - id: matricula
+        title: Matricula
+    note: "Cada oferta pode configurar quais etapas utilizar via selectedStages/pipelineStages"
+
+  CANDIDATE_STATUS_CONFIG:
+    description: "Status possiveis do candidato (definido em useAdmissions hook)"
+    statuses:
+      - key: em_andamento
+        label: Em Andamento
+        bgColor: bg-blue-100
+        color: text-blue-700
+      - key: aprovado
+        label: Aprovado
+        bgColor: bg-green-100
+        color: text-green-700
+      - key: reprovado
+        label: Reprovado
+        bgColor: bg-red-100
+        color: text-red-700
+      - key: cancelado
+        label: Cancelado
+        bgColor: bg-gray-100
+        color: text-gray-700
+
+  ADMISSION_STATUS:
+    description: "Status possiveis da admissao"
+    statuses:
+      - value: draft
+        label: Rascunho
+      - value: active
+        label: Ativa
+      - value: closed
+        label: Encerrada
+
+  ENROLLMENT_MODES:
+    description: "Modos de matricula disponiveis"
+    modes:
+      - value: single_inherited
+        label: "Turma Unica (herdada por ofertas)"
+      - value: multiple_choice
+        label: "Escolha Multipla (candidato ordena preferencias)"
+
+  FORM_COMPONENT_TYPES:
+    description: "Tipos de componentes disponiveis no FormBuilder"
+    types:
+      - id: dados-pessoais
+        label: Dados Pessoais
+        description: "Etapa fixa - coleta dados basicos do candidato (fullName, email, phone, CPF)"
+        fixed: true
+      - id: campos
+        label: Campos
+        description: "Campos personalizados (text, number, email, tel, date, select, radio, checkbox, textarea)"
+        fixed: false
+      - id: documentos
+        label: Documentos
+        description: "Upload de documentos exigidos"
+        fixed: false
+      - id: pagamento
+        label: Pagamento
+        description: "Cobranca de taxa (em desenvolvimento)"
+        fixed: false
+        disabled: true
+      - id: avaliacao
+        label: Avaliacao
+        description: "Prova ou teste (interna, externa ou agendada)"
+        fixed: false
+      - id: contrato
+        label: Contrato
+        description: "Assinatura de contrato com suporte a assinatura digital OTP"
+        fixed: false
+
+  DOCUMENT_STATUSES:
+    description: "Status possiveis dos documentos de candidatos"
+    statuses:
+      - value: pending
+        label: Pendente
+      - value: approved
+        label: Aprovado
+      - value: rejected
+        label: Rejeitado
+      - value: requires_reupload
+        label: Reenvio
+
+  HOOKS_USED:
+    description: "React Query hooks do modulo de admissao (useAdmissions.ts)"
+    hooks:
+      - useAdmissions
+      - useAdmission
+      - useCreateAdmission
+      - useUpdateAdmission
+      - useDeleteAdmission
+      - usePublishAdmission
+      - useAddAdmissionClassInstance
+      - useRemoveAdmissionClassInstance
+      - useReorderAdmissionClassInstances
+      - useOffers
+      - useOffer
+      - useCreateOffer
+      - useUpdateOffer
+      - useDeleteOffer
+      - useCandidates
+      - useCandidate
+      - useApproveCandidate
+      - useRejectCandidate
+      - useUpdateCandidatePipelineStage
+      - useUpdateCandidateStatus
+      - useDocumentRequirements
+      - useCreateCandidateNote
+      - useDocumentDownload
+      - useSignedContractDownload
+      - useUpdateDocumentStatus
+      - useCandidateClassPreferences
+      - calculateCompletionPercentage

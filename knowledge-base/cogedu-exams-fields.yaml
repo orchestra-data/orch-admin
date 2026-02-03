@@ -1,0 +1,1998 @@
+# =============================================================================
+# Cogedu Platform - Complete Field/Modal/Action Extraction
+# Modules: Exams, Certification, Admin, Public
+# Generated: 2026-02-03
+# =============================================================================
+
+modules:
+
+  # ===========================================================================
+  # EXAMS MODULE
+  # ===========================================================================
+  exams:
+
+    # -------------------------------------------------------------------------
+    # YourEvaluationsPage (TutorAssessments)
+    # File: routes/exams/YourEvaluations/YourEvaluationsRoute.tsx
+    #       routes/exams/YourEvaluations/TutorAssessments.tsx
+    # -------------------------------------------------------------------------
+    your_evaluations_page:
+      description: >
+        Tutor/teacher view for managing assessment attempts (grading student
+        submissions). Lists all assessment attempts with filtering.
+      fields:
+        - name: search
+          field_id: search
+          type: text
+          required: false
+          validation: null
+          options: null
+          description: Search by student name or assessment title
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          required: false
+          validation: null
+          options:
+            - value: all
+              label: Todos
+            - value: submitted
+              label: Aguardando Correcao
+            - value: graded
+              label: Corrigido
+            - value: in_progress
+              label: Em Progresso
+            - value: cancelled
+              label: Cancelado
+
+        - name: companyId
+          field_id: companyId
+          type: select
+          required: false
+          validation: null
+          options: dynamic_from_api  # Loaded from apiClient.listCompanies
+          description: Filter by company/institution
+
+        - name: collectionId
+          field_id: collectionId
+          type: select
+          required: false
+          validation: null
+          options: dynamic_from_api  # Loaded from apiClient.listCollections
+          description: Filter by collection
+
+        - name: seriesId
+          field_id: seriesId
+          type: select
+          required: false
+          validation: null
+          options: dynamic_from_api  # Loaded from apiClient.listSeries
+          description: Filter by series
+
+        - name: showUnfinished
+          field_id: showUnfinished
+          type: checkbox
+          required: false
+          validation: null
+          options: null
+          description: Include in_progress and cancelled attempts
+
+        - name: attendanceProofFilter
+          field_id: attendanceProofFilter
+          type: select
+          required: false
+          validation: null
+          options:
+            - value: all
+              label: Todos
+            - value: "true"
+              label: Comprovantes de Presenca
+            - value: "false"
+              label: Avaliacoes
+
+        - name: page
+          field_id: page
+          type: number
+          required: false
+          validation: min=1
+          options: null
+          description: Pagination page number
+
+      modals: []
+        # No modals - navigates to AssessmentGradingView component inline
+
+      actions:
+        - name: Select Attempt
+          type: navigation
+          effect: Opens AssessmentGradingView inline for the selected attempt
+          reversible: true
+          confirmation_required: false
+
+        - name: Change Page
+          type: pagination
+          effect: Navigates to different page of results
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # QuestionBankPage
+    # File: routes/exams/Bank/QuestionBankList.tsx
+    # -------------------------------------------------------------------------
+    question_bank_page:
+      description: >
+        Listing page for all questions in the question bank. Supports search,
+        filtering by difficulty/type/tags, and CRUD operations.
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          required: false
+          validation: null
+          options: null
+          description: Search questions by text content
+
+        - name: selectedDifficulty
+          field_id: selectedDifficulty
+          type: select
+          required: false
+          validation: null
+          options:
+            - value: all
+              label: Todas
+            - value: easy
+              label: Facil
+            - value: medium
+              label: Medio
+            - value: hard
+              label: Dificil
+
+        - name: selectedQuestionType
+          field_id: selectedQuestionType
+          type: select
+          required: false
+          validation: null
+          options:
+            - value: all
+              label: Todos
+            - value: multipla_escolha
+              label: Multipla Escolha
+            - value: verdadeiro_falso
+              label: Verdadeiro/Falso
+            - value: dissertativa
+              label: Dissertativa
+            - value: oral
+              label: Oral
+            - value: associacao
+              label: Associacao
+            - value: ordenacao
+              label: Ordenacao
+            - value: mista
+              label: Mista
+
+        - name: selectedTags
+          field_id: selectedTags
+          type: tag_input
+          required: false
+          validation: null
+          options: dynamic_from_questions  # Tags extracted from loaded questions
+          description: Filter by tags (multiple selection with manual input)
+
+      modals:
+        - name: QuestionCreateModal
+          trigger: Button "Nova Questao" or Edit icon click
+          purpose: Create or edit a question
+          fields: see_question_create_modal_below
+
+        - name: QuestionAiModal
+          trigger: Button "IA"
+          purpose: Generate questions using AI
+          fields: see_question_ai_modal_below
+
+        - name: QuestionDetailModal
+          trigger: Click on question row
+          purpose: View question details (read-only)
+          fields: null  # Read-only display
+
+      actions:
+        - name: Create Question
+          type: button
+          effect: Opens QuestionCreateModal
+          reversible: false
+          confirmation_required: false
+
+        - name: Generate AI Questions
+          type: button
+          effect: Opens QuestionAiModal
+          reversible: false
+          confirmation_required: false
+
+        - name: Edit Question
+          type: icon_button
+          effect: Opens QuestionCreateModal with initialData
+          reversible: false
+          confirmation_required: false
+
+        - name: Delete Question
+          type: icon_button
+          effect: DELETE request to delete question
+          reversible: false
+          confirmation_required: true  # window.confirm dialog
+
+        - name: View Question Details
+          type: row_click
+          effect: Opens QuestionDetailModal
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # QuestionCreateModal (shared modal)
+    # File: routes/exams/QuestionCreate/QuestionCreateModal.tsx
+    # -------------------------------------------------------------------------
+    question_create_modal:
+      description: >
+        Modal for creating or editing a question. Supports multiple question
+        types with alternatives, attachments, tags, and justification.
+      fields:
+        - name: questionText
+          field_id: questionText
+          type: textarea
+          required: true
+          validation: must_not_be_empty
+          options: null
+          description: Question statement/prompt
+
+        - name: questionType
+          field_id: questionType
+          type: select
+          required: true
+          validation: null
+          options:
+            - value: multipla_escolha
+              label: Multipla Escolha
+            - value: verdadeiro_falso
+              label: Verdadeiro/Falso
+            - value: dissertativa
+              label: Dissertativa
+            - value: oral
+              label: Oral
+            - value: associacao
+              label: Associacao (Likert)
+            - value: ordenacao
+              label: Ordenacao (Ranking)
+            - value: mista
+              label: Mista
+          description: Default is multipla_escolha
+
+        - name: difficulty
+          field_id: difficulty
+          type: select
+          required: false
+          validation: null
+          options:
+            - value: easy
+              label: Facil
+            - value: medium
+              label: Medio
+            - value: hard
+              label: Dificil
+          description: Default is medium
+
+        - name: points
+          field_id: points
+          type: number
+          required: true
+          validation: must_be_greater_than_zero
+          options: null
+          description: Points value for the question. Default 1.
+
+        - name: tags
+          field_id: tags
+          type: tag_input
+          required: false
+          validation: null
+          options: null
+          description: Tags for categorization (lowercase, manual input)
+
+        - name: alternatives
+          field_id: alternatives
+          type: dynamic_list
+          required: conditional  # Required for multipla_escolha, verdadeiro_falso
+          validation: >
+            min 2 alternatives for multipla_escolha/verdadeiro_falso;
+            at least one must be marked correct
+          options: null
+          description: >
+            Each alternative has: id, text, isCorrect (boolean), weight (number).
+            Weight defaults to question points if correct, 0 if not.
+
+        - name: attachments
+          field_id: attachments
+          type: file_upload
+          required: false
+          validation: null
+          options: null
+          description: Image attachments via QuestionImageUpload component
+
+        - name: justification
+          field_id: justification
+          type: textarea
+          required: false
+          validation: null
+          options: null
+
+        - name: bncc
+          field_id: bncc
+          type: text
+          required: false
+          validation: null
+          options: null
+          description: BNCC code reference
+
+        - name: mufa
+          field_id: mufa
+          type: text
+          required: false
+          validation: null
+          options: null
+          description: MUFA code reference
+
+      actions:
+        - name: Save (Create)
+          type: submit
+          effect: POST /questions via useCreateQuestion
+          reversible: false
+          confirmation_required: false
+
+        - name: Save (Update)
+          type: submit
+          effect: PUT /questions/{id} via useUpdateQuestion
+          reversible: false
+          confirmation_required: false
+
+        - name: Add Alternative
+          type: button
+          effect: Adds new alternative row to form
+          reversible: true
+          confirmation_required: false
+
+        - name: Remove Alternative
+          type: icon_button
+          effect: Removes alternative from list
+          reversible: false
+          confirmation_required: false
+
+        - name: Cancel
+          type: button
+          effect: Closes modal without saving
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # QuestionAiModal
+    # File: routes/exams/QuestionCreate/QuestionAiModal.tsx
+    # -------------------------------------------------------------------------
+    question_ai_modal:
+      description: >
+        Modal for generating questions via AI. Takes context and parameters,
+        generates multiple choice questions, then allows reviewing/saving each.
+      fields:
+        - name: context
+          field_id: context
+          type: textarea
+          required: true
+          validation: must_not_be_empty
+          options: null
+          description: Context/topic for AI question generation
+
+        - name: difficulty
+          field_id: difficulty
+          type: select
+          required: true
+          validation: null
+          options:
+            - value: easy
+              label: Facil
+            - value: medium
+              label: Medio
+            - value: hard
+              label: Dificil
+          description: Default is medium
+
+        - name: quantity
+          field_id: quantity
+          type: number
+          required: true
+          validation: min=1
+          options: null
+          description: Number of questions to generate. Default 1.
+
+        - name: tags
+          field_id: tags
+          type: tag_input
+          required: false
+          validation: null
+          options: null
+          description: Tags to apply to generated questions
+
+        - name: useLargeContext
+          field_id: useLargeContext
+          type: switch
+          required: false
+          validation: null
+          options: null
+          description: Toggle for large context mode
+
+      actions:
+        - name: Generate
+          type: button
+          effect: POST to useGenerateQuestion with context/difficulty/quantity/tags
+          reversible: false
+          confirmation_required: false
+
+        - name: Keep Question
+          type: button
+          effect: Saves individual AI-generated question via useCreateQuestion (marked aiGenerated=true)
+          reversible: false
+          confirmation_required: false
+
+        - name: Discard Question
+          type: button
+          effect: Removes generated question from review list
+          reversible: false
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # QuestionDetailModal (read-only)
+    # File: routes/exams/Bank/QuestionDetailModal.tsx
+    # -------------------------------------------------------------------------
+    question_detail_modal:
+      description: >
+        Read-only modal displaying full question details including statement,
+        type, difficulty, points, options with correct answer highlighting,
+        tags, attachments, and justification.
+      fields: []  # No editable fields - display only
+      modals: []
+      actions: []
+
+    # -------------------------------------------------------------------------
+    # QuestionCreatePage (standalone route)
+    # File: routes/exams/QuestionCreate/QuestionCreateRoute.tsx
+    # -------------------------------------------------------------------------
+    question_create_page:
+      description: >
+        Standalone page (not modal) for creating a question. Same fields as
+        QuestionCreateModal but rendered as a full page with navigation.
+      fields:
+        - name: questionText
+          field_id: questionText
+          type: textarea
+          required: true
+          validation: must_not_be_empty
+
+        - name: questionType
+          field_id: questionType
+          type: select
+          required: true
+          validation: null
+          options:
+            - value: multipla_escolha
+            - value: verdadeiro_falso
+            - value: dissertativa
+            - value: oral
+            - value: associacao
+            - value: ordenacao
+            - value: mista
+
+        - name: difficulty
+          field_id: difficulty
+          type: select
+          required: false
+          options:
+            - value: easy
+            - value: medium
+            - value: hard
+
+        - name: points
+          field_id: points
+          type: number
+          required: true
+          validation: greater_than_zero
+
+        - name: tags
+          field_id: tags
+          type: tag_input
+          required: false
+
+        - name: alternatives
+          field_id: alternatives
+          type: dynamic_list
+          required: conditional
+          validation: min_2_for_mc_tf; at_least_one_correct
+
+        - name: justification
+          field_id: justification
+          type: textarea
+          required: false
+
+        - name: bncc
+          field_id: bncc
+          type: text
+          required: false
+
+        - name: mufa
+          field_id: mufa
+          type: text
+          required: false
+
+      modals: []
+      actions:
+        - name: Submit
+          type: form_submit
+          effect: POST via useCreateQuestion
+          reversible: false
+          confirmation_required: false
+
+        - name: Go Back
+          type: navigation
+          effect: navigate(-1)
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # ExamBuilderPage (AssessmentBuilderList)
+    # File: routes/exams/Builder/AssessmentBuilderList.tsx
+    # -------------------------------------------------------------------------
+    exam_builder_page:
+      description: >
+        Listing page for assessments/exams. Supports search, CRUD via modals,
+        and viewing assessment details.
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          required: false
+          validation: null
+          options: null
+          description: Search assessments by name or description
+
+      modals:
+        - name: AssessmentBuilderCreateModal
+          trigger: Button "Nova Avaliacao"
+          purpose: Create a new assessment (manual or auto from question bank)
+          fields: see_assessment_create_modal_below
+
+        - name: AssessmentBuilderEditModal
+          trigger: Edit icon button on assessment card
+          purpose: Edit assessment name, description, and manage questions
+          fields: see_assessment_edit_modal_below
+
+        - name: AssessmentDetailsModal
+          trigger: Click on assessment card
+          purpose: View assessment details and questions (read-only)
+          fields: null  # Read-only
+
+      actions:
+        - name: Create Assessment
+          type: button
+          effect: Opens AssessmentBuilderCreateModal
+          reversible: false
+          confirmation_required: false
+
+        - name: Edit Assessment
+          type: icon_button
+          effect: Opens AssessmentBuilderEditModal
+          reversible: false
+          confirmation_required: false
+
+        - name: Delete Assessment
+          type: icon_button
+          effect: DELETE via useDeleteAssessment
+          reversible: false
+          confirmation_required: true  # window.confirm
+
+        - name: View Details
+          type: card_click
+          effect: Opens AssessmentDetailsModal
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # AssessmentBuilderCreateModal
+    # File: routes/exams/Builder/AssessmentBuilderCreateModal.tsx
+    # -------------------------------------------------------------------------
+    assessment_create_modal:
+      description: >
+        Modal for creating assessments. Supports two modes:
+        1) Manual - select specific questions from bank
+        2) Auto (Question Bank) - configure tags, difficulty distribution,
+           question type distribution, and let system randomize selection.
+        Also supports TRI scoring and rubric-based correction.
+      fields:
+        - name: name
+          field_id: name
+          type: text
+          required: true
+          validation: must_not_be_empty
+          options: null
+          description: Assessment name
+
+        - name: description
+          field_id: description
+          type: textarea
+          required: false
+          validation: null
+          options: null
+
+        - name: useQuestionBank
+          field_id: useQuestionBank
+          type: switch
+          required: false
+          validation: null
+          options: null
+          description: Toggle between manual and auto (question bank) mode
+
+        # --- Auto mode fields (shown when useQuestionBank=true) ---
+        - name: selectedTags
+          field_id: selectedTags
+          type: tag_selector
+          required: true  # Required when useQuestionBank=true
+          validation: at_least_one_tag
+          options: dynamic_from_api  # Loaded via useQuestionTags
+          description: Tags to filter questions from bank. Supports Popover with existing tags.
+
+        - name: questionCount
+          field_id: questionCount
+          type: number
+          required: true  # Required when useQuestionBank=true
+          validation: min=1, max=100
+          options: null
+          description: Total number of questions in assessment. Default 10.
+
+        - name: difficultyLevel
+          field_id: difficultyLevel
+          type: range_slider
+          required: false
+          validation: 0-100
+          options: null
+          description: >
+            Slider controlling difficulty distribution.
+            0=100% Easy, 50=Balanced (34/33/33), 100=100% Hard.
+            Computes difficultyRatios (easy/medium/hard percentages).
+
+        - name: questionTypeLevel
+          field_id: questionTypeLevel
+          type: range_slider
+          required: false
+          validation: 0-100
+          options: null
+          description: >
+            Slider controlling question type distribution.
+            0=100% Multiple Choice, 100=100% Dissertative.
+
+        - name: useTRI
+          field_id: useTRI
+          type: toggle_button
+          required: false
+          validation: null
+          options: null
+          description: >
+            Enable TRI (Teoria de Resposta ao Item) scoring system.
+
+        - name: rubricCorrection
+          field_id: rubricCorrection
+          type: toggle
+          required: false
+          validation: null
+          options: null
+          description: Enable rubric-based grading
+
+        - name: selectedRubricId
+          field_id: selectedRubricId
+          type: select
+          required: false  # Required when rubricCorrection=true
+          validation: null
+          options: dynamic_from_api
+
+        # --- Manual mode fields ---
+        - name: selectedQuestionIds
+          field_id: selectedQuestionIds
+          type: multi_select
+          required: true  # Required when useQuestionBank=false
+          validation: at_least_one_question
+          options: null
+          description: Manually selected question IDs (via QuestionSelectorModal)
+
+      modals:
+        - name: QuestionSelectorModal
+          trigger: Button "Adicionar Questoes"
+          purpose: Select questions from the bank
+          fields: see_question_selector_modal_below
+
+      actions:
+        - name: Verify Questions
+          type: button
+          effect: Checks if enough questions in bank match criteria
+          reversible: true
+          confirmation_required: false
+
+        - name: Create Assessment
+          type: submit
+          effect: POST via useCreateAssessment
+          reversible: false
+          confirmation_required: false
+
+        - name: Cancel
+          type: button
+          effect: Closes modal
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # AssessmentBuilderEditModal
+    # File: routes/exams/Builder/AssessmentBuilderEditModal.tsx
+    # -------------------------------------------------------------------------
+    assessment_edit_modal:
+      description: >
+        Modal for editing an existing assessment. Allows updating name,
+        description, managing questions (add/remove/reorder via drag-and-drop).
+      fields:
+        - name: name
+          field_id: name
+          type: text
+          required: true
+          validation: must_not_be_empty
+          options: null
+          description: Assessment name
+
+        - name: description
+          field_id: description
+          type: textarea
+          required: false
+          validation: null
+          options: null
+
+        - name: selectedQuestionIds
+          field_id: selectedQuestionIds
+          type: sortable_list  # drag-and-drop via @hello-pangea/dnd
+          required: false
+          validation: null
+          options: null
+          description: >
+            Ordered list of question IDs. Supports drag-and-drop reordering
+            via DragDropContext/Droppable/Draggable.
+
+      modals:
+        - name: QuestionSelectorModal
+          trigger: Button "Gerenciar Questoes"
+          purpose: Add/remove questions from the assessment
+          fields: see_question_selector_modal_below
+
+      actions:
+        - name: Save Changes
+          type: submit
+          effect: >
+            PUT via useUpdateAssessment (name/description) and
+            useUpdateAssessmentQuestionOrder (question order)
+          reversible: false
+          confirmation_required: false
+
+        - name: Clear All Questions
+          type: button
+          effect: Removes all selected questions
+          reversible: false
+          confirmation_required: false
+
+        - name: Remove Individual Question
+          type: icon_button
+          effect: Removes one question from list
+          reversible: false
+          confirmation_required: false
+
+        - name: Cancel
+          type: button
+          effect: Closes modal
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # AssessmentDetailsModal (read-only)
+    # File: routes/exams/Builder/AssessmentDetailsModal.tsx
+    # -------------------------------------------------------------------------
+    assessment_details_modal:
+      description: >
+        Read-only modal showing full assessment details: name, description,
+        mode (auto/manual), tags, difficulty ratios, questions list with
+        options and justifications, and rubric grading matrix if applicable.
+      fields: []  # Read-only
+      modals: []
+      actions: []
+
+    # -------------------------------------------------------------------------
+    # QuestionSelectorModal (shared modal)
+    # File: routes/exams/Builder/QuestionSelectorModal.tsx
+    # -------------------------------------------------------------------------
+    question_selector_modal:
+      description: >
+        Modal for selecting questions from the question bank. Supports
+        comprehensive filtering: search, difficulty, type, tags, creator,
+        and AI-generated filter.
+      fields:
+        - name: searchTerm
+          field_id: search
+          type: text
+          required: false
+          validation: null
+          description: Search by question text
+
+        - name: selectedDifficulty
+          field_id: difficulty
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todas
+            - value: easy
+              label: Facil
+            - value: medium
+              label: Medio
+            - value: hard
+              label: Dificil
+
+        - name: selectedQuestionType
+          field_id: questionType
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todos
+            - value: multipla_escolha
+              label: Multipla Escolha
+            - value: verdadeiro_falso
+              label: Verdadeiro/Falso
+            - value: dissertativa
+              label: Dissertativa
+            - value: oral
+              label: Oral
+            - value: associacao
+              label: Associacao
+            - value: ordenacao
+              label: Ordenacao
+            - value: mista
+              label: Mista
+
+        - name: aiGeneratedFilter
+          field_id: aiGenerated
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todas
+            - value: ai
+              label: Geradas por IA
+            - value: manual
+              label: Manuais
+
+        - name: selectedTags
+          field_id: tags
+          type: tag_input
+          required: false
+          description: Filter by tags with available tag suggestions
+
+        - name: creatorEmailSearch
+          field_id: creatorEmail
+          type: text
+          required: false
+          validation: min_3_chars_to_search
+          description: >
+            Search questions by creator email/name. Uses debounced
+            user search (apiClient.listUsers) with autocomplete dropdown.
+
+      actions:
+        - name: Toggle Question Selection
+          type: checkbox_click
+          effect: Adds/removes question from selection
+          reversible: true
+          confirmation_required: false
+
+        - name: Confirm Selection
+          type: button
+          effect: Closes modal with selected question IDs
+          reversible: true
+          confirmation_required: false
+
+        - name: Cancel
+          type: button
+          effect: Closes modal without changes
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # RubricListPage
+    # File: routes/exams/Rubrics/RubricsList.tsx
+    # -------------------------------------------------------------------------
+    rubric_list_page:
+      description: >
+        Listing page for grading rubrics. Supports search, creation (via
+        fullscreen RubricBuilder dialog), deletion with confirmation.
+      fields:
+        - name: search
+          field_id: search
+          type: text
+          required: false
+          validation: null
+          description: Filter rubrics by name
+
+      modals:
+        - name: Create Rubric Dialog
+          trigger: Button "Nova Rubrica"
+          purpose: Opens fullscreen dialog wrapping RubricBuilder component
+          fields:
+            - note: Fields are managed by the RubricBuilder component
+
+        - name: Delete Confirmation
+          trigger: Trash icon button
+          purpose: Confirm rubric deletion
+          fields: null  # AlertDialog with title/description only
+
+      actions:
+        - name: Create Rubric
+          type: button
+          effect: Opens create dialog with RubricBuilder
+          reversible: false
+          confirmation_required: false
+
+        - name: Edit Rubric
+          type: navigation
+          effect: Navigate to /educational/exams/rubrics/{id}/edit
+          reversible: true
+          confirmation_required: false
+
+        - name: Delete Rubric
+          type: icon_button
+          effect: DELETE /rubric/{id}
+          reversible: false
+          confirmation_required: true  # AlertDialog
+
+    # -------------------------------------------------------------------------
+    # RubricEditPage
+    # File: routes/exams/Rubrics/RubricEditRoute.tsx
+    # -------------------------------------------------------------------------
+    rubric_edit_page:
+      description: >
+        Loads rubric by ID and renders RubricBuilder component for editing.
+        All fields are managed by RubricBuilder.
+      fields:
+        - note: >
+            Fields managed by RubricBuilder component.
+            Rubric data model includes: name, description, criteria (each with
+            name, description, sequence_order, levels array), where each level
+            has: id, label, description, points, sequence_order.
+      modals: []
+      actions:
+        - name: Save Rubric
+          type: submit
+          effect: PUT /rubric/{id} via RubricBuilder
+          reversible: false
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # BlocklyGamesListPage
+    # File: routes/educational/BlocklyGameList/BlocklyGameListRoute.tsx
+    # -------------------------------------------------------------------------
+    blockly_games_list_page:
+      description: >
+        Listing page for Blockly visual programming games/activities.
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          required: false
+          validation: null
+          description: Search games by title or description
+
+        - name: difficultyFilter
+          field_id: difficultyFilter
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todas as dificuldades
+            - value: easy
+              label: Facil
+            - value: medium
+              label: Medio
+            - value: hard
+              label: Dificil
+
+      modals: []
+
+      actions:
+        - name: Create New Game
+          type: button
+          effect: Navigate to /educational/exams/blockly-games/new
+          reversible: true
+          confirmation_required: false
+
+        - name: Edit Game
+          type: card_click
+          effect: Navigate to /educational/exams/blockly-games/{id}/edit
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # ProctoringPage
+    # File: routes/exams/Proctoring/ProctoringRoute.tsx
+    # -------------------------------------------------------------------------
+    proctoring_page:
+      description: Coming soon placeholder page. No interactive elements.
+      fields: []
+      modals: []
+      actions: []
+
+    # -------------------------------------------------------------------------
+    # BrokerPage
+    # File: routes/exams/Broker/BrokerRoute.tsx
+    # -------------------------------------------------------------------------
+    broker_page:
+      description: Coming soon placeholder page. No interactive elements.
+      fields: []
+      modals: []
+      actions: []
+
+  # ===========================================================================
+  # CERTIFICATION MODULE
+  # ===========================================================================
+  certification:
+
+    # -------------------------------------------------------------------------
+    # CertTemplateListPage
+    # File: routes/certification/CertificateTemplateList/CertificateTemplateListRoute.tsx
+    # -------------------------------------------------------------------------
+    cert_template_list_page:
+      description: >
+        Listing page for certificate templates. Supports filtering by status,
+        type, and category. CRUD via navigation and API calls.
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          required: false
+          validation: null
+          description: Search templates by name
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todos
+            - value: draft
+              label: Rascunho
+            - value: published
+              label: Publicado
+
+        - name: typeFilter
+          field_id: typeFilter
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todos
+            - value: free_course
+              label: Curso Livre
+            - value: extension
+              label: Extensao
+            - value: undergraduate
+              label: Graduacao
+            - value: graduate
+              label: Pos-Graduacao
+            - value: technical
+              label: Tecnico
+
+        - name: categoryFilter
+          field_id: categoryFilter
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todos
+            - value: certificate
+              label: Certificado
+            - value: diploma
+              label: Diploma
+            - value: declaration
+              label: Declaracao
+
+      modals: []
+
+      actions:
+        - name: Create Template
+          type: button
+          effect: Navigate to /educational/certificates/templates/new
+          reversible: true
+          confirmation_required: false
+
+        - name: View Template
+          type: dropdown_item
+          effect: Navigate to template detail
+          reversible: true
+          confirmation_required: false
+
+        - name: Edit Template
+          type: dropdown_item
+          effect: Navigate to template editor
+          reversible: true
+          confirmation_required: false
+
+        - name: Clone Template
+          type: dropdown_item
+          effect: POST /certification/templates/{id}/clone
+          reversible: false
+          confirmation_required: false
+
+        - name: Delete Template
+          type: dropdown_item
+          effect: DELETE /certification/templates/{id}
+          reversible: false
+          confirmation_required: true  # confirm dialog
+
+    # -------------------------------------------------------------------------
+    # CertTemplateEditorPage
+    # File: routes/certification/CertificateTemplateEditor/CertificateTemplateEditorRoute.tsx
+    # -------------------------------------------------------------------------
+    cert_template_editor_page:
+      description: >
+        Full canvas-based visual editor for certificate templates. Supports
+        drag-and-drop element positioning, text/image/qrcode/signature
+        elements, template variables, front/back pages, and publish workflow.
+      fields:
+        # Template settings
+        - name: name
+          field_id: name
+          type: text
+          required: true
+          validation: must_not_be_empty  # Validated on save
+          description: Template name
+
+        - name: type
+          field_id: type
+          type: select
+          required: true
+          options:
+            - value: free_course
+              label: Curso Livre
+            - value: extension
+              label: Extensao
+            - value: undergraduate
+              label: Graduacao
+            - value: graduate
+              label: Pos-Graduacao
+            - value: technical
+              label: Tecnico
+
+        - name: category
+          field_id: category
+          type: select
+          required: true
+          options:
+            - value: certificate
+              label: Certificado
+            - value: diploma
+              label: Diploma
+            - value: declaration
+              label: Declaracao
+
+        - name: width
+          field_id: width
+          type: number
+          required: true
+          validation: null
+          description: Template width in mm. Default 297 (A4 landscape).
+
+        - name: height
+          field_id: height
+          type: number
+          required: true
+          validation: null
+          description: Template height in mm. Default 210 (A4 landscape).
+
+        # Element properties (shown when an element is selected)
+        - name: element_x
+          field_id: x
+          type: number
+          required: false
+          description: Element X position
+
+        - name: element_y
+          field_id: y
+          type: number
+          required: false
+          description: Element Y position
+
+        - name: element_width
+          field_id: width
+          type: number
+          required: false
+          description: Element width in px (auto-calculates with aspect ratio for images)
+
+        - name: element_height
+          field_id: height
+          type: number
+          required: false
+          description: Element height in px (auto-calculates with aspect ratio for images)
+
+        - name: element_zIndex
+          field_id: zIndex
+          type: number
+          required: false
+          description: Layer order (+/- buttons)
+
+        - name: element_content
+          field_id: content
+          type: textarea
+          required: false
+          description: Text content (supports template variables)
+
+        - name: element_fontFamily
+          field_id: fontFamily
+          type: select
+          required: false
+          options:
+            - value: Arial
+            - value: Helvetica
+            - value: Times New Roman
+            - value: Georgia
+            - value: Courier New
+            - value: Verdana
+            - value: Roboto
+            - value: Open Sans
+            - value: Lato
+            - value: Montserrat
+            - value: Playfair Display
+            - value: Great Vibes
+            - value: Dancing Script
+          description: Font family for text and signature elements
+
+        - name: element_fontSize
+          field_id: fontSize
+          type: number
+          required: false
+          description: Font size in pixels
+
+        - name: element_color
+          field_id: color
+          type: color
+          required: false
+          description: Text color
+
+        - name: element_fontWeight
+          field_id: fontWeight
+          type: toggle  # bold/normal
+          required: false
+
+        - name: element_fontStyle
+          field_id: fontStyle
+          type: toggle  # italic/normal
+          required: false
+
+        - name: element_textDecoration
+          field_id: textDecoration
+          type: toggle  # underline/none
+          required: false
+
+        - name: element_textAlign
+          field_id: textAlign
+          type: button_group
+          required: false
+          options:
+            - value: left
+            - value: center
+            - value: right
+            - value: justify
+
+        - name: element_image_upload
+          field_id: file
+          type: file_upload
+          required: false
+          validation: accept=image/*
+          description: Image file upload for image elements
+
+      template_variables:
+        - "{{student_name}}"
+        - "{{course_name}}"
+        - "{{hours}}"
+        - "{{completed_at}}"
+        - "{{validation_code}}"
+        - "{{validation_url}}"
+        - "{{institution_name}}"
+        - "{{cpf}}"
+        - "{{registration_number}}"
+
+      element_types:
+        - text
+        - image
+        - qrcode
+        - signature
+
+      modals: []
+
+      actions:
+        - name: Save Draft
+          type: button
+          effect: >
+            Uploads pending images via presigned URL, then
+            POST /certification/templates (create) or
+            PUT /certification/templates/{id} (update) with status=draft
+          reversible: false
+          confirmation_required: false
+
+        - name: Publish
+          type: button
+          effect: Same as Save Draft but with status=published
+          reversible: false
+          confirmation_required: false
+
+        - name: Cancel
+          type: button
+          effect: Navigate back
+          reversible: true
+          confirmation_required: false
+
+        - name: Add Element
+          type: button
+          effect: Adds text/image/qrcode/signature element to canvas
+          reversible: true
+          confirmation_required: false
+
+        - name: Delete Element
+          type: button
+          effect: Removes selected element from canvas
+          reversible: false
+          confirmation_required: false
+
+        - name: Add Back Page
+          type: button
+          effect: Creates back page tab with separate elements array
+          reversible: false
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # IssuedCertListPage (CertificateListRoute)
+    # File: routes/certification/CertificateList/CertificateListRoute.tsx
+    # -------------------------------------------------------------------------
+    issued_cert_list_page:
+      description: >
+        Listing page for issued certificates. Shows stats cards and supports
+        search/filter with actions like validate, download, revoke.
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          required: false
+          validation: null
+          description: Search by student_name, course_name, or validation_code
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todos
+            - value: issued
+              label: Emitido
+            - value: signed
+              label: Assinado
+            - value: revoked
+              label: Revogado
+            - value: expired
+              label: Expirado
+
+      stats_cards:
+        - total_count
+        - issued_count
+        - signed_count
+        - revoked_count
+
+      modals: []
+
+      actions:
+        - name: View Certificate
+          type: dropdown_item
+          effect: Navigate to /educational/certificates/issued/{id}
+          reversible: true
+          confirmation_required: false
+
+        - name: Validate Certificate
+          type: dropdown_item
+          effect: Opens /validate/{validation_code} in new tab
+          reversible: true
+          confirmation_required: false
+
+        - name: Download Certificate
+          type: dropdown_item
+          effect: GET /certification/certificates/{id}/download
+          reversible: true
+          confirmation_required: false
+
+        - name: Revoke Certificate
+          type: dropdown_item
+          effect: POST /certification/certificates/{id}/revoke with reason
+          reversible: false
+          confirmation_required: true  # prompt for reason (min 10 chars)
+
+    # -------------------------------------------------------------------------
+    # CertificateDetailPage
+    # File: routes/certification/CertificateDetail/CertificateDetailRoute.tsx
+    # -------------------------------------------------------------------------
+    certificate_detail_page:
+      description: >
+        Read-only detail page for a single issued certificate. Displays full
+        certificate info with QR code, hash, and blockchain TX.
+      fields: []  # Read-only page
+
+      modals: []
+
+      actions:
+        - name: Go Back
+          type: button
+          effect: Navigate back
+          reversible: true
+          confirmation_required: false
+
+        - name: Validate
+          type: button
+          effect: Opens validation URL in new tab
+          reversible: true
+          confirmation_required: false
+
+        - name: Download PDF
+          type: button
+          effect: Generates PDF from certificate card via html2canvas + jsPDF
+          reversible: true
+          confirmation_required: false
+
+        - name: Copy Validation Code
+          type: icon_button
+          effect: Copies validation code to clipboard
+          reversible: true
+          confirmation_required: false
+
+        - name: Copy Validation URL
+          type: icon_button
+          effect: Copies validation URL to clipboard
+          reversible: true
+          confirmation_required: false
+
+        - name: Copy Hash
+          type: icon_button
+          effect: Copies SHA-256 hash to clipboard
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # DocumentsPage (DocumentListRoute)
+    # File: routes/certification/DocumentList/DocumentListRoute.tsx
+    # -------------------------------------------------------------------------
+    documents_page:
+      description: >
+        Academic document management page. Lists documents with status
+        tracking and approval workflow.
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          required: false
+          validation: null
+          description: Search by student_name or validation_code
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          required: false
+          options:
+            - value: all
+            - value: processing
+            - value: approved
+            - value: available
+            - value: expired
+            - value: cancelled
+
+        - name: typeFilter
+          field_id: typeFilter
+          type: select
+          required: false
+          options:
+            - value: all
+              label: Todos os tipos
+            - value: enrollment_declaration
+              label: Declaracao de Matricula
+            - value: completion_declaration
+              label: Declaracao de Conclusao
+            - value: attendance_declaration
+              label: Declaracao de Frequencia
+            - value: affiliation_declaration
+              label: Declaracao de Vinculo
+            - value: grade_report
+              label: Boletim
+            - value: partial_transcript
+              label: Historico Parcial
+            - value: final_transcript
+              label: Historico Final
+            - value: certificate_copy
+              label: Segunda Via
+
+      stats_cards:
+        - total
+        - processing_count
+        - approved_count
+        - available_count
+        - cancelled_count
+
+      modals: []
+
+      actions:
+        - name: View Document
+          type: dropdown_item
+          effect: View document details
+          reversible: true
+          confirmation_required: false
+
+        - name: Approve Document
+          type: dropdown_item
+          effect: PATCH /certification/documents/{id}/status with status=approved
+          reversible: false
+          confirmation_required: false
+          condition: status === 'processing'
+
+        - name: Make Available
+          type: dropdown_item
+          effect: PATCH /certification/documents/{id}/status with status=available
+          reversible: false
+          confirmation_required: false
+          condition: status === 'approved'
+
+        - name: Download Document
+          type: dropdown_item
+          effect: Opens pdf_url in new tab
+          reversible: true
+          confirmation_required: false
+          condition: status === 'available' && pdf_url exists
+
+        - name: Cancel Document
+          type: dropdown_item
+          effect: PATCH /certification/documents/{id}/status with status=cancelled
+          reversible: false
+          confirmation_required: true  # confirm() dialog
+          condition: status !== 'cancelled' && status !== 'expired'
+
+  # ===========================================================================
+  # ADMIN MODULE
+  # ===========================================================================
+  admin:
+
+    # -------------------------------------------------------------------------
+    # BIPage (Business Intelligence)
+    # File: routes/BI/BIDashboardV2.tsx
+    # -------------------------------------------------------------------------
+    bi_page:
+      description: >
+        Business Intelligence dashboard with tabbed navigation. Main tabs
+        contain sub-tabs (Metricas/Listas/Logs). Fields are in sub-components.
+      fields:
+        - name: mainTab
+          field_id: mainTab
+          type: tab_selector
+          required: true
+          options:
+            - value: global
+              label: Global
+            - value: pessoas
+              label: Pessoas
+            - value: turmas
+              label: Turmas
+            - value: conteudo
+              label: Conteudo
+            - value: finops
+              label: FinOps
+
+        - name: pessoasSubTab
+          field_id: pessoasSubTab
+          type: tab_selector
+          required: false
+          options:
+            - value: estudantes
+              label: Estudantes
+          description: Sub-tab within Pessoas tab
+
+        - name: subTab
+          field_id: subTab
+          type: tab_selector
+          required: false
+          options:
+            - value: metricas
+              label: Metricas
+            - value: listas
+              label: Listas
+            - value: logs
+              label: Logs
+          description: >
+            Sub-tabs for each main tab (except FinOps which has no sub-tabs).
+            Global tab excludes the 'logs' sub-tab.
+
+      sidebar:
+        description: >
+          BISidebar component with class filters. Shown only for 'pessoas'
+          and 'turmas' main tabs. Uses FilterProvider for URL-synced filters.
+
+      modals: []
+      actions:
+        - name: Navigate Tab
+          type: tab_click
+          effect: Changes active tab, resets sub-tab to 'metricas'
+          reversible: true
+          confirmation_required: false
+
+        - name: Navigate from Global
+          type: inline_navigation
+          effect: >
+            GlobalTab can navigate to other tabs with specific sub-tab
+            targets (e.g., to pessoas/listas)
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # ZoomIntegrationPage
+    # File: routes/integrations/ZoomInstructions/ZoomInstructionsRoute.tsx
+    # -------------------------------------------------------------------------
+    zoom_integration_page:
+      description: >
+        Static instruction page for configuring Zoom integration.
+        Step-by-step guide with no interactive form elements.
+        Provides links to Zoom website and Zoom Marketplace.
+      fields: []  # Static content only
+      modals: []
+      actions:
+        - name: Go Back
+          type: navigation
+          effect: Navigate to /companies
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # PrivacyCenterPage
+    # File: routes/settings/PrivacyCenter/PrivacyCenterRoute.tsx
+    # -------------------------------------------------------------------------
+    privacy_center_page:
+      description: >
+        LGPD compliance center with three tabs: Consent History, My Data,
+        and Data Deletion. Allows users to manage their privacy settings.
+      fields:
+        - name: activeTab
+          field_id: activeTab
+          type: tab_selector
+          required: true
+          options:
+            - value: consents
+              label: Historico de Consentimentos
+            - value: data
+              label: Meus Dados
+            - value: deletion
+              label: Excluir Dados
+
+        # Deletion tab fields
+        - name: confirmEmail
+          field_id: confirmEmail
+          type: text
+          required: true  # Required for deletion
+          validation: must_match_user_email
+          description: Email confirmation for data deletion request
+
+        - name: deletionReason
+          field_id: deletionReason
+          type: text
+          required: false
+          validation: null
+          description: Optional reason for data deletion request
+
+      modals: []
+
+      actions:
+        - name: Export Data
+          type: button
+          effect: >
+            Downloads JSON file with all user data via apiClient.getMyData().
+            Creates blob and triggers download as meus-dados-{date}.json
+          reversible: true
+          confirmation_required: false
+
+        - name: Request Data Deletion
+          type: button
+          effect: >
+            POST deletion request via requestDeletion({ reason, confirmEmail }).
+            Validates that confirmEmail matches user's actual email.
+          reversible: false
+          confirmation_required: true  # Email match validation
+
+        - name: Go Back
+          type: button
+          effect: navigate(-1)
+          reversible: true
+          confirmation_required: false
+
+  # ===========================================================================
+  # PUBLIC MODULE
+  # ===========================================================================
+  public:
+
+    # -------------------------------------------------------------------------
+    # PublicApplicationPage
+    # File: routes/admission/PublicApplication/PublicApplicationRoute.tsx
+    # -------------------------------------------------------------------------
+    public_application_page:
+      description: >
+        Multi-step public application/enrollment form wizard. Steps and fields
+        are dynamically configured via form_config from the admission process.
+        Supports progressive saving, localStorage backup, document upload,
+        contract signing with OTP verification, and class preference selection.
+      default_personal_fields:
+        - name: fullName
+          field_id: fullName
+          type: text
+          required: true
+          validation: must_not_be_empty
+          description: Full name
+
+        - name: cpf
+          field_id: cpf
+          type: cpf
+          required: true
+          validation: validateCpf (11 digits, checksum)
+          format: formatCpf (000.000.000-00)
+          description: Brazilian CPF number
+
+        - name: email
+          field_id: email
+          type: email
+          required: true
+          validation: validateEmail
+          description: Email address
+
+        - name: phone
+          field_id: phone
+          type: phone
+          required: false
+          validation: validatePhoneBR
+          format: formatPhoneBR ((00) 00000-0000)
+          description: Brazilian phone number
+
+        - name: birthDate
+          field_id: birthDate
+          type: date
+          required: false
+          validation: null
+          description: Date of birth
+
+      dynamic_field_types:
+        - text
+        - email
+        - phone
+        - cpf
+        - date
+        - textarea
+        - select
+        - file
+        - checkbox
+        - contract
+
+      step_types:
+        - dados-pessoais  # Fixed personal data step
+        - campos          # Custom fields step
+        - documentos      # Document upload step
+        - contrato        # Contract signing step
+
+      step_config_options:
+        - triggerOnStart
+        - triggerOnComplete
+        - enableWebhook
+        - webhookUrl
+        - webhookTrigger  # on_start | on_complete | on_approve | on_reject
+        - webhookMethod   # POST | PUT | PATCH
+        - webhookHeaders
+
+      modals:
+        - name: ContractSignatureModal
+          trigger: Contract step in form wizard
+          purpose: >
+            Display contract text (with variable substitution) and handle
+            OTP-based signature verification.
+          fields:
+            - name: otp_code
+              field_id: otp
+              type: text
+              required: true
+              validation: OTP verification
+              description: One-time password sent via email for contract signature
+
+      actions:
+        - name: Next Step
+          type: button
+          effect: >
+            Validates current step fields, saves progress via
+            PATCH /api/public/applications/{candidateId}/step,
+            advances to next step
+          reversible: true
+          confirmation_required: false
+
+        - name: Previous Step
+          type: button
+          effect: Returns to previous step
+          reversible: true
+          confirmation_required: false
+
+        - name: Start Application
+          type: submit
+          effect: POST /api/public/applications/start with personal data
+          reversible: false
+          confirmation_required: false
+
+        - name: Upload Document
+          type: file_upload
+          effect: Uploads document via presigned URL flow
+          reversible: false
+          confirmation_required: false
+
+        - name: Sign Contract
+          type: button
+          effect: >
+            Opens ContractSignatureModal, sends OTP, verifies signature
+          reversible: false
+          confirmation_required: true  # OTP verification
+
+        - name: Resend Access Link
+          type: button
+          effect: POST /api/public/applications/resend-access
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # ApplicationStatusPage
+    # File: routes/admission/PublicApplicationStatus/PublicApplicationStatusRoute.tsx
+    # -------------------------------------------------------------------------
+    application_status_page:
+      description: >
+        Public status tracking page for admission applications. Shows
+        pipeline stages, step statuses, document statuses, and contract
+        signing functionality.
+      fields: []  # Primarily read-only status display
+
+      pipeline_stages:
+        - inscricao
+        - documentacao
+        - avaliacao
+        - pagamento
+        - contrato
+        - resultado
+
+      candidate_statuses:
+        - em_andamento
+        - aprovado
+        - reprovado
+        - cancelado
+
+      document_statuses:
+        - pending
+        - approved
+        - rejected
+        - requires_reupload
+
+      step_statuses:
+        - pending
+        - completed
+        - in_review
+        - approved
+        - rejected
+
+      modals:
+        - name: ContractSignatureModal
+          trigger: Sign Contract button
+          purpose: Sign enrollment contract with OTP verification
+          fields:
+            - name: otp_code
+              type: text
+              required: true
+
+      actions:
+        - name: Refresh Status
+          type: button
+          effect: Re-fetches application status from API
+          reversible: true
+          confirmation_required: false
+
+        - name: Resume Application
+          type: navigation
+          effect: Navigate back to application form
+          reversible: true
+          confirmation_required: false
+
+        - name: Resubmit Documents
+          type: file_upload
+          effect: Re-upload rejected documents
+          reversible: false
+          confirmation_required: false
+
+        - name: Sign Contract
+          type: button
+          effect: Opens ContractSignatureModal for OTP-based signing
+          reversible: false
+          confirmation_required: true  # OTP verification
+
+        - name: Download Signed Contract
+          type: button
+          effect: GET /api/public/contracts/{candidateId}/download
+          reversible: true
+          confirmation_required: false
+
+    # -------------------------------------------------------------------------
+    # CertificateValidationPage
+    # File: routes/certification/PublicValidation/PublicValidationRoute.tsx
+    # -------------------------------------------------------------------------
+    certificate_validation_page:
+      description: >
+        Public page for validating certificates and academic documents.
+        Accepts a validation code and returns verification results.
+      fields:
+        - name: searchCode
+          field_id: searchCode
+          type: text
+          required: true
+          validation: must_not_be_empty
+          description: >
+            Validation code input. Large styled input. Auto-validates
+            if code present in URL search params.
+
+      validation_result_types:
+        - valid
+        - revoked
+        - expired
+        - not_found
+        - invalid_format
+
+      certificate_result_fields:
+        - student_name
+        - course_name
+        - hours
+        - completed_at
+        - validation_code
+        - issued_at
+        - signature_type
+
+      document_result_fields:
+        - type
+        - course_name
+        - expires_at
+        - validation_code
+        - created_at
+
+      integrity_fields:
+        - hash_sha256
+        - blockchain_tx
+
+      modals: []
+
+      actions:
+        - name: Validate
+          type: form_submit
+          effect: GET /api/public/validate/{code}
+          reversible: true
+          confirmation_required: false
+
+        - name: URL Auto-Validate
+          type: automatic
+          effect: >
+            If URL contains validation code in search params,
+            automatically triggers validation on page load
+          reversible: true
+          confirmation_required: false
