@@ -1,0 +1,912 @@
+# ============================================================================
+# Orch Workflows - Guia de Caminhos e Fluxos do Sistema Cogedu
+#
+# Cada workflow descreve o caminho passo-a-passo que o funcionario
+# deve seguir para completar uma tarefa no sistema.
+#
+# Estrutura:
+#   menu_path: Caminho no menu principal ate a pagina
+#   steps: Lista de passos numerados com URL, acao e detalhes
+#   prerequisites: O que precisa existir antes de comecar
+#   tips: Dicas uteis para o funcionario
+#
+# Versao: 1.0.0
+# Atualizado: 2026-02-03
+# ============================================================================
+
+metadata:
+  version: "1.0.0"
+  description: "Workflows completos do sistema Cogedu para guia do Orch"
+  total_workflows: 25
+  last_updated: "2026-02-03"
+
+# ============================================================================
+# NAVEGACAO PRINCIPAL
+# ============================================================================
+
+navigation:
+  description: "Estrutura de navegacao do sistema Orchestra"
+  header_tabs:
+    - label: "Empresas"
+      path: "/companies"
+      i18n_key: "nav.companies"
+    - label: "Usuarios"
+      path: "/users"
+      i18n_key: "nav.users"
+    - label: "Conteudos"
+      path: "/educational/collections"
+      i18n_key: "nav.content"
+      sub_tabs:
+        - label: "Colecoes"
+          path: "/educational/collections"
+        - label: "Trilhas"
+          path: "/educational/pathways"
+        - label: "Disciplinas"
+          path: "/educational/series"
+        - label: "Modulos"
+          path: "/educational/units"
+        - label: "Avaliacoes"
+          path: "/educational/exams"
+          sub_tabs:
+            - label: "Suas Avaliacoes"
+              path: "/educational/exams/your-evaluations"
+            - label: "Atividades"
+              path: "/educational/exams/your-activities"
+            - label: "Banco de Questoes"
+              path: "/educational/exams/bank"
+            - label: "Builder"
+              path: "/educational/exams/builder"
+            - label: "Rubricas"
+              path: "/educational/exams/rubrics"
+            - label: "Blockly"
+              path: "/educational/exams/blockly-games"
+        - label: "Certificados"
+          path: "/educational/certificates"
+          sub_tabs:
+            - label: "Templates"
+              path: "/educational/certificates/templates"
+            - label: "Emitidos"
+              path: "/educational/certificates/issued"
+            - label: "Documentos"
+              path: "/educational/certificates/documents"
+    - label: "Turmas"
+      path: "/educational/class-instances"
+      i18n_key: "nav.class"
+    - label: "Ofertas"
+      path: "/educational/admission"
+      i18n_key: "nav.offers"
+    - label: "BI"
+      path: "/bi"
+      i18n_key: "nav.bi"
+
+  user_menu:
+    - label: "Meu Perfil"
+      path: "/users/{userId}"
+    - label: "Centro de Privacidade"
+      path: "/privacy"
+    - label: "Sair"
+      action: "logout"
+
+  app_switcher:
+    - name: "Orchestra"
+      description: "Gestao Educacional"
+      url: "/"
+    - name: "AVA"
+      description: "Ambiente Virtual de Aprendizagem"
+      url: "ava.{domain}"
+
+# ============================================================================
+# WORKFLOWS - USUARIOS
+# ============================================================================
+
+workflows:
+
+  # --------------------------------------------------
+  # CADASTRAR ALUNO
+  # --------------------------------------------------
+  - id: "add-student"
+    title: "Como cadastrar um aluno"
+    description: "Passo a passo para cadastrar um novo aluno no sistema"
+    category: "users"
+    keywords: ["aluno", "cadastrar", "novo aluno", "adicionar aluno", "estudante", "matricula"]
+    prerequisites:
+      - "Estar logado com permissao de cadastro de usuarios"
+    menu_path: "Usuarios"
+    steps:
+      - step: 1
+        action: "Clique na aba **Usuarios** no menu superior"
+        url: "/users"
+        detail: "Voce vera a lista de todos os usuarios cadastrados no sistema"
+      - step: 2
+        action: "Clique no botao **Novo Aluno** (ou 'New Student')"
+        url: "/users/newStudent"
+        detail: "Vai abrir o formulario de cadastro de aluno"
+      - step: 3
+        action: "Preencha os dados pessoais do aluno"
+        fields:
+          - "Nome completo (obrigatorio)"
+          - "Email (obrigatorio)"
+          - "CPF"
+          - "Data de nascimento"
+          - "Telefone"
+        detail: "Todos os campos marcados com * sao obrigatorios"
+      - step: 4
+        action: "Clique em **Salvar** para criar o cadastro"
+        detail: "O aluno sera criado e voce sera redirecionado para o perfil dele"
+    tips:
+      - "Para cadastrar varios alunos de uma vez, use o Upload em Lote em /users/batch-students"
+      - "O email do aluno sera usado para o login no AVA"
+    related_workflows: ["batch-students", "enroll-student"]
+
+  # --------------------------------------------------
+  # CADASTRO EM LOTE DE ALUNOS
+  # --------------------------------------------------
+  - id: "batch-students"
+    title: "Como cadastrar alunos em lote"
+    description: "Upload de planilha para cadastro em massa de alunos"
+    category: "users"
+    keywords: ["lote", "batch", "planilha", "varios alunos", "massa", "excel", "csv"]
+    prerequisites:
+      - "Ter uma planilha com os dados dos alunos no formato correto"
+    menu_path: "Usuarios"
+    steps:
+      - step: 1
+        action: "Clique na aba **Usuarios** no menu superior"
+        url: "/users"
+      - step: 2
+        action: "Clique no botao **Upload em Lote** (ou encontre a opcao 'Batch Students')"
+        url: "/users/batch-students"
+      - step: 3
+        action: "Baixe o template de planilha modelo"
+        detail: "Use o botao de download do template para garantir o formato correto"
+      - step: 4
+        action: "Preencha a planilha com os dados dos alunos"
+        detail: "Siga o formato do template - cada linha e um aluno"
+      - step: 5
+        action: "Faca upload da planilha preenchida"
+        detail: "Arraste o arquivo ou clique para selecionar"
+      - step: 6
+        action: "Revise os dados e confirme o cadastro"
+        detail: "O sistema mostrara um preview dos dados antes de confirmar"
+    tips:
+      - "Formatos aceitos: CSV, XLSX"
+      - "Se houver erros, o sistema indicara quais linhas precisam correcao"
+
+  # --------------------------------------------------
+  # CADASTRAR FUNCIONARIO
+  # --------------------------------------------------
+  - id: "add-employee"
+    title: "Como cadastrar um funcionario"
+    description: "Passo a passo para cadastrar um novo funcionario"
+    category: "users"
+    keywords: ["funcionario", "cadastrar", "novo funcionario", "colaborador", "professor", "admin"]
+    prerequisites:
+      - "Estar logado com permissao de administrador"
+    menu_path: "Usuarios"
+    steps:
+      - step: 1
+        action: "Clique na aba **Usuarios** no menu superior"
+        url: "/users"
+      - step: 2
+        action: "Clique no botao **Novo Funcionario** (ou 'New Employee')"
+        url: "/users/newEmployee"
+      - step: 3
+        action: "Preencha os dados do funcionario"
+        fields:
+          - "Nome completo (obrigatorio)"
+          - "Email corporativo (obrigatorio)"
+          - "CPF"
+          - "Cargo/funcao"
+          - "Departamento"
+        detail: "O email sera usado para login do funcionario"
+      - step: 4
+        action: "Defina as permissoes de acesso"
+        detail: "Selecione o nivel de acesso (admin, professor, secretaria, etc.)"
+      - step: 5
+        action: "Clique em **Salvar**"
+        detail: "O funcionario recebera um email de primeiro acesso"
+    tips:
+      - "O funcionario precisara fazer o primeiro acesso via /primeiro-acesso"
+
+  # --------------------------------------------------
+  # VER PERFIL DO USUARIO
+  # --------------------------------------------------
+  - id: "view-user-profile"
+    title: "Como ver o perfil de um usuario"
+    description: "Acessar detalhes, editar dados e gerenciar um usuario"
+    category: "users"
+    keywords: ["perfil", "detalhes", "editar usuario", "ver usuario"]
+    menu_path: "Usuarios"
+    steps:
+      - step: 1
+        action: "Clique na aba **Usuarios** no menu superior"
+        url: "/users"
+      - step: 2
+        action: "Busque o usuario na lista ou use o campo de pesquisa"
+        detail: "Voce pode filtrar por nome, email ou tipo"
+      - step: 3
+        action: "Clique no nome do usuario para abrir o perfil"
+        url: "/users/{userId}"
+        detail: "Voce vera foto, dados pessoais, senha e acoes administrativas"
+
+  # --------------------------------------------------
+  # CRIAR EMPRESA/INSTITUICAO
+  # --------------------------------------------------
+  - id: "create-company"
+    title: "Como cadastrar uma nova empresa/instituicao"
+    description: "Criar uma nova empresa no sistema multi-tenant"
+    category: "companies"
+    keywords: ["empresa", "instituicao", "criar empresa", "nova empresa", "tenant"]
+    prerequisites:
+      - "Estar logado como administrador do sistema"
+    menu_path: "Empresas"
+    steps:
+      - step: 1
+        action: "Clique na aba **Empresas** no menu superior"
+        url: "/companies"
+      - step: 2
+        action: "Clique no botao **Nova Empresa**"
+        url: "/companies/new"
+      - step: 3
+        action: "Preencha os dados da empresa"
+        fields:
+          - "Nome da empresa (obrigatorio)"
+          - "CNPJ"
+          - "Endereco"
+          - "Responsavel"
+          - "Logo"
+      - step: 4
+        action: "Clique em **Salvar**"
+        detail: "A empresa sera criada e voce podera configurar recursos, eventos e integracoes"
+    related_workflows: ["create-event", "setup-zoom"]
+
+  # --------------------------------------------------
+  # CRIAR EVENTO (AULA PRESENCIAL, WORKSHOP, ETC.)
+  # --------------------------------------------------
+  - id: "create-event"
+    title: "Como criar um evento (aula presencial, palestra, workshop)"
+    description: "Agendar um evento dentro de uma empresa com recursos fisicos"
+    category: "companies"
+    keywords: ["evento", "aula presencial", "palestra", "workshop", "seminario", "agendar", "sala", "presencial"]
+    prerequisites:
+      - "Ter uma empresa cadastrada"
+      - "Ter recursos cadastrados na empresa (salas, laboratorios, etc.)"
+    menu_path: "Empresas > Detalhes da Empresa > Eventos"
+    event_types:
+      - "aula - Aula"
+      - "estagio - Estagio"
+      - "palestra - Palestra"
+      - "visitacao_tecnica - Visitacao Tecnica"
+      - "workshop - Workshop"
+      - "seminario - Seminario"
+      - "reuniao - Reuniao"
+      - "avaliacao - Avaliacao"
+      - "outro - Outro"
+    resource_types:
+      - "sala - Sala"
+      - "laboratorio - Laboratorio"
+      - "auditorio - Auditorio"
+      - "equipamento - Equipamento"
+      - "veiculo - Veiculo"
+      - "virtual - Virtual"
+      - "outro - Outro"
+    steps:
+      - step: 1
+        action: "Clique na aba **Empresas** no menu superior"
+        url: "/companies"
+      - step: 2
+        action: "Clique na empresa onde deseja criar o evento"
+        url: "/companies/{companyId}"
+      - step: 3
+        action: "Va para a aba **Eventos** dentro dos detalhes da empresa"
+        detail: "Pode estar na aba 5 ou acessivel por tab dentro da pagina"
+      - step: 4
+        action: "Clique em **Novo Evento**"
+        url: "/companies/{companyId}/events/new"
+      - step: 5
+        action: "Preencha as informacoes do evento"
+        fields:
+          - "Titulo (obrigatorio)"
+          - "Tipo de Evento (aula, palestra, workshop, etc.)"
+          - "Status (rascunho ou agendado)"
+          - "Data/Hora Inicio (obrigatorio)"
+          - "Data/Hora Termino (obrigatorio)"
+          - "Max. Participantes (opcional)"
+          - "Descricao (opcional)"
+      - step: 6
+        action: "Selecione os **recursos** necessarios (salas, laboratorios, equipamentos)"
+        detail: "Clique no botao + ao lado do recurso desejado. E obrigatorio selecionar pelo menos um recurso."
+      - step: 7
+        action: "Defina a quantidade e observacoes de cada recurso"
+      - step: 8
+        action: "Clique em **Criar Evento**"
+        detail: "O evento sera agendado e os recursos reservados"
+    tips:
+      - "Para aula presencial, escolha tipo 'Aula' e selecione uma Sala como recurso"
+      - "Certifique-se de que os recursos estao cadastrados na aba Recursos da empresa"
+      - "Voce pode editar o evento depois em /companies/{companyId}/events/{eventId}/edit"
+
+  # --------------------------------------------------
+  # CONFIGURAR ZOOM (AULA ONLINE AO VIVO)
+  # --------------------------------------------------
+  - id: "setup-zoom"
+    title: "Como configurar o Zoom para aulas online ao vivo"
+    description: "Integrar o Zoom com o Orchestra para aulas ao vivo"
+    category: "integrations"
+    keywords: ["zoom", "aula online", "ao vivo", "live", "videoconferencia", "video", "meeting", "reuniao online"]
+    prerequisites:
+      - "Ter conta Zoom com plano PRO ou superior"
+      - "Ter uma empresa cadastrada no sistema"
+    menu_path: "Integracoes > Zoom"
+    steps:
+      - step: 1
+        action: "Acesse a pagina de instrucoes do Zoom"
+        url: "/integrations/zoom"
+        detail: "Esta pagina tem um guia completo passo-a-passo"
+      - step: 2
+        action: "Verifique se voce tem plano PRO do Zoom"
+        detail: "Planos em https://zoom.us/pt/pricing"
+      - step: 3
+        action: "Acesse o Zoom Marketplace (marketplace.zoom.us)"
+        detail: "Clique em Develop > Build app"
+      - step: 4
+        action: "Crie um app do tipo **Server to Server OAuth App**"
+      - step: 5
+        action: "Preencha os dados do app (Company Name, Nome, Email)"
+      - step: 6
+        action: "Configure os **Scopes** (permissoes)"
+        detail: "Adicione: meeting:read:meeting:admin, meeting:write:meeting:admin, meeting:write:registrant:admin, report:read:meeting:admin, report:read:list_meeting_participants:admin, report:read:user:admin"
+      - step: 7
+        action: "Copie as **credenciais** (Account ID, Client ID, Client Secret)"
+      - step: 8
+        action: "Copie o **Secret Token** na aba Feature"
+      - step: 9
+        action: "Ative o app na aba Activation"
+      - step: 10
+        action: "Configure **Event Subscriptions** (webhook)"
+        detail: "Habilite Event Subscriptions, adicione evento 'End Meeting', cole a URL do webhook do Orchestra"
+      - step: 11
+        action: "Volte ao Orchestra e cole as credenciais no formulario de integracao"
+    tips:
+      - "A integracao permite criar reunioes Zoom automaticamente para turmas"
+      - "O webhook notifica o Orchestra quando uma reuniao termina (para registrar presenca)"
+
+  # --------------------------------------------------
+  # CRIAR TURMA
+  # --------------------------------------------------
+  - id: "create-class"
+    title: "Como criar uma turma"
+    description: "Criar uma nova turma e configurar seus parametros"
+    category: "class-instances"
+    keywords: ["turma", "criar turma", "nova turma", "classe", "class"]
+    prerequisites:
+      - "Ter conteudo educacional criado (colecoes, trilhas ou unidades)"
+    menu_path: "Turmas"
+    steps:
+      - step: 1
+        action: "Clique na aba **Turmas** no menu superior"
+        url: "/educational/class-instances"
+        detail: "Voce vera a lista de todas as turmas"
+      - step: 2
+        action: "Clique no botao **Nova Turma**"
+        url: "/educational/class-instances/new"
+      - step: 3
+        action: "Preencha os dados da turma"
+        fields:
+          - "Nome da turma (obrigatorio)"
+          - "Descricao"
+          - "Periodo (data inicio e fim)"
+          - "Conteudo vinculado (colecao, trilha ou unidade)"
+          - "Limite de alunos"
+      - step: 4
+        action: "Clique em **Salvar**"
+        detail: "A turma sera criada. Agora voce pode matricular alunos."
+    related_workflows: ["enroll-student", "manage-class-activities"]
+
+  # --------------------------------------------------
+  # MATRICULAR ALUNO EM TURMA
+  # --------------------------------------------------
+  - id: "enroll-student"
+    title: "Como matricular um aluno em uma turma"
+    description: "Adicionar um aluno a uma turma existente"
+    category: "class-instances"
+    keywords: ["matricula", "matricular", "aluno na turma", "inscrever", "enrollment", "adicionar aluno turma"]
+    prerequisites:
+      - "Ter uma turma criada"
+      - "Ter o aluno cadastrado no sistema"
+    menu_path: "Turmas > Detalhes da Turma > Matriculas"
+    steps:
+      - step: 1
+        action: "Clique na aba **Turmas** no menu superior"
+        url: "/educational/class-instances"
+      - step: 2
+        action: "Clique na turma desejada para abrir os detalhes"
+        url: "/educational/class-instances/{id}"
+      - step: 3
+        action: "Acesse a secao de **Matriculas** da turma"
+        url: "/educational/class-instances/{classInstanceId}/enrollments"
+      - step: 4
+        action: "Clique em **Nova Matricula**"
+        url: "/educational/class-instances/{classInstanceId}/enrollments/new"
+      - step: 5
+        action: "Busque e selecione o aluno"
+        detail: "Use o campo de busca para encontrar o aluno pelo nome ou email"
+      - step: 6
+        action: "Confirme a matricula"
+        detail: "O aluno tera acesso ao conteudo da turma no AVA"
+    tips:
+      - "O aluno precisa estar cadastrado antes de ser matriculado"
+      - "Voce pode matricular varios alunos de uma vez se disponivel"
+
+  # --------------------------------------------------
+  # GERENCIAR ATIVIDADES DA TURMA
+  # --------------------------------------------------
+  - id: "manage-class-activities"
+    title: "Como gerenciar atividades de uma turma"
+    description: "Acessar e gerenciar atividades, provas de presenca e trabalhos em grupo"
+    category: "class-instances"
+    keywords: ["atividades", "presenca", "frequencia", "trabalho em grupo", "professor"]
+    menu_path: "Turmas > Detalhes da Turma > Atividades"
+    steps:
+      - step: 1
+        action: "Clique na aba **Turmas** no menu superior"
+        url: "/educational/class-instances"
+      - step: 2
+        action: "Clique na turma desejada"
+        url: "/educational/class-instances/{id}"
+      - step: 3
+        action: "Acesse a secao de **Atividades**"
+        url: "/educational/class-instances/{classInstanceId}/activities"
+        detail: "Visao do professor com provas de presenca, trabalhos em grupo e configuracoes"
+    tips:
+      - "Esta e a visao do professor/coordenador"
+      - "Alunos acessam pela visao do estudante em /educational/class-instances/{id}"
+
+  # --------------------------------------------------
+  # CRIAR COLECAO DE CONTEUDO
+  # --------------------------------------------------
+  - id: "create-collection"
+    title: "Como criar uma colecao de conteudo"
+    description: "Criar uma colecao que agrupa trilhas, series e unidades"
+    category: "educational"
+    keywords: ["colecao", "conteudo", "criar colecao", "curso", "programa"]
+    menu_path: "Conteudos > Colecoes"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** no menu superior"
+        url: "/educational/collections"
+        detail: "Voce estara na sub-aba Colecoes por padrao"
+      - step: 2
+        action: "Clique no botao **Nova Colecao**"
+        url: "/educational/collections/new"
+      - step: 3
+        action: "Preencha os dados da colecao"
+        fields:
+          - "Nome da colecao (obrigatorio)"
+          - "Descricao"
+          - "Imagem de capa"
+          - "Categoria"
+      - step: 4
+        action: "Clique em **Salvar**"
+    related_workflows: ["create-pathway", "create-series", "create-unit"]
+
+  # --------------------------------------------------
+  # CRIAR TRILHA DE APRENDIZAGEM
+  # --------------------------------------------------
+  - id: "create-pathway"
+    title: "Como criar uma trilha de aprendizagem"
+    description: "Criar uma trilha que organiza o percurso do aluno"
+    category: "educational"
+    keywords: ["trilha", "pathway", "criar trilha", "percurso", "caminho de aprendizagem"]
+    menu_path: "Conteudos > Trilhas"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** no menu superior"
+        url: "/educational/collections"
+      - step: 2
+        action: "Clique na sub-aba **Trilhas**"
+        url: "/educational/pathways"
+      - step: 3
+        action: "Clique no botao **Nova Trilha**"
+        url: "/educational/pathways/new"
+      - step: 4
+        action: "Preencha os dados da trilha"
+        fields:
+          - "Nome da trilha (obrigatorio)"
+          - "Descricao"
+          - "Ordem das unidades/disciplinas"
+      - step: 5
+        action: "Clique em **Salvar**"
+    related_workflows: ["create-collection", "create-unit"]
+
+  # --------------------------------------------------
+  # CRIAR DISCIPLINA (SERIE)
+  # --------------------------------------------------
+  - id: "create-series"
+    title: "Como criar uma disciplina"
+    description: "Criar uma disciplina (serie) de conteudo"
+    category: "educational"
+    keywords: ["disciplina", "serie", "criar disciplina", "materia"]
+    menu_path: "Conteudos > Disciplinas"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** no menu superior"
+        url: "/educational/collections"
+      - step: 2
+        action: "Clique na sub-aba **Disciplinas**"
+        url: "/educational/series"
+      - step: 3
+        action: "Clique no botao **Nova Disciplina**"
+        url: "/educational/series/new"
+      - step: 4
+        action: "Preencha os dados da disciplina"
+      - step: 5
+        action: "Clique em **Salvar**"
+
+  # --------------------------------------------------
+  # CRIAR MODULO/UNIDADE DE CONTEUDO
+  # --------------------------------------------------
+  - id: "create-unit"
+    title: "Como criar um modulo (unidade) de conteudo"
+    description: "Criar uma unidade de aprendizagem e adicionar componentes com o builder"
+    category: "educational"
+    keywords: ["modulo", "unidade", "criar unidade", "conteudo", "aula", "material"]
+    menu_path: "Conteudos > Modulos"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** no menu superior"
+        url: "/educational/collections"
+      - step: 2
+        action: "Clique na sub-aba **Modulos**"
+        url: "/educational/units"
+      - step: 3
+        action: "Clique no botao **Novo Modulo**"
+        url: "/educational/units/new"
+      - step: 4
+        action: "Preencha os dados basicos do modulo"
+        fields:
+          - "Nome do modulo (obrigatorio)"
+          - "Descricao"
+      - step: 5
+        action: "Clique em **Salvar** para criar o modulo"
+      - step: 6
+        action: "Acesse o **Builder** para adicionar conteudo"
+        url: "/educational/units/{unitId}/builder"
+        detail: "O builder e uma interface drag-and-drop para montar o conteudo do modulo"
+      - step: 7
+        action: "Arraste componentes da sidebar para a area de construcao"
+        detail: "Tipos disponiveis: Video, PDF, SCORM, H5P, Texto, Avaliacao, Prova de Presenca, Trabalho em Grupo"
+      - step: 8
+        action: "Configure cada componente no painel lateral direito"
+        detail: "Upload de arquivos, configuracao de parametros, ordem dos componentes"
+    tips:
+      - "O builder suporta: upload de video, PDF, SCORM, H5P"
+      - "Voce pode adicionar avaliacoes e atividades diretamente no modulo"
+      - "Use 'Compartilhar com Unidades' para reutilizar componentes entre modulos"
+    related_workflows: ["create-exam", "create-collection"]
+
+  # --------------------------------------------------
+  # CRIAR PROCESSO SELETIVO
+  # --------------------------------------------------
+  - id: "create-admission"
+    title: "Como criar um processo seletivo"
+    description: "Criar e configurar um processo seletivo completo"
+    category: "admission"
+    keywords: ["processo seletivo", "admissao", "vestibular", "selecao", "inscricao"]
+    menu_path: "Ofertas"
+    steps:
+      - step: 1
+        action: "Clique na aba **Ofertas** no menu superior"
+        url: "/educational/admission"
+        detail: "Voce vera a lista de processos seletivos"
+      - step: 2
+        action: "Clique no botao **Novo Processo Seletivo**"
+        url: "/educational/admission/new"
+      - step: 3
+        action: "Preencha os dados do processo"
+        fields:
+          - "Nome do processo (obrigatorio)"
+          - "Descricao"
+          - "Periodo de inscricao"
+          - "Status"
+      - step: 4
+        action: "Clique em **Salvar**"
+      - step: 5
+        action: "Crie **ofertas** dentro do processo"
+        url: "/educational/admission/{id}"
+        detail: "Cada oferta e um curso/vaga especifica dentro do processo"
+    related_workflows: ["create-offer", "view-candidates"]
+
+  # --------------------------------------------------
+  # CRIAR OFERTA EM PROCESSO SELETIVO
+  # --------------------------------------------------
+  - id: "create-offer"
+    title: "Como criar uma oferta dentro de um processo seletivo"
+    description: "Adicionar um curso/vaga ofertado no processo seletivo"
+    category: "admission"
+    keywords: ["oferta", "vaga", "curso", "inscricao", "formulario de inscricao"]
+    prerequisites:
+      - "Ter um processo seletivo criado"
+    menu_path: "Ofertas > Processo Seletivo > Nova Oferta"
+    steps:
+      - step: 1
+        action: "Acesse o processo seletivo desejado"
+        url: "/educational/admission/{id}"
+      - step: 2
+        action: "Clique em **Nova Oferta**"
+        url: "/educational/admission/{admissionId}/offers/new"
+      - step: 3
+        action: "Preencha os dados da oferta"
+        fields:
+          - "Nome da oferta (obrigatorio)"
+          - "Vagas disponiveis"
+          - "Descricao"
+          - "Requisitos"
+      - step: 4
+        action: "Configure as etapas do formulario de inscricao"
+        detail: "Voce pode ter etapas de dados pessoais, documentos, pagamento, avaliacao, contrato"
+      - step: 5
+        action: "Clique em **Salvar**"
+      - step: 6
+        action: "Opcionalmente, acesse o **Form Builder** para customizar o formulario"
+        url: "/educational/admission/offers/{offerId}/form-builder"
+        detail: "Interface drag-and-drop para montar o formulario de inscricao"
+    tips:
+      - "O link publico de inscricao sera /apply/{offerId}"
+      - "Tipos de etapa: dados-pessoais, campos customizados, documentos, pagamento, avaliacao, contrato"
+
+  # --------------------------------------------------
+  # VER E GERENCIAR CANDIDATOS
+  # --------------------------------------------------
+  - id: "view-candidates"
+    title: "Como ver e gerenciar candidatos"
+    description: "Acompanhar candidatos inscritos e gerenciar o pipeline"
+    category: "admission"
+    keywords: ["candidatos", "inscritos", "kanban", "pipeline", "selecao"]
+    menu_path: "Ofertas > Candidatos"
+    steps:
+      - step: 1
+        action: "Clique na aba **Ofertas** no menu superior"
+        url: "/educational/admission"
+      - step: 2
+        action: "Acesse a lista de **Candidatos**"
+        url: "/educational/admission/candidates"
+        detail: "Voce vera todos os candidatos de todos os processos"
+      - step: 3
+        action: "Use o **Kanban** para visao por etapas"
+        url: "/educational/admission/candidates/kanban"
+        detail: "Arraste candidatos entre colunas para mudar o status"
+      - step: 4
+        action: "Clique em um candidato para ver detalhes"
+        url: "/educational/admission/candidates/{candidateId}"
+
+  # --------------------------------------------------
+  # CRIAR QUESTAO
+  # --------------------------------------------------
+  - id: "create-question"
+    title: "Como criar uma questao no banco de questoes"
+    description: "Adicionar questoes ao repositorio reutilizavel"
+    category: "exams"
+    keywords: ["questao", "pergunta", "banco de questoes", "criar questao", "prova"]
+    menu_path: "Conteudos > Avaliacoes > Banco de Questoes"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** no menu superior"
+        url: "/educational/collections"
+      - step: 2
+        action: "Clique na sub-aba **Avaliacoes**"
+        url: "/educational/exams"
+      - step: 3
+        action: "Clique na aba **Banco de Questoes**"
+        url: "/educational/exams/bank"
+      - step: 4
+        action: "Clique em **Nova Questao**"
+        url: "/educational/exams/questions/new"
+      - step: 5
+        action: "Escolha o tipo de questao e preencha os dados"
+        detail: "Tipos: multipla escolha, verdadeiro/falso, dissertativa, etc."
+      - step: 6
+        action: "Clique em **Salvar**"
+    related_workflows: ["create-exam"]
+
+  # --------------------------------------------------
+  # CRIAR AVALIACAO
+  # --------------------------------------------------
+  - id: "create-exam"
+    title: "Como criar uma avaliacao"
+    description: "Montar uma avaliacao usando o builder com questoes do banco"
+    category: "exams"
+    keywords: ["avaliacao", "prova", "exame", "teste", "criar avaliacao", "builder"]
+    prerequisites:
+      - "Ter questoes no banco de questoes"
+    menu_path: "Conteudos > Avaliacoes > Builder"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** no menu superior"
+        url: "/educational/collections"
+      - step: 2
+        action: "Clique na sub-aba **Avaliacoes**"
+        url: "/educational/exams"
+      - step: 3
+        action: "Clique na aba **Builder**"
+        url: "/educational/exams/builder"
+      - step: 4
+        action: "Crie uma nova avaliacao"
+        fields:
+          - "Titulo da avaliacao (obrigatorio)"
+          - "Descricao"
+          - "Tempo limite"
+          - "Nota minima para aprovacao"
+      - step: 5
+        action: "Adicione questoes do banco de questoes"
+        detail: "Selecione questoes existentes ou crie novas diretamente"
+      - step: 6
+        action: "Configure a ordem e pontuacao de cada questao"
+      - step: 7
+        action: "Clique em **Salvar**"
+    tips:
+      - "Voce pode vincular a avaliacao a um modulo/unidade via o Unit Builder"
+      - "Configure proctoring em /educational/exams/proctoring se necessario"
+    related_workflows: ["create-question", "create-rubric"]
+
+  # --------------------------------------------------
+  # CRIAR RUBRICA
+  # --------------------------------------------------
+  - id: "create-rubric"
+    title: "Como criar uma rubrica de avaliacao"
+    description: "Criar criterios de avaliacao com rubricas"
+    category: "exams"
+    keywords: ["rubrica", "criterio", "avaliacao", "nota", "correcao"]
+    menu_path: "Conteudos > Avaliacoes > Rubricas"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** no menu superior"
+      - step: 2
+        action: "Clique na sub-aba **Avaliacoes**"
+        url: "/educational/exams"
+      - step: 3
+        action: "Clique na aba **Rubricas**"
+        url: "/educational/exams/rubrics"
+      - step: 4
+        action: "Clique em **Nova Rubrica**"
+      - step: 5
+        action: "Defina os criterios e niveis de desempenho"
+      - step: 6
+        action: "Clique em **Salvar**"
+
+  # --------------------------------------------------
+  # CORRIGIR ATIVIDADE
+  # --------------------------------------------------
+  - id: "grade-activity"
+    title: "Como corrigir uma atividade"
+    description: "Avaliar e dar nota a uma atividade submetida por aluno"
+    category: "exams"
+    keywords: ["corrigir", "nota", "correcao", "avaliar", "atividade"]
+    menu_path: "Conteudos > Avaliacoes > Atividades"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** > sub-aba **Avaliacoes**"
+        url: "/educational/exams"
+      - step: 2
+        action: "Clique na aba **Atividades**"
+        url: "/educational/exams/your-activities"
+      - step: 3
+        action: "Selecione a atividade a ser corrigida"
+      - step: 4
+        action: "Acesse a tela de correcao"
+        url: "/educational/exams/activity-grade/{attemptId}"
+      - step: 5
+        action: "Avalie a resposta e atribua a nota"
+      - step: 6
+        action: "Clique em **Salvar**"
+
+  # --------------------------------------------------
+  # CRIAR TEMPLATE DE CERTIFICADO
+  # --------------------------------------------------
+  - id: "create-certificate-template"
+    title: "Como criar um template de certificado"
+    description: "Criar modelo visual de certificado para emissao"
+    category: "certification"
+    keywords: ["certificado", "template", "modelo", "diploma", "criar certificado"]
+    menu_path: "Conteudos > Certificados > Templates"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** no menu superior"
+      - step: 2
+        action: "Clique na sub-aba **Certificados**"
+        url: "/educational/certificates"
+      - step: 3
+        action: "Clique na aba **Templates**"
+        url: "/educational/certificates/templates"
+      - step: 4
+        action: "Clique em **Novo Template**"
+        url: "/educational/certificates/templates/new"
+      - step: 5
+        action: "Monte o certificado no editor visual"
+        detail: "Defina layout, textos, campos dinamicos (nome do aluno, curso, data)"
+      - step: 6
+        action: "Clique em **Salvar**"
+    related_workflows: ["issue-certificate"]
+
+  # --------------------------------------------------
+  # EMITIR CERTIFICADO
+  # --------------------------------------------------
+  - id: "issue-certificate"
+    title: "Como emitir um certificado"
+    description: "Emitir certificados para alunos que concluiram um curso"
+    category: "certification"
+    keywords: ["emitir", "certificado", "diploma", "conclusao", "gerar certificado"]
+    prerequisites:
+      - "Ter um template de certificado criado"
+      - "Aluno ter concluido os requisitos do curso"
+    menu_path: "Conteudos > Certificados > Emitidos"
+    steps:
+      - step: 1
+        action: "Clique na aba **Conteudos** > sub-aba **Certificados**"
+        url: "/educational/certificates"
+      - step: 2
+        action: "Clique na aba **Emitidos**"
+        url: "/educational/certificates/issued"
+      - step: 3
+        action: "Clique em **Emitir Certificado** (ou equivalente)"
+      - step: 4
+        action: "Selecione o template e o(s) aluno(s)"
+      - step: 5
+        action: "Confirme a emissao"
+        detail: "O certificado tera um codigo de validacao unico"
+    tips:
+      - "Certificados podem ser validados publicamente em /validate/{codigo}"
+      - "O aluno recebera o certificado no perfil dele"
+
+  # --------------------------------------------------
+  # VALIDAR CERTIFICADO
+  # --------------------------------------------------
+  - id: "validate-certificate"
+    title: "Como validar um certificado"
+    description: "Verificar a autenticidade de um certificado emitido"
+    category: "certification"
+    keywords: ["validar", "verificar", "autenticidade", "certificado", "codigo"]
+    menu_path: "Pagina publica (sem login)"
+    steps:
+      - step: 1
+        action: "Acesse a pagina de validacao"
+        url: "/validate"
+        detail: "Esta pagina e publica, nao precisa de login"
+      - step: 2
+        action: "Digite o codigo do certificado"
+      - step: 3
+        action: "Clique em **Validar**"
+        detail: "O sistema mostrara os dados do certificado se for valido"
+
+  # --------------------------------------------------
+  # ACESSAR DASHBOARD BI
+  # --------------------------------------------------
+  - id: "access-bi"
+    title: "Como acessar o dashboard de BI"
+    description: "Visualizar indicadores e relatorios do sistema"
+    category: "admin"
+    keywords: ["bi", "dashboard", "relatorio", "indicadores", "metricas", "analytics"]
+    menu_path: "BI"
+    steps:
+      - step: 1
+        action: "Clique na aba **BI** no menu superior"
+        url: "/bi"
+        detail: "Voce vera o dashboard com indicadores e graficos"
+
+  # --------------------------------------------------
+  # CENTRO DE PRIVACIDADE (LGPD)
+  # --------------------------------------------------
+  - id: "privacy-center"
+    title: "Como acessar o centro de privacidade"
+    description: "Gerenciar consentimentos e dados pessoais conforme LGPD"
+    category: "admin"
+    keywords: ["privacidade", "lgpd", "consentimento", "dados pessoais", "gdpr"]
+    menu_path: "Menu do usuario > Centro de Privacidade"
+    steps:
+      - step: 1
+        action: "Clique no seu **nome/avatar** no canto superior direito"
+        detail: "Abre o menu do usuario"
+      - step: 2
+        action: "Clique em **Centro de Privacidade**"
+        url: "/privacy"
+        detail: "Gerencie consentimentos e acesse seus dados pessoais"
