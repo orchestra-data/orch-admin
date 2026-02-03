@@ -1,0 +1,602 @@
+# ============================================================
+# Cogedu Data Schema - Referencia para consultas do Orch
+# Mapeamento de entidades, permissoes, API e insights
+# ============================================================
+
+version: "1.0.0"
+updated: "2026-02-03"
+description: "Schema de dados para consultas inteligentes do Orch com verificacao de permissao"
+
+# ============================================================
+# SISTEMA DE PERMISSOES
+# ============================================================
+permission_system:
+  description: |
+    Cadeia de verificacao:
+    1. Identificar user_id do colaborador logado
+    2. Buscar UserCompanyRole (user_id + company_id) -> role_id
+    3. Buscar RolePermission (role_id) -> permission_ids
+    4. Buscar Permission (permission_id) -> permission.key
+    5. Verificar se permission.key inclui a permissao necessaria
+
+    Tudo e multi-tenant (tenant_id) e multi-company (company_id).
+
+  tables:
+    - name: permissions
+      fields: [id, tenant_id, key, name, description]
+      example_keys:
+        - "people.users.read"
+        - "people.users.write"
+        - "class.instances.read"
+        - "class.enrollments.read"
+        - "class.grades.read"
+        - "admission.candidates.read"
+        - "bi.dashboard.read"
+        - "content.collections.read"
+
+    - name: roles
+      fields: [id, slug, name, description, created_at]
+      example_slugs:
+        - "admin"
+        - "coordinator"
+        - "teacher"
+        - "secretary"
+        - "viewer"
+
+    - name: role_permissions
+      fields: [tenant_id, role_id, permission_id]
+      description: "Vincula permissoes a roles"
+
+    - name: user_roles
+      fields: [user_id, role_id, assigned_at]
+      description: "Vinculo global usuario-role"
+
+    - name: user_company_roles
+      fields: [tenant_id, user_id, company_id, role_id, assigned_at]
+      description: "Vinculo usuario-role POR empresa (mais granular)"
+
+  verification_flow:
+    api_method: "getUserEffectivePermissions"
+    params: ["userId", "companyId"]
+    returns: "{ permissions: string[] }"
+    usage: |
+      Antes de responder QUALQUER consulta de dados:
+      1. Chamar getUserEffectivePermissions(userId, companyId)
+      2. Verificar se a permissao necessaria esta na lista
+      3. Se NAO tiver permissao -> negar educadamente
+      4. Se tiver permissao -> prosseguir com a consulta
+
+# ============================================================
+# ENTIDADES CONSULTAVEIS
+# ============================================================
+entities:
+
+  # ----------------------------------------------------------
+  # ALUNOS E NOTAS
+  # ----------------------------------------------------------
+  students:
+    description: "Dados de alunos, notas, progresso e frequencia"
+    required_permissions:
+      view_profile: "people.users.read"
+      view_grades: "class.grades.read"
+      view_progress: "class.enrollments.read"
+      view_attendance: "class.enrollments.read"
+
+    data_sources:
+      - source: "api"
+        method: "getUser"
+        expand: ["documents", "studentProfiles", "addresses"]
+        fields:
+          - name: full_name
+            type: string
+          - name: email
+            type: string
+          - name: user_type
+            type: enum
+            values: [student, employee, student_employee, admin]
+          - name: status
+            type: enum
+            values: [active, inactive, graduated, ingresso, egresso, evadido, trancado, atual]
+          - name: phone
+            type: string
+          - name: photo_url
+            type: string
+
+      - source: "api"
+        method: "listClassEnrollments"
+        params: { userId: "{student_id}", includeClassDetails: true }
+        fields:
+          - name: class_instance_name
+            type: string
+          - name: enrollment_status
+            type: enum
+            values: [enrolled, completed, dropped, suspended, transferred]
+          - name: final_grade
+            type: number
+            range: [0, 100]
+          - name: completion_date
+            type: date
+
+      - source: "db_readonly"
+        table: "class_grades"
+        fields:
+          - name: student_id
+            type: uuid
+          - name: class_instance_id
+            type: uuid
+          - name: grade_type
+            type: enum
+            values: [exam, assignment, participation, project, final]
+          - name: grade_value
+            type: number
+            range: [0, 100]
+          - name: weight
+            type: number
+          - name: approval_status
+            type: enum
+            values: [approved, at_risk, failed, pending]
+          - name: graded_at
+            type: timestamp
+
+      - source: "db_readonly"
+        table: "student_progress"
+        fields:
+          - name: tracked_entity_type
+            type: enum
+            values: [unit, component, pathway, series]
+          - name: completion_status
+            type: enum
+            values: [not_started, in_progress, completed, blocked]
+          - name: completion_percentage
+            type: number
+            range: [0, 100]
+          - name: score
+            type: number
+          - name: attempts_count
+            type: integer
+          - name: time_spent_minutes
+            type: integer
+          - name: first_accessed_at
+            type: timestamp
+          - name: last_accessed_at
+            type: timestamp
+
+      - source: "db_readonly"
+        table: "attendance_records"
+        fields:
+          - name: session_type
+            type: enum
+            values: [presencial, sincrono, assincrono]
+          - name: attendance_source
+            type: enum
+            values: [event, video_completion, live_session, manual]
+          - name: check_in_method
+            type: enum
+            values: [manual, qr_code, zoom_api, auto_video]
+          - name: duration_minutes
+            type: integer
+          - name: is_present
+            type: boolean
+
+    insights:
+      - id: "grade_trend"
+        name: "Tendencia de notas"
+        description: "Analisa se as notas estao subindo, estaveis ou caindo"
+        logic: |
+          Comparar notas ao longo do tempo (graded_at).
+          Se ultimas 3 notas < media anterior -> tendencia de queda
+          Se ultimas 3 notas > media anterior -> tendencia de alta
+        severity_rules:
+          - condition: "3+ notas consecutivas abaixo de 60"
+            level: "alerta"
+            message: "Aluno com desempenho abaixo do minimo em sequencia"
+          - condition: "media caiu mais de 20 pontos"
+            level: "critico"
+            message: "Queda significativa de desempenho"
+
+      - id: "attendance_pattern"
+        name: "Padrao de frequencia"
+        description: "Identifica padroes de presenca/ausencia"
+        logic: |
+          Calcular taxa de presenca por tipo de sessao.
+          Identificar semanas com mais faltas.
+          Detectar abandono progressivo (faltas crescentes).
+        severity_rules:
+          - condition: "frequencia < 75%"
+            level: "alerta"
+            message: "Frequencia abaixo do minimo exigido"
+          - condition: "3+ faltas consecutivas"
+            level: "critico"
+            message: "Possivel abandono - intervencao recomendada"
+
+      - id: "progress_stall"
+        name: "Progresso estagnado"
+        description: "Detecta quando o aluno parou de avancar"
+        logic: |
+          Se last_accessed_at > 14 dias atras E completion_percentage < 100 -> estagnado
+          Se attempts_count > 5 E score < 60 -> com dificuldade
+        severity_rules:
+          - condition: "sem acesso ha mais de 14 dias"
+            level: "alerta"
+            message: "Aluno nao acessa o conteudo ha mais de 2 semanas"
+          - condition: "muitas tentativas com nota baixa"
+            level: "alerta"
+            message: "Aluno com dificuldade persistente neste conteudo"
+
+      - id: "completion_prediction"
+        name: "Previsao de conclusao"
+        description: "Estima se o aluno vai concluir no prazo"
+        logic: |
+          Baseado no ritmo atual de progresso vs prazo da turma.
+          Se ritmo atual projetado termina apos end_date -> risco
+
+  # ----------------------------------------------------------
+  # TURMAS E MATRICULAS
+  # ----------------------------------------------------------
+  classes:
+    description: "Dados de turmas, matriculas, estatisticas e engajamento"
+    required_permissions:
+      view_class: "class.instances.read"
+      view_enrollments: "class.enrollments.read"
+      view_grades: "class.grades.read"
+
+    data_sources:
+      - source: "api"
+        method: "getClassInstance"
+        params: { includeContent: true }
+        fields:
+          - name: name
+            type: string
+          - name: code
+            type: string
+          - name: content_type
+            type: enum
+            values: [collection, series]
+          - name: delivery_mode
+            type: enum
+            values: [in_person, online, hybrid]
+          - name: schedule_type
+            type: enum
+            values: [fixed, flexible, self_paced]
+          - name: status
+            type: enum
+            values: [draft, active, completed, archived, cancelled]
+          - name: start_date
+            type: date
+          - name: end_date
+            type: date
+          - name: max_students
+            type: integer
+          - name: enrolled_students_count
+            type: integer
+          - name: engagement_score
+            type: number
+          - name: churn_rate
+            type: number
+
+      - source: "api"
+        method: "getClassEnrollmentStats"
+        params: { classInstanceId: "{class_id}" }
+        fields:
+          - name: total_enrolled
+            type: integer
+          - name: total_completed
+            type: integer
+          - name: total_dropped
+            type: integer
+          - name: average_grade
+            type: number
+          - name: completion_rate
+            type: number
+
+      - source: "api"
+        method: "listClassEnrollments"
+        params: { classInstanceId: "{class_id}", includeUserDetails: true }
+        fields:
+          - name: user_name
+            type: string
+          - name: enrollment_status
+            type: enum
+          - name: final_grade
+            type: number
+
+      - source: "db_readonly"
+        table: "class_grades"
+        aggregate: true
+        description: "Visao geral de notas da turma (ClassGradesOverview)"
+        fields:
+          - name: approved_count
+            type: integer
+          - name: at_risk_count
+            type: integer
+          - name: failed_count
+            type: integer
+          - name: pending_count
+            type: integer
+          - name: average_grade
+            type: number
+          - name: highest_grade
+            type: number
+          - name: lowest_grade
+            type: number
+
+    insights:
+      - id: "class_health"
+        name: "Saude da turma"
+        description: "Avaliacao geral do desempenho da turma"
+        logic: |
+          Combinar: taxa de conclusao, media de notas, engajamento, evasao.
+          Score de saude: 0-100
+          > 80 = saudavel
+          60-80 = atencao
+          < 60 = critico
+        components:
+          - weight: 0.3
+            metric: "completion_rate"
+          - weight: 0.25
+            metric: "average_grade"
+          - weight: 0.25
+            metric: "engagement_score"
+          - weight: 0.2
+            metric: "1 - churn_rate"
+
+      - id: "churn_risk"
+        name: "Risco de evasao"
+        description: "Identifica turmas com alto risco de evasao"
+        logic: |
+          Se churn_rate > 20% -> alerta
+          Se dropped_count crescendo mês a mes -> tendencia negativa
+          Correlacionar com notas baixas e baixa frequencia
+
+      - id: "grade_distribution"
+        name: "Distribuicao de notas"
+        description: "Analisa como as notas estao distribuidas na turma"
+        logic: |
+          Classificar: aprovados, em risco, reprovados, pendentes
+          Se at_risk > 30% -> turma precisa de atencao
+          Se failed > 15% -> revisar metodologia
+
+      - id: "engagement_trend"
+        name: "Tendencia de engajamento"
+        description: "Analisa se o engajamento da turma esta subindo ou caindo"
+        logic: |
+          Comparar engagement_score ao longo do tempo.
+          Correlacionar com eventos/aulas presenciais.
+
+  # ----------------------------------------------------------
+  # FUNCIONARIOS E PERMISSOES
+  # ----------------------------------------------------------
+  employees:
+    description: "Dados de funcionarios, roles, permissoes e empresas"
+    required_permissions:
+      view_profile: "people.users.read"
+      view_roles: "people.users.read"
+      view_permissions: "platform.permissions.read"
+
+    data_sources:
+      - source: "api"
+        method: "getUser"
+        expand: ["documents", "employeeProfiles"]
+        fields:
+          - name: full_name
+            type: string
+          - name: email
+            type: string
+          - name: user_type
+            type: enum
+          - name: status
+            type: enum
+            values: [active, inactive, atual, ex-colaborador]
+          - name: employee_profile
+            type: object
+            sub_fields: [department, position, hire_date]
+
+      - source: "api"
+        method: "getUserRoles"
+        params: { userId: "{employee_id}", companyId: "{company_id}" }
+        fields:
+          - name: roles
+            type: array
+            item_fields: [role_id, role_name, role_slug, assigned_at]
+
+      - source: "api"
+        method: "getUserEffectivePermissions"
+        params: { userId: "{employee_id}", companyId: "{company_id}" }
+        fields:
+          - name: permissions
+            type: array
+            description: "Lista de permission keys efetivas"
+
+      - source: "api"
+        method: "listUserCompanies"
+        params: { userId: "{employee_id}" }
+        fields:
+          - name: companies
+            type: array
+            item_fields: [company_id, company_name, role]
+
+    insights:
+      - id: "permission_audit"
+        name: "Auditoria de permissoes"
+        description: "Verifica se as permissoes do funcionario estao adequadas ao cargo"
+        logic: |
+          Comparar permissoes efetivas com o que e esperado para o cargo.
+          Alertar se tem permissoes demais (privilegio excessivo).
+          Alertar se faltam permissoes essenciais para o trabalho.
+
+      - id: "multi_company_access"
+        name: "Acesso multi-empresa"
+        description: "Mapa de quais empresas o funcionario tem acesso"
+        logic: |
+          Listar empresas com roles em cada uma.
+          Util para coordenadores que atuam em varias unidades.
+
+  # ----------------------------------------------------------
+  # PROCESSOS SELETIVOS E CANDIDATOS
+  # ----------------------------------------------------------
+  admissions:
+    description: "Dados de processos seletivos, candidatos e pipeline"
+    required_permissions:
+      view_process: "admission.processes.read"
+      view_candidates: "admission.candidates.read"
+
+    data_sources:
+      - source: "api"
+        method: "listClassInstances"
+        description: "Processos vinculados a ofertas/turmas"
+
+      - source: "db_readonly"
+        table: "admission_candidates"
+        fields:
+          - name: candidate_id
+            type: uuid
+          - name: admission_id
+            type: uuid
+          - name: offer_id
+            type: uuid
+          - name: pipeline_stage
+            type: string
+          - name: evaluation_score
+            type: number
+          - name: payment_status
+            type: enum
+            values: [pending, paid, overdue, waived, refunded]
+          - name: completion_percentage
+            type: number
+            range: [0, 100]
+          - name: created_at
+            type: timestamp
+          - name: updated_at
+            type: timestamp
+
+    insights:
+      - id: "pipeline_bottleneck"
+        name: "Gargalos no pipeline"
+        description: "Identifica onde candidatos estao travando"
+        logic: |
+          Agrupar candidatos por pipeline_stage.
+          Se muitos estao parados em um estagio -> gargalo.
+          Calcular tempo medio em cada estagio.
+
+      - id: "conversion_rate"
+        name: "Taxa de conversao"
+        description: "Analisa conversao inscricao -> matricula"
+        logic: |
+          Total candidatos vs total que completaram todas as etapas.
+          Comparar entre ofertas diferentes.
+          Identificar ofertas com melhor/pior conversao.
+
+      - id: "payment_health"
+        name: "Saude de pagamentos"
+        description: "Status dos pagamentos dos candidatos"
+        logic: |
+          % pago vs % pendente vs % atrasado
+          Se overdue > 20% -> alerta financeiro
+          Tempo medio para pagamento
+
+      - id: "dropout_analysis"
+        name: "Analise de desistencia"
+        description: "Onde e por que candidatos desistem"
+        logic: |
+          Identificar estagio com maior taxa de abandono.
+          Correlacionar com complexidade do formulario.
+          Comparar entre diferentes processos seletivos.
+
+# ============================================================
+# REGRAS DE CONCLUSAO (INSIGHTS ENGINE)
+# ============================================================
+insights_engine:
+  description: |
+    O Orch pode tirar conclusoes inteligentes dos dados.
+    Regras gerais para gerar insights:
+
+  rules:
+    - id: "data_sufficiency"
+      description: "So gerar insights quando houver dados suficientes"
+      min_data_points: 3
+      message_when_insufficient: "Ainda nao tenho dados suficientes para tirar uma conclusao sobre isso."
+
+    - id: "confidence_level"
+      description: "Sempre indicar o nivel de confianca da conclusao"
+      levels:
+        - name: "alta"
+          condition: "Baseado em dados quantitativos claros (notas, frequencia)"
+          display: "Com base nos dados..."
+        - name: "media"
+          condition: "Baseado em padroes observados com alguma variacao"
+          display: "Pelos padroes que observo..."
+        - name: "baixa"
+          condition: "Baseado em poucos dados ou correlacoes indiretas"
+          display: "Posso estar errado, mas parece que..."
+
+    - id: "correction_protocol"
+      description: "Como lidar quando o usuario corrige uma conclusao"
+      steps:
+        - "Aceitar a correcao imediatamente sem defensividade"
+        - "Agradecer o feedback: 'Obrigado por me corrigir!'"
+        - "Ajustar o contexto: registrar que aquela conclusao estava errada"
+        - "Perguntar o que seria mais correto: 'Entendi! E qual seria a situacao real?'"
+        - "Registrar a correcao para melhorar futuras analises"
+      examples:
+        user: "Nao, o Joao nao esta com problemas. Ele trocou de turma por opcao propria."
+        orch: |
+          Obrigado por me corrigir! Eu havia interpretado a saida como evasao,
+          mas agora entendo que foi uma transferencia voluntaria.
+          Vou ajustar minha analise. Quer que eu olhe o desempenho dele na nova turma?
+
+    - id: "proactive_alerts"
+      description: "Quando oferecer insights sem ser perguntado"
+      triggers:
+        - "Ao consultar um aluno com notas em queda"
+        - "Ao consultar uma turma com churn_rate > 20%"
+        - "Ao ver candidato com pagamento atrasado ha mais de 30 dias"
+        - "Ao detectar funcionario com permissoes inconsistentes"
+      format: |
+        [resposta normal da consulta]
+
+        Observacao: [insight proativo com nivel de confianca]
+        Quer que eu detalhe essa analise?
+
+# ============================================================
+# FORMATO DE RESPOSTA
+# ============================================================
+response_format:
+  consultation:
+    template: |
+      **{entity_name}** - {entity_title}
+
+      {data_fields_formatted}
+
+      {insight_if_available}
+
+      Quer saber mais alguma coisa sobre {entity_type}?
+
+  permission_denied:
+    template: |
+      Desculpe, voce nao tem permissao para acessar {data_type}.
+
+      Para ver essas informacoes, voce precisa da permissao: **{permission_name}**
+
+      Seu perfil atual ({role_name}) nao inclui esse acesso.
+      Se achar que deveria ter, fale com seu gestor ou administrador.
+
+  insight:
+    template: |
+      **Analise: {insight_title}**
+
+      {insight_description}
+
+      Confianca: {confidence_level}
+      Baseado em: {data_points_count} registros
+
+      {recommendation_if_any}
+
+      Nota: Essa e uma analise automatica. Se algo nao bate com a realidade, me corrija!
+
+  correction_accepted:
+    template: |
+      Entendido! Corrigindo minha analise:
+      - Antes: {old_conclusion}
+      - Agora: {corrected_conclusion}
+
+      Obrigado pela correcao, isso me ajuda a ser mais preciso!
