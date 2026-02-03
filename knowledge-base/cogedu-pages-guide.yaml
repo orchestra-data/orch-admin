@@ -1,0 +1,1008 @@
+# ============================================================================
+# COGEDU SYSTEM - COMPLETE PAGES KNOWLEDGE BASE
+# ============================================================================
+# Agent: Orch (Page Guide) v2.0
+# Purpose: RAG knowledge base for contextual page assistance
+# Generated: 2026-02-03
+# Source: Full code analysis of cogedu-main codebase
+# ============================================================================
+
+metadata:
+  system_name: "Cogedu - Sistema de Gestao Educacional"
+  version: "3.10.0"
+  tech_stack:
+    frontend: "React 19 + TypeScript + Vite"
+    ui_library: "Radix UI + Tailwind CSS"
+    state: "Zustand + React Query"
+    routing: "React Router v7"
+    validation: "Zod"
+    auth: "Keycloak"
+  total_pages: 45
+  total_modules: 8
+
+# ============================================================================
+# MODULE 1: ADMISSION (Processo Seletivo)
+# ============================================================================
+admission_module:
+  base_route: "/educational/admission"
+  description: "Gerenciamento completo de processos seletivos, ofertas, candidatos e inscricoes"
+
+  pages:
+    # --- ADMISSIONS LIST ---
+    admissions_list:
+      url_pattern: "/educational/admission"
+      page_name: "Lista de Processos Seletivos"
+      description: "Tela principal com todos os processos seletivos cadastrados. Permite buscar, filtrar por status e visualizar metricas."
+
+      filters:
+        - name: "Busca"
+          type: "text"
+          placeholder: "Buscar admissoes..."
+          fields_searched: ["name", "code", "description"]
+        - name: "Status"
+          type: "select"
+          options:
+            - { value: "all", label: "Todos" }
+            - { value: "draft", label: "Rascunho" }
+            - { value: "active", label: "Ativas" }
+            - { value: "closed", label: "Encerradas" }
+
+      columns:
+        - { field: "name", label: "Nome", type: "text" }
+        - { field: "code", label: "Codigo", type: "text" }
+        - { field: "status", label: "Status", type: "badge", options: ["Ativa", "Rascunho", "Encerrada"] }
+        - { field: "totalCandidates", label: "Total Candidatos", type: "number" }
+        - { field: "totalApproved", label: "Aprovados", type: "number" }
+        - { field: "totalRejected", label: "Reprovados", type: "number" }
+        - { field: "approvalRate", label: "Taxa de Aprovacao", type: "percentage" }
+
+      actions:
+        - { name: "Nova Admissao", type: "button", destination: "/educational/admission/new", reversible: false }
+        - { name: "Ver Admissao", type: "card_click", destination: "/educational/admission/{id}", reversible: false }
+
+    # --- ADMISSION CREATE ---
+    admission_create:
+      url_pattern: "/educational/admission/new"
+      page_name: "Criar Processo Seletivo"
+      description: "Formulario para criar um novo processo seletivo com dados basicos, modo de matricula, turmas e datas."
+
+      fields:
+        - name: "companyId"
+          label: "Empresa"
+          type: "select"
+          required: true
+          placeholder: "Selecione uma empresa"
+          options_source: "API - lista de empresas"
+
+        - name: "name"
+          label: "Nome"
+          type: "text"
+          required: true
+          placeholder: "ex: Processo Seletivo 2025.1"
+          validation: "Obrigatorio"
+
+        - name: "description"
+          label: "Descricao"
+          type: "textarea"
+          required: false
+          rows: 4
+          placeholder: "Descreva o processo de admissao..."
+
+        - name: "enrollmentMode"
+          label: "Modo de Matricula"
+          type: "enum_selector"
+          required: true
+          options:
+            - { value: "single_inherited", label: "Matricula Unica", description: "Todos os candidatos sao matriculados em uma mesma turma" }
+            - { value: "multiple_choice", label: "Escolha Multipla", description: "Candidatos escolhem sua turma entre varias opcoes" }
+
+        - name: "classInstanceId"
+          label: "Turma"
+          type: "select"
+          required: true
+          condition: "enrollmentMode == single_inherited"
+          placeholder: "Selecione uma turma"
+          help: "Candidatos aprovados serao automaticamente matriculados nesta turma."
+
+        - name: "classInstanceIds"
+          label: "Turmas Disponiveis"
+          type: "multi_select_list"
+          required: true
+          condition: "enrollmentMode == multiple_choice"
+          min_items: 2
+          help: "Candidatos poderao ordenar suas preferencias de turma."
+
+        - name: "registrationStartDate"
+          label: "Inicio das Inscricoes"
+          type: "datetime-local"
+          required: false
+
+        - name: "registrationEndDate"
+          label: "Termino das Inscricoes"
+          type: "datetime-local"
+          required: false
+          validation: "Deve ser posterior a data de inicio"
+
+        - name: "resultReleaseDate"
+          label: "Divulgacao do Resultado"
+          type: "datetime-local"
+          required: false
+          validation: "Deve ser posterior ao termino das inscricoes"
+
+        - name: "allowMultipleApplications"
+          label: "Permitir multiplas candidaturas"
+          type: "checkbox"
+          required: false
+
+        - name: "requirePayment"
+          label: "Requer pagamento"
+          type: "checkbox"
+          required: false
+
+      actions:
+        - { name: "Criar Admissao", type: "submit", reversible: false }
+        - { name: "Cancelar", type: "cancel", destination: "/educational/admission", reversible: true }
+
+    # --- ADMISSION DETAIL ---
+    admission_detail:
+      url_pattern: "/educational/admission/{id}"
+      page_name: "Detalhes do Processo Seletivo"
+      description: "Visualizacao completa com metricas, datas, configuracoes e lista de ofertas vinculadas."
+
+      display_sections:
+        - "Nome, Status, Descricao"
+        - "Metricas: Total Candidatos, Aprovados, Reprovados, Taxa"
+        - "Info: Codigo, Empresa, Datas de inicio/termino/resultado"
+        - "Configuracoes: Multiplas candidaturas, Pagamento"
+        - "Lista de Ofertas vinculadas"
+
+      actions:
+        - { name: "Editar", icon: "Edit", destination: "/educational/admission/{id}/edit", reversible: false }
+        - { name: "Excluir", icon: "Trash2", type: "delete_confirmation", reversible: false }
+        - { name: "Publicar", icon: "Rocket", condition: "status == draft", reversible: false }
+        - { name: "Adicionar Oferta", icon: "Plus", destination: "/educational/admission/{id}/offers/new", reversible: false }
+
+    # --- ADMISSION EDIT ---
+    admission_edit:
+      url_pattern: "/educational/admission/{id}/edit"
+      page_name: "Editar Processo Seletivo"
+      description: "Formulario para editar nome, descricao, datas e configuracoes de um processo seletivo existente."
+      fields: "Mesmos do Create, exceto companyId (nao editavel)"
+
+    # --- OFFER CREATE ---
+    offer_create:
+      url_pattern: "/educational/admission/{admissionId}/offers/new"
+      page_name: "Criar Oferta"
+      description: "Formulario para criar uma nova oferta dentro de um processo seletivo."
+
+      fields:
+        - name: "name"
+          label: "Nome da Oferta"
+          type: "text"
+          required: true
+          placeholder: "Ex: Oferta 2025.1 - Graduacao"
+
+        - name: "description"
+          label: "Descricao"
+          type: "textarea"
+          required: false
+
+        - name: "offerType"
+          label: "Tipo de Oferta"
+          type: "text"
+          required: false
+          placeholder: "Ex: Regular, Vestibular, ENEM"
+
+        - name: "admissionFee"
+          label: "Taxa de Inscricao (R$)"
+          type: "number"
+          required: false
+          min: 0
+          step: 0.01
+
+        - name: "discountPercentage"
+          label: "Desconto (%)"
+          type: "number"
+          required: false
+          min: 0
+          max: 100
+
+        - name: "vacancyTotal"
+          label: "Vagas Totais"
+          type: "number"
+          required: false
+
+        - name: "vacancyReserved"
+          label: "Vagas Reservadas"
+          type: "number"
+          required: false
+
+        - name: "pipelineStages"
+          label: "Etapas do Pipeline"
+          type: "checkbox_group"
+          required: true
+          options:
+            - { id: "inscricao", label: "Inscricao" }
+            - { id: "documentacao", label: "Documentacao" }
+            - { id: "avaliacao", label: "Avaliacao" }
+            - { id: "pagamento", label: "Pagamento" }
+            - { id: "contrato", label: "Contrato" }
+            - { id: "resultado", label: "Resultado" }
+
+      modals:
+        - name: "StepConfigModal"
+          trigger: "Configurar etapas da oferta"
+          purpose: "Configurar passos do formulario de inscricao"
+        - name: "ContractSignatureModal"
+          trigger: "Definir contrato da oferta"
+          purpose: "Capturar assinatura de contrato"
+
+    # --- OFFER DETAIL / EDIT ---
+    offer_detail:
+      url_pattern: "/educational/admission/offers/{offerId}"
+      page_name: "Detalhes da Oferta"
+      description: "Visualizacao de detalhes da oferta, link publico, metricas e configuracao do formulario."
+      actions:
+        - { name: "Editar", destination: "/educational/admission/offers/{offerId}/edit" }
+        - { name: "Excluir", type: "delete_confirmation" }
+        - { name: "Editar Formulario", destination: "/educational/admission/offers/{offerId}/form-builder" }
+
+    # --- FORM BUILDER ---
+    form_builder:
+      url_pattern: "/educational/admission/offers/{offerId}/form-builder"
+      page_name: "Construtor de Formulario"
+      description: "Construtor visual de formularios de inscricao com drag-and-drop. Permite criar etapas e adicionar campos personalizados."
+
+      component_types:
+        - { id: "dados-pessoais", name: "Dados Pessoais", description: "Etapa fixa com informacoes pessoais" }
+        - { id: "campos", name: "Campos Customizados", description: "Campos texto, email, telefone, select" }
+        - { id: "documentos", name: "Documentos", description: "Upload de documentos" }
+        - { id: "pagamento", name: "Pagamento", description: "Processamento de pagamento" }
+        - { id: "avaliacao", name: "Avaliacao", description: "Etapa de avaliacao/teste" }
+        - { id: "contrato", name: "Contrato", description: "Assinatura de contrato" }
+
+      field_types: ["text", "email", "phone", "cpf", "date", "textarea", "select", "file", "checkbox", "contract"]
+
+    # --- CANDIDATES LIST ---
+    candidates_list:
+      url_pattern: "/educational/admission/candidates"
+      page_name: "Lista de Candidatos"
+      description: "Lista todos os candidatos com filtros por admissao, oferta e status. Inclui drawer lateral com detalhes."
+
+      filters:
+        - { name: "Busca", type: "text", placeholder: "Buscar por nome, email ou CPF..." }
+        - { name: "Admissao", type: "select", options_source: "API" }
+        - { name: "Oferta", type: "select", options_source: "API" }
+        - { name: "Status", type: "select", options: ["all", "em_andamento", "aprovado", "reprovado", "cancelado"] }
+
+      status_cards:
+        - { label: "Em Andamento", icon: "Clock", color: "blue" }
+        - { label: "Aprovados", icon: "CheckCircle2", color: "green" }
+        - { label: "Reprovados", icon: "XCircle", color: "red" }
+        - { label: "Cancelados", icon: "XCircle", color: "gray" }
+
+      modals:
+        - name: "Drawer de Detalhes do Candidato"
+          trigger: "Clicar no card do candidato"
+          tabs: ["Linha do Tempo", "Documentos", "Notas"]
+
+    # --- CANDIDATES KANBAN ---
+    candidates_kanban:
+      url_pattern: "/educational/admission/candidates/kanban"
+      page_name: "Kanban de Candidatos"
+      description: "Visualizacao kanban dos candidatos por etapa do pipeline. Suporta drag-and-drop para mover candidatos entre etapas."
+
+      columns:
+        - { id: "inscricao", name: "Inscricao" }
+        - { id: "documentacao", name: "Documentacao" }
+        - { id: "avaliacao", name: "Avaliacao" }
+        - { id: "pagamento", name: "Pagamento" }
+        - { id: "contrato", name: "Contrato" }
+        - { id: "resultado", name: "Resultado" }
+
+    # --- CANDIDATE DETAIL ---
+    candidate_detail:
+      url_pattern: "/educational/admission/candidates/{candidateId}"
+      page_name: "Detalhes do Candidato"
+      description: "Pagina completa com dados pessoais, info da oferta, preferencias de turma, resultados de avaliacao, documentos, contratos e notas."
+
+      modals:
+        - name: "Modal de Aprovacao"
+          trigger: "Botao Aprovar"
+          fields:
+            - { name: "evaluationScore", label: "Nota (0-100)", type: "number", required: true }
+            - { name: "evaluationNotes", label: "Observacoes", type: "textarea", required: false }
+        - name: "Modal de Revisao de Documento"
+          trigger: "Rejeitar ou solicitar reenvio de documento"
+          fields:
+            - { name: "reviewNotes", label: "Motivo", type: "textarea", required: true }
+
+    # --- PUBLIC APPLICATION ---
+    public_application:
+      url_pattern: "/apply/{offerId}"
+      page_name: "Formulario de Inscricao (Publico)"
+      description: "Formulario publico multi-etapas para candidatos se inscreverem. Nao requer autenticacao."
+      access: "publico"
+
+      default_fields:
+        - { name: "fullName", label: "Nome Completo", type: "text", required: true }
+        - { name: "cpf", label: "CPF", type: "cpf", required: true, format: "000.000.000-00" }
+        - { name: "email", label: "E-mail", type: "email", required: true }
+        - { name: "phone", label: "Telefone", type: "phone", required: false, format: "(00) 00000-0000" }
+        - { name: "birthDate", label: "Data de Nascimento", type: "date", required: false }
+
+    # --- APPLICATION STATUS ---
+    public_application_status:
+      url_pattern: "/application/status/{accessToken}"
+      page_name: "Status da Inscricao (Publico)"
+      description: "Pagina publica para acompanhar o status da inscricao, documentos e contrato."
+      access: "publico (token de acesso)"
+
+# ============================================================================
+# MODULE 2: EDUCATIONAL CONTENT (Conteudo Educacional)
+# ============================================================================
+educational_module:
+  base_route: "/educational"
+  description: "Gerenciamento de conteudo educacional: colecoes, trilhas, series, unidades e componentes"
+
+  pages:
+    # --- COLLECTIONS ---
+    collections_list:
+      url_pattern: "/educational/collections"
+      page_name: "Lista de Colecoes"
+      description: "Lista todas as colecoes de conteudo com filtros de busca, status e marketplace."
+
+      filters:
+        - { name: "Busca", type: "text", fields: ["title", "description", "sku"] }
+        - { name: "Status", type: "select", options: ["all", "draft", "published", "archived"] }
+        - { name: "Marketplace", type: "select", options: ["all", "marketplace", "private"] }
+
+    collections_create:
+      url_pattern: "/educational/collections/new"
+      page_name: "Criar Colecao"
+      description: "Formulario para criar nova colecao com metadados, imagens e configuracao de marketplace."
+
+      fields:
+        - { name: "companyId", label: "Empresa", type: "select", required: true }
+        - { name: "title", label: "Titulo", type: "text", required: true }
+        - { name: "description", label: "Descricao", type: "textarea", required: false }
+        - name: "sku"
+          label: "SKU"
+          type: "text"
+          required: true
+          placeholder: "ex: COLL-001"
+          transform: "toUpperCase"
+          validation: "Min 3 chars, formato: A-Z0-9-"
+        - { name: "status", label: "Status", type: "select", options: ["draft", "published", "archived"], default: "draft" }
+        - { name: "isOfferable", label: "Disponivel no marketplace", type: "checkbox", default: true }
+        - { name: "thumbnailUrl", label: "Thumbnail", type: "image_upload", max_size: "5MB" }
+        - { name: "bannerUrl", label: "Banner", type: "image_upload", max_size: "5MB" }
+
+    collections_detail:
+      url_pattern: "/educational/collections/{collectionId}"
+      page_name: "Detalhes da Colecao"
+      description: "Detalhes da colecao com metadados, trilhas vinculadas (reordenaveis por drag-and-drop)."
+      actions:
+        - { name: "Publicar", condition: "status == draft" }
+        - { name: "Editar" }
+        - { name: "Excluir", type: "delete_confirmation" }
+        - { name: "Adicionar Trilha", destination: "/pathways/new?collectionId={id}" }
+
+    # --- PATHWAYS ---
+    pathways_create:
+      url_pattern: "/educational/pathways/new"
+      page_name: "Criar Trilha"
+      description: "Formulario para criar trilha de aprendizagem vinculada a colecoes."
+
+      fields:
+        - { name: "collectionIds", label: "Colecoes", type: "multi_select", required: true }
+        - { name: "title", label: "Titulo", type: "text", required: true }
+        - { name: "objective", label: "Objetivo", type: "textarea", required: false }
+        - { name: "sku", label: "SKU", type: "text", required: true, transform: "toUpperCase" }
+        - name: "progressionRule"
+          label: "Regra de Progressao"
+          type: "select"
+          options:
+            - { value: "flexible", label: "Flexivel (qualquer ordem)" }
+            - { value: "linear", label: "Linear (sequencial)" }
+        - { name: "max_progress_percentage_for_late_enrollment", label: "Max % para matricula tardia", type: "number", min: 0, max: 100 }
+        - { name: "alert_percentage", label: "% de Alerta (Checkpoint)", type: "number", min: 0, max: 100 }
+        - { name: "payment_status_check", label: "Checar pagamento", type: "checkbox" }
+        - { name: "attendance_check", label: "Checar presenca", type: "checkbox" }
+        - { name: "grade_check", label: "Checar nota", type: "checkbox" }
+        - { name: "status", label: "Status", type: "select", options: ["published", "draft", "archived"] }
+
+    # --- SERIES ---
+    series_create:
+      url_pattern: "/educational/series/new"
+      page_name: "Criar Serie"
+      description: "Formulario para criar serie de conteudo vinculada a trilhas."
+
+      fields:
+        - { name: "pathwayIds", label: "Trilhas", type: "multi_select", required: false }
+        - { name: "companyId", label: "Empresa", type: "select", required: true, condition: "pathwayIds vazio" }
+        - { name: "title", label: "Titulo", type: "text", required: true, min: 3 }
+        - { name: "objective", label: "Objetivo", type: "textarea", required: false }
+        - { name: "sku", label: "SKU", type: "text", required: true, max: 50 }
+        - { name: "workloadHours", label: "Carga Horaria", type: "number", min: 0 }
+        - { name: "thumbnailUrl", label: "Thumbnail", type: "image_upload" }
+        - { name: "bannerUrl", label: "Banner", type: "image_upload" }
+        - { name: "minAttendancePercentage", label: "Presenca Minima %", type: "number", min: 0, max: 100 }
+        - { name: "minFinalGrade", label: "Nota Minima", type: "number", min: 0, max: 10 }
+        - { name: "status", label: "Status", type: "select", options: ["published", "draft", "archived"] }
+
+    # --- UNITS ---
+    units_create:
+      url_pattern: "/educational/units/new"
+      page_name: "Criar Unidade"
+      description: "Formulario para criar unidade de aprendizagem com condicoes de liberacao."
+
+      fields:
+        - { name: "seriesIds", label: "Series", type: "multi_select", required: true }
+        - { name: "title", label: "Titulo", type: "text", required: true, min: 3 }
+        - { name: "description", label: "Descricao", type: "textarea", required: false }
+        - { name: "sequenceOrder", label: "Ordem", type: "number", required: true, min: 1 }
+        - name: "releaseType"
+          label: "Condicao de Liberacao"
+          type: "radio_group"
+          options:
+            - { value: "always_available", label: "Sempre Disponivel" }
+            - value: "scheduled"
+              label: "Agendada"
+              conditional_fields:
+                - { name: "scheduledDatetime", type: "datetime-local", required: true }
+            - value: "relative"
+              label: "Relativa"
+              conditional_fields:
+                - { name: "relativeQuantity", type: "number", min: 1 }
+                - { name: "relativeUnit", type: "select", options: ["hours", "days", "weeks"] }
+                - name: "relativeAnchor"
+                  type: "select"
+                  options:
+                    - { value: "enrollment", label: "Matricula do Aluno" }
+                    - { value: "series_start", label: "Inicio da Serie" }
+                    - { value: "previous_unit_completion", label: "Conclusao da Unidade Anterior" }
+                    - { value: "previous_component_completion", label: "Conclusao do Componente Anterior" }
+
+    # --- COMPONENT BUILDER ---
+    component_builder:
+      url_pattern: "/educational/units/{unitId}/builder"
+      page_name: "Builder de Componentes"
+      description: "Editor visual drag-and-drop para arranjar e configurar componentes de conteudo dentro de uma unidade."
+
+      layout:
+        - "Sidebar esquerda: Templates arrastáveis"
+        - "Centro: Canvas (area de drop)"
+        - "Painel direito: ConfigPanel (ao selecionar componente)"
+
+      component_types:
+        - { value: "video", label: "Video/Streaming" }
+        - { value: "text", label: "Texto/Leitura" }
+        - { value: "quiz", label: "Quiz/Avaliacao" }
+        - { value: "formative_assessment", label: "Avaliacao Formativa" }
+        - { value: "summative_assessment", label: "Avaliacao Somativa" }
+        - { value: "assignment", label: "Atividade" }
+        - { value: "discussion", label: "Discussao" }
+        - { value: "link", label: "Link Externo" }
+        - { value: "file", label: "Arquivo/Recurso" }
+        - { value: "interactive", label: "Atividade Interativa" }
+        - { value: "live_session", label: "Sessao ao Vivo" }
+
+      config_panel_fields:
+        - { name: "title", label: "Titulo", type: "text" }
+        - { name: "description", label: "Descricao", type: "textarea" }
+
+      feature_flags:
+        - { name: "enableXapiTracking", label: "Rastreamento xAPI" }
+        - { name: "enableAiFeatures", label: "Recursos de IA" }
+        - { name: "enableAnnotations", label: "Anotacoes" }
+        - { name: "enableAiQa", label: "Assistente IA Q&A" }
+        - { name: "groupWorkEnabled", label: "Trabalho em Grupo" }
+        - { name: "discussionEnabled", label: "Grupos de Discussao" }
+        - { name: "proctoringEnabled", label: "Proctoring" }
+        - { name: "antiPlagiarismEnabled", label: "Anti-Plagio" }
+
+      video_providers: ["youtube", "vimeo", "wistia", "smartplayer", "zoom", "teams", "meet"]
+
+    # --- CLASS INSTANCES ---
+    class_instances_create:
+      url_pattern: "/educational/class-instances/new"
+      page_name: "Criar Turma"
+      description: "Formulario em 3 secoes para criar turma vinculada a colecao ou serie."
+
+      fields:
+        - name: "institution"
+          label: "Instituicao"
+          type: "select"
+          required: true
+
+        - name: "contentType"
+          label: "Tipo de Conteudo"
+          type: "select"
+          required: true
+          options:
+            - { value: "collection", label: "Colecao" }
+            - { value: "series", label: "Serie" }
+
+        - { name: "contentId", label: "Colecao/Serie", type: "select", required: true }
+
+        - { name: "startDate", label: "Data de Inicio", type: "date", required: true }
+
+        - name: "scheduleType"
+          label: "Turno"
+          type: "select"
+          required: true
+          options:
+            - { value: "morning", label: "Matutino" }
+            - { value: "afternoon", label: "Vespertino" }
+            - { value: "evening", label: "Noturno" }
+            - { value: "full_time", label: "Integral" }
+            - { value: "flexible", label: "Flexivel" }
+            - { value: "weekend", label: "Final de Semana" }
+
+        - { name: "maxStudents", label: "Max Alunos", type: "number" }
+
+        - name: "deliveryMode"
+          label: "Modalidade"
+          type: "select"
+          options:
+            - { value: "in_person", label: "Presencial" }
+            - { value: "online", label: "Online" }
+            - { value: "hybrid", label: "Hibrido" }
+
+        - name: "status"
+          label: "Status"
+          type: "select"
+          options: ["active", "inactive", "completed", "cancelled"]
+          default: "active"
+
+        - { name: "endDate", label: "Data de Termino", type: "date", help: "Auto-calculada para colecoes" }
+
+        - name: "certificateIssuerType"
+          label: "Emissor do Certificado"
+          type: "select"
+          options:
+            - { value: "tenant", label: "Tenant (Matriz)" }
+            - { value: "unit", label: "Instituicao (Unidade)" }
+
+        - { name: "code", label: "Codigo da Turma", type: "text", disabled: true, help: "Gerado automaticamente" }
+        - { name: "name", label: "Nome da Turma", type: "text", required: true }
+        - { name: "classType", label: "Tipo da Turma", type: "text", placeholder: "Ex: Regular, Intensivo" }
+
+# ============================================================================
+# MODULE 3: EXAMS/ASSESSMENTS (Avaliacoes)
+# ============================================================================
+exams_module:
+  base_route: "/educational/exams"
+  description: "Gerenciamento de avaliacoes, banco de questoes, rubricas e correcao"
+
+  pages:
+    # --- QUESTION BANK ---
+    question_bank:
+      url_pattern: "/educational/exams/bank"
+      page_name: "Banco de Questoes"
+      description: "Repositorio central de questoes reutilizaveis com filtros avancados, criacao manual e geracao por IA."
+
+      filters:
+        - { name: "Busca", type: "text", placeholder: "Buscar por titulo, materia, topico ou tags..." }
+        - name: "Dificuldade"
+          type: "select"
+          options: ["all:Todas", "easy:Facil", "medium:Medio", "hard:Dificil"]
+        - name: "Tipo"
+          type: "select"
+          options:
+            - { value: "all", label: "Todos" }
+            - { value: "multipla_escolha", label: "Multipla Escolha" }
+            - { value: "verdadeiro_falso", label: "Verdadeiro/Falso" }
+            - { value: "dissertativa", label: "Dissertativa" }
+            - { value: "associacao", label: "Associacao" }
+            - { value: "ordenacao", label: "Ordenacao" }
+            - { value: "oral", label: "Oral" }
+            - { value: "mista", label: "Mista" }
+        - { name: "Tags", type: "multi_select" }
+
+      actions:
+        - { name: "Nova Questao", icon: "Plus", type: "modal" }
+        - { name: "IA", icon: "Bot", type: "modal", description: "Gerar questoes com IA" }
+
+      modals:
+        question_create_modal:
+          name: "Criar/Editar Questao"
+          fields:
+            - { name: "questionText", label: "Enunciado", type: "textarea", required: true, placeholder: "Digite o enunciado da questao..." }
+            - name: "questionType"
+              label: "Tipo"
+              type: "select"
+              required: true
+              default: "multipla_escolha"
+              options: ["multipla_escolha", "verdadeiro_falso", "dissertativa", "associacao"]
+            - { name: "difficulty", label: "Dificuldade", type: "select", options: ["easy", "medium", "hard"] }
+            - { name: "points", label: "Pontos", type: "number", min: 0, default: 1 }
+            - { name: "attachments", label: "Anexar Arquivos", type: "file_upload", accept: "image/*,.pdf", max: "10MB" }
+            - name: "alternatives"
+              label: "Alternativas"
+              type: "dynamic_array"
+              min_items: 2
+              fields_per_item:
+                - { name: "text", type: "text", placeholder: "Alternativa X" }
+                - { name: "weight", label: "Valor", type: "number" }
+                - { name: "isCorrect", label: "Correta", type: "checkbox" }
+            - { name: "tags", label: "Tags", type: "tag_input", placeholder: "Digite e pressione Enter" }
+            - { name: "justification", label: "Justificativa", type: "textarea" }
+            - { name: "bncc", label: "BNCC", type: "text", placeholder: "Ex: EM13MAT301" }
+            - { name: "mufa", label: "MUFA", type: "text", placeholder: "Ex: C2.1" }
+
+        question_ai_modal:
+          name: "Gerar Questoes com IA"
+          warning: "A IA nao e 100% confiavel. Valide todas as questoes antes de usar."
+          fields:
+            - { name: "context", label: "Contexto", type: "text/textarea", required: true }
+            - { name: "difficulty", label: "Dificuldade", type: "slider", options: ["easy", "medium", "hard"] }
+            - { name: "quantity", label: "Quantidade (max 3)", type: "number", min: 1, max: 3 }
+            - { name: "tags", label: "Tags", type: "tag_input" }
+
+    # --- ASSESSMENT BUILDER ---
+    assessment_builder:
+      url_pattern: "/educational/exams/builder"
+      page_name: "Construtor de Avaliacoes"
+      description: "Criar e gerenciar avaliacoes compostas por questoes do banco. Suporta modo automatico (por tags e proporcao) e manual."
+
+      modals:
+        create_assessment_modal:
+          name: "Criar Avaliacao"
+          fields:
+            - { name: "name", label: "Nome", type: "text", required: true, placeholder: "Ex: Avaliacao de Matematica - Modulo 1" }
+            - { name: "description", label: "Descricao", type: "textarea" }
+            - { name: "useQuestionBank", label: "Usar Banco de Questoes", type: "toggle", description: "Selecao automatica por tags" }
+            - { name: "selectedTags", label: "Tags", type: "popover_select", condition: "useQuestionBank == true" }
+            - { name: "questionCount", label: "Qtd Questoes", type: "number", min: 1, max: 100, condition: "useQuestionBank == true" }
+            - { name: "useTRI", label: "Usar TRI", type: "toggle", description: "Teoria de Resposta ao Item" }
+            - { name: "difficultyLevel", label: "Proporcao Dificuldade", type: "slider", min: 0, max: 100 }
+            - { name: "questionTypeLevel", label: "Proporcao Tipo", type: "slider", min: 0, max: 100, labels: ["Multipla Escolha", "Dissertativas"] }
+
+    # --- RUBRICS ---
+    rubrics_list:
+      url_pattern: "/educational/exams/rubrics"
+      page_name: "Lista de Rubricas"
+      description: "Gerenciamento de rubricas de avaliacao com criterios e niveis de desempenho."
+
+    # --- TUTOR GRADING ---
+    tutor_assessments:
+      url_pattern: "/educational/exams/your-evaluations"
+      page_name: "Suas Avaliacoes (Tutor)"
+      description: "Lista de tentativas de alunos aguardando correcao. Filtros por status, empresa, colecao, serie."
+
+      filters:
+        - { name: "Status", type: "select", options: ["all", "submitted:Aguardando Correcao", "graded:Corrigido", "in_progress:Em Progresso", "cancelled:Cancelado"] }
+        - { name: "Tipo", type: "select", options: ["all", "false:Apenas Avaliacoes", "true:Apenas Comprovantes"] }
+        - { name: "Empresa", type: "select", options_source: "API" }
+        - { name: "Colecao", type: "select", options_source: "API" }
+        - { name: "Serie", type: "select", options_source: "API" }
+
+    assessment_grading:
+      url_pattern: "/educational/exams/your-evaluations/assessments/{attemptId}"
+      page_name: "Correcao de Avaliacao"
+      description: "Tela de correcao individual. Mostra cada questao com resposta do aluno, permite dar nota e feedback."
+
+      per_question_fields:
+        - { name: "isCorrect", label: "Considerar Correta", type: "checkbox" }
+        - { name: "score", label: "Nota", type: "number", max: "valor da questao" }
+        - { name: "questionFeedback", label: "Feedback", type: "textarea" }
+
+      finish_modal:
+        fields:
+          - { name: "finalScore", label: "Nota Final", type: "number" }
+          - { name: "generalFeedback", label: "Feedback Geral", type: "textarea" }
+
+    # --- OTHER EXAM PAGES ---
+    blockly_games:
+      url_pattern: "/educational/exams/blockly-games"
+      page_name: "Jogos Blockly"
+      description: "Lista de jogos de programacao visual para exercicios interativos."
+
+    proctoring:
+      url_pattern: "/educational/exams/proctoring"
+      page_name: "Proctoring"
+      description: "Monitoramento de provas online com webcam e gravacao de tela."
+
+# ============================================================================
+# MODULE 4: USERS (Usuarios)
+# ============================================================================
+users_module:
+  base_route: "/users"
+  description: "Gerenciamento de usuarios (funcionarios e alunos)"
+
+  pages:
+    users_list:
+      url_pattern: "/users"
+      page_name: "Lista de Usuarios"
+      description: "Lista todos os usuarios com abas para funcionarios e alunos. Busca por nome/email, paginacao."
+
+      filters:
+        - { name: "Tipo", type: "toggle", options: ["employee:Funcionarios", "student:Alunos"] }
+        - { name: "Busca", type: "text", placeholder: "Buscar por nome ou email" }
+
+      columns:
+        - { field: "fullName", label: "Nome" }
+        - { field: "email", label: "Email" }
+        - { field: "userType", label: "Tipo", values: ["student", "employee"] }
+        - { field: "status", label: "Status" }
+        - { field: "primaryDocument", label: "CPF" }
+        - { field: "photoUrl", label: "Foto" }
+
+      actions:
+        - { name: "Novo Colaborador/Aluno", type: "navigation" }
+        - { name: "Import em Lote", icon: "FileUp", condition: "aba alunos" }
+        - { name: "Excluir", icon: "Trash2", type: "delete_confirmation" }
+
+    user_create:
+      url_pattern: "/users/new"
+      page_name: "Criar Usuario"
+      description: "Wizard multi-abas para criar usuario. Salva rascunho em localStorage."
+
+      tabs:
+        - tab: "Identidade"
+          fields:
+            - { name: "fullName", label: "Nome Completo", type: "text", required: true }
+            - { name: "socialName", label: "Nome Social", type: "text", required: false }
+            - name: "gender"
+              label: "Genero"
+              type: "select"
+              required: true
+              default: "other"
+              options: ["male:Masculino", "female:Feminino", "other:Outro"]
+            - { name: "email", label: "Email", type: "email", required: true }
+            - { name: "phone", label: "Telefone", type: "text", required: false }
+            - { name: "birthDate", label: "Data de Nascimento", type: "date", required: false }
+            - name: "primaryDocument"
+              label: "Documento Principal"
+              fields:
+                - { name: "type", label: "Tipo", type: "select", options: ["CPF", "CNPJ", "RG", "PASSAPORTE"] }
+                - { name: "value", label: "Numero", type: "text", validation: "CPF=11 digitos, CNPJ=14 digitos" }
+            - { name: "photoUrl", label: "Foto", type: "file_upload", accept: "image/*", max_size: "5MB" }
+
+        - tab: "Vinculo"
+          fields_employee:
+            - { name: "companyId", label: "Empresa", type: "select", required: true }
+            - { name: "roleTitle", label: "Cargo", type: "text", required: true }
+            - { name: "governanceLevel", label: "Nivel de Governanca", type: "select" }
+          fields_student:
+            - { name: "institutionId", label: "Instituicao", type: "select", required: true }
+            - { name: "courseName", label: "Curso", type: "text", required: true }
+
+        - tab: "Enderecos"
+          repeatable: true
+          fields:
+            - { name: "postalCode", label: "CEP", type: "text", format: "00000-000", action: "Busca automatica via ViaCEP" }
+            - { name: "state", label: "Estado", type: "text" }
+            - { name: "city", label: "Cidade", type: "text" }
+            - { name: "district", label: "Bairro", type: "text" }
+            - { name: "street", label: "Rua", type: "text" }
+            - { name: "number", label: "Numero", type: "text" }
+            - { name: "complement", label: "Complemento", type: "text" }
+
+        - tab: "Mais Informacoes"
+          description: "Campos customizaveis dinamicos"
+
+        - tab: "Permissoes"
+          condition: "apenas funcionarios"
+          description: "Configuracao de permissoes globais e por unidade"
+
+    user_detail:
+      url_pattern: "/users/{userId}"
+      page_name: "Detalhes do Usuario"
+      description: "Visualizacao e edicao de dados do usuario com edicao por blocos."
+
+      components:
+        - "ProfilePhotoCard - Foto do perfil"
+        - "ChangePasswordBlock - Troca de senha (proprio usuario)"
+        - "AdminActionsBlock - Acoes administrativas (reset de senha com auditoria)"
+
+      modals:
+        change_password_modal:
+          name: "Alterar Senha"
+          fields:
+            - { name: "currentPassword", label: "Senha Atual", type: "password", required: true }
+            - name: "newPassword"
+              label: "Nova Senha"
+              type: "password"
+              required: true
+              validation:
+                - "Minimo 8 caracteres"
+                - "Pelo menos 1 maiuscula"
+                - "Pelo menos 1 minuscula"
+                - "Pelo menos 1 numero"
+            - { name: "confirmPassword", label: "Confirmar Senha", type: "password", required: true, validation: "deve ser igual" }
+
+        admin_reset_password_modal:
+          name: "Reset de Senha (Admin)"
+          fields:
+            - { name: "justification", label: "Justificativa (min 10 chars)", type: "textarea", required: true }
+            - { name: "temporary", label: "Senha temporaria", type: "checkbox", default: true }
+            - { name: "notifyUser", label: "Notificar por email", type: "checkbox", default: true }
+          warning: "Esta acao requer justificativa e sera auditada"
+
+    batch_students:
+      url_pattern: "/users/batch-students"
+      page_name: "Upload em Lote de Alunos"
+      description: "Importar multiplos alunos via planilha Excel (.xlsx). Campos obrigatorios: Nome, Email, CPF, Instituicao."
+
+# ============================================================================
+# MODULE 5: COMPANIES (Empresas)
+# ============================================================================
+companies_module:
+  base_route: "/companies"
+  description: "Gerenciamento de empresas/instituicoes (multi-tenant)"
+
+  pages:
+    company_list:
+      url_pattern: "/companies"
+      page_name: "Lista de Empresas"
+      description: "Lista empresas internas e externas com busca e filtros."
+
+      filters:
+        - { name: "Grupo", type: "toggle", options: ["internal:Interna", "external:Externa"] }
+        - { name: "Busca", type: "text", fields: ["displayName", "legalName", "cnpj"] }
+
+      columns:
+        - { field: "displayName", label: "Nome" }
+        - { field: "registrationNumber", label: "CNPJ", format: "mascara CNPJ" }
+        - { field: "groupType", label: "Grupo" }
+        - { field: "institutionalType", label: "Tipo" }
+        - { field: "parentName", label: "Responsavel Legal" }
+        - { field: "isActive", label: "Status", values: ["Ativa", "Inativa"] }
+
+    company_create:
+      url_pattern: "/companies/new"
+      page_name: "Criar Empresa"
+      description: "Wizard multi-abas para cadastrar nova empresa."
+
+    company_detail:
+      url_pattern: "/companies/{companyId}"
+      page_name: "Detalhes da Empresa"
+      description: "Visualizacao e edicao de dados da empresa."
+
+# ============================================================================
+# MODULE 6: CERTIFICATION (Certificados)
+# ============================================================================
+certification_module:
+  base_route: "/educational/certificates"
+  description: "Gerenciamento de certificados, templates e documentos academicos"
+
+  pages:
+    certificate_list:
+      url_pattern: "/educational/certificates/issued"
+      page_name: "Certificados Emitidos"
+      description: "Lista de certificados emitidos com filtros por status."
+
+      filters:
+        - { name: "Status", type: "select", options: ["all", "issued:Emitido", "signed:Assinado", "revoked:Revogado", "expired:Expirado"] }
+        - { name: "Busca", type: "text", fields: ["student_name", "course_name", "validation_code"] }
+
+      stats:
+        - { label: "Total", color: "gray" }
+        - { label: "Emitidos", color: "green" }
+        - { label: "Assinados", color: "blue" }
+        - { label: "Revogados", color: "red" }
+
+    certificate_templates:
+      url_pattern: "/educational/certificates/templates"
+      page_name: "Templates de Certificado"
+      description: "Modelos de certificado editaveis."
+
+    certificate_documents:
+      url_pattern: "/educational/certificates/documents"
+      page_name: "Documentos Academicos"
+      description: "Gerenciamento de documentos academicos."
+
+    public_validation:
+      url_pattern: "/validate/{code}"
+      page_name: "Validar Certificado (Publico)"
+      description: "Validacao publica de certificados usando codigo de validacao."
+      access: "publico"
+
+# ============================================================================
+# MODULE 7: ADMIN/SETTINGS
+# ============================================================================
+admin_module:
+  description: "Paginas administrativas, dashboard e configuracoes"
+
+  pages:
+    home:
+      url_pattern: "/"
+      page_name: "Dashboard / Home"
+      description: "Pagina inicial com visao geral, metricas BI e acoes rapidas."
+
+    privacy_center:
+      url_pattern: "/privacy"
+      page_name: "Central de Privacidade"
+      description: "Gerenciamento de consentimentos e conformidade LGPD."
+
+    bi_dashboard:
+      url_pattern: "/bi"
+      page_name: "BI Dashboard"
+      description: "Dashboard de Business Intelligence com estatisticas do sistema."
+
+    zoom_integration:
+      url_pattern: "/integrations/zoom"
+      page_name: "Integracao Zoom"
+      description: "Guia passo-a-passo para configurar integracao com Zoom (webhook, OAuth, escopos)."
+
+# ============================================================================
+# MODULE 8: AUTH (Autenticacao)
+# ============================================================================
+auth_module:
+  description: "Paginas de autenticacao e acesso"
+
+  pages:
+    auth_register:
+      url_pattern: "/auth-register"
+      page_name: "Login/Registro"
+      fields:
+        - { name: "email", label: "Email", type: "email", required: true }
+        - { name: "name", label: "Nome", type: "text", required: true }
+
+    first_access:
+      url_pattern: "/primeiro-acesso"
+      page_name: "Primeiro Acesso"
+      description: "Redireciona para criacao de empresa ou home."
+
+    forgot_password:
+      url_pattern: "/password-forgot"
+      page_name: "Esqueci a Senha"
+      description: "Solicitar link de reset de senha por email."
+
+    reset_password:
+      url_pattern: "/password-reset"
+      page_name: "Redefinir Senha"
+      fields:
+        - name: "password"
+          label: "Nova Senha"
+          type: "password"
+          required: true
+          validation: "Min 8 chars, 1 maiuscula, 1 minuscula, 1 numero"
+        - { name: "confirmPassword", label: "Confirmar Senha", type: "password", required: true }
+
+    set_password:
+      url_pattern: "/set-password"
+      page_name: "Definir Senha"
+      description: "Definir senha inicial para novos usuarios."
+
+# ============================================================================
+# SHARED COMPONENTS (Componentes Compartilhados)
+# ============================================================================
+shared_components:
+  session_expired_modal:
+    trigger: "API retorna 401"
+    title: "Sessao Expirada"
+    message: "Sua sessao expirou por inatividade. Faca login novamente."
+    countdown: "10 segundos para redirecionar"
+
+  consent_modal:
+    trigger: "Primeiro acesso ou atualizacao de termos"
+    purpose: "Consentimento LGPD"
+
+  image_crop_modal:
+    trigger: "Upload de foto de perfil"
+    purpose: "Recortar imagem antes de salvar"
+
+# ============================================================================
+# ENUMS AND OPTIONS REFERENCE
+# ============================================================================
+enums:
+  status_options: ["draft:Rascunho", "published:Publicado", "archived:Arquivado"]
+  user_types: ["employee:Funcionario", "student:Aluno"]
+  user_status_employee: ["atual:Atual", "ex-colaborador:Ex-colaborador"]
+  user_status_student: ["ingresso:Ingresso", "egresso:Egresso", "evadido:Evadido", "trancado:Trancado"]
+  gender_options: ["male:Masculino", "female:Feminino", "other:Outro"]
+  document_types: ["CPF", "CNPJ", "RG", "PASSAPORTE"]
+  schedule_types: ["morning:Matutino", "afternoon:Vespertino", "evening:Noturno", "full_time:Integral", "flexible:Flexivel", "weekend:Final de Semana"]
+  delivery_modes: ["in_person:Presencial", "online:Online", "hybrid:Hibrido"]
+  class_status: ["active:Ativa", "inactive:Inativa", "completed:Concluida", "cancelled:Cancelada"]
+  enrollment_status: ["enrolled:Matriculado", "completed:Concluido", "dropped:Desistente", "suspended:Suspenso", "transferred:Transferido"]
+  candidate_status: ["em_andamento:Em Andamento", "aprovado:Aprovado", "reprovado:Reprovado", "cancelado:Cancelado"]
+  pipeline_stages: ["inscricao:Inscricao", "documentacao:Documentacao", "avaliacao:Avaliacao", "pagamento:Pagamento", "contrato:Contrato", "resultado:Resultado"]
+  difficulty_levels: ["easy:Facil", "medium:Medio", "hard:Dificil"]
+  question_types: ["multipla_escolha:Multipla Escolha", "verdadeiro_falso:Verdadeiro/Falso", "dissertativa:Dissertativa", "associacao:Associacao", "ordenacao:Ordenacao", "oral:Oral", "mista:Mista"]
+  certificate_status: ["issued:Emitido", "signed:Assinado", "revoked:Revogado", "expired:Expirado"]
+  enrollment_modes: ["single_inherited:Matricula Unica", "multiple_choice:Escolha Multipla"]
