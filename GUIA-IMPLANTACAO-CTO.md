@@ -60,11 +60,12 @@ O Orch e um **assistente inteligente embarcado** no sistema de gestao Cogedu. El
 |--------|-----------|--------|
 | Frontend (Widget) | React 19 + TypeScript | Chat embarcado no CommunicationHub |
 | Comunicacao | postMessage API | Bridge entre widget e DOM da pagina |
-| Backend | LLM API (GPT-4o-mini / Dify) | Processamento de linguagem natural |
-| RAG | Dify / LangChain / Custom | Busca semantica no knowledge base |
+| Backend | Dify (self-hosted) + GPT-4o-mini | Orquestracao RAG + LLM |
+| RAG | Dify Knowledge Base + pgvector | Busca semantica hibrida no knowledge base |
 | Knowledge Base | 14 arquivos YAML (604 KB) | Documentacao de paginas, campos, workflows |
-| Memoria | File system / Database | Logs de conversa persistentes |
+| Memoria | PostgreSQL (monolito Cogedu) | Logs de conversa persistentes |
 | CI/CD | GitHub Actions | Auto-update do knowledge base |
+| Hosting | Monolito (API Cogedu existente) | Endpoints /orch/* na mesma API |
 
 ---
 
@@ -92,26 +93,26 @@ O Orch e um **assistente inteligente embarcado** no sistema de gestao Cogedu. El
 +-------------------------------------------------------------------+
 |                        BACKEND (API)                               |
 |                                                                    |
-|  +------------------+    +------------------+   +---------------+  |
-|  |  Orch API        |    |  RAG Engine      |   |  LLM Provider |  |
-|  |  (Node.js)       |--->|  (Dify/Custom)   |-->|  (GPT-4o-mini)|  |
-|  |                  |    |                  |   |  fallback:    |  |
-|  |  - /chat         |    |  - search YAML   |   |  GPT-4o       |  |
-|  |  - /memory       |    |  - top_k: 5      |   |               |  |
-|  |  - /feedback     |    |  - threshold: 0.7 |   +---------------+  |
-|  |  - /alerts       |    +------------------+                      |
-|  |  - /analytics    |                                              |
-|  +------------------+    +------------------+                      |
-|                          |  Knowledge Base  |                      |
-|  +------------------+    |  (14 YAMLs)      |                      |
-|  |  Database        |    |  604 KB          |                      |
-|  |  (Postgres/Mongo)|    +------------------+                      |
-|  |                  |                                              |
-|  |  - conversations |    +------------------+                      |
-|  |  - user_memory   |    |  GitHub Actions  |                      |
-|  |  - feedback      |    |  (orch-update)   |                      |
-|  |  - analytics     |    |  auto-update     |                      |
-|  +------------------+    +------------------+                      |
+|  +---------------------------------------------------------------+  |
+|  |            MONOLITO COGEDU (API existente)                    |  |
+|  |                                                               |  |
+|  |  +------------------+   +------------------+  +------------+  |  |
+|  |  | Orch Endpoints   |   | Dify             |  | PostgreSQL |  |  |
+|  |  | (mesma API)      |-->| (self-hosted)    |  | (existente)|  |  |
+|  |  |                  |   |                  |  |            |  |  |
+|  |  | POST /orch/chat  |   | - RAG Engine     |  | - orch_*   |  |  |
+|  |  | POST /orch/ctx   |   | - Knowledge Base |  | - pgvector |  |  |
+|  |  | GET  /orch/mem   |   | - GPT-4o-mini    |  | - logs     |  |  |
+|  |  | POST /orch/fb    |   | - Embeddings     |  | - feedback |  |  |
+|  |  | GET  /orch/alert  |   | - top_k: 5      |  | - analytics|  |  |
+|  |  +------------------+   +------------------+  +------------+  |  |
+|  |                                                               |  |
+|  +---------------------------------------------------------------+  |
+|                                                                      |
+|  +------------------+                                                |
+|  |  GitHub Actions  |  (auto-update do knowledge base)               |
+|  |  orch-update.yml |                                                |
+|  +------------------+                                                |
 +-------------------------------------------------------------------+
 ```
 
@@ -194,8 +195,8 @@ ORCH ADMIN/                          # 1.7 MB total
 | **CommunicationHub** | `apps/web/src/components/communication-hub/` | Ja existe |
 | **Keycloak** | Autenticacao SSO com JWT multi-tenant | Ja existe |
 | **LLM API** | GPT-4o-mini (primario) + GPT-4o (fallback) | Contratar |
-| **RAG Engine** | Dify, LangChain, ou API custom com embedding | Escolher |
-| **Banco de dados** | PostgreSQL ou MongoDB (para logs e memoria) | Provisionar |
+| **Dify** (self-hosted) | Orquestracao RAG + LLM com UI de admin | Instalar |
+| **PostgreSQL + pgvector** | Banco existente do Cogedu + extensao pgvector | Ativar extensao |
 
 ### Opcionais (funcionalidades avancadas)
 
@@ -210,15 +211,86 @@ ORCH ADMIN/                          # 1.7 MB total
 
 ## 5. FASE 1: Preparar Backend (RAG + API)
 
-### Passo 1.1: Escolher plataforma RAG
+### Passo 1.1: Instalar Dify (self-hosted)
 
-| Opcao | Pros | Contras | Recomendacao |
-|-------|------|---------|-------------|
-| **Dify** (SaaS/Self-hosted) | Setup rapido, UI de admin, RAG built-in | Vendor lock-in, custo | Para comecar rapido |
-| **LangChain + Chroma** | Flexivel, open source | Requer dev backend | Para controle total |
-| **API Custom + pgvector** | Sem dependencias extras | Mais trabalho | Se ja tem Postgres |
+**Decisao tomada:** Dify self-hosted como plataforma RAG + orquestracao LLM.
 
-**Decisao necessaria do CTO:** Qual plataforma RAG usar?
+**Por que Dify:**
+- RAG built-in com UI de admin (upload YAML, configurar chunking, testar queries)
+- Orquestracao de LLM integrada (prompt engineering via UI)
+- Logs de conversa e analytics nativos
+- API REST pronta para integracao
+- Self-hosted = dados ficam na infra propria (compliance)
+
+**Instalacao via Docker Compose:**
+```bash
+git clone https://github.com/langgenius/dify.git
+cd dify/docker
+cp .env.example .env
+# Editar .env: configurar POSTGRES_*, OPENAI_API_KEY
+docker compose up -d
+```
+
+**Configuracao pos-instalacao:**
+1. Acessar `http://localhost/install` e criar conta admin
+2. Em Settings > Model Provider: adicionar OpenAI API key
+3. Modelo primario: `gpt-4o-mini` (temperature: 0.3)
+4. Modelo fallback: `gpt-4o`
+5. Embedding model: `text-embedding-3-small`
+
+**Integrar pgvector como storage adicional:**
+- Dify usa seu proprio PostgreSQL internamente
+- Para busca hibrida, ativar pgvector no Postgres do Cogedu tambem:
+```sql
+-- No PostgreSQL do Cogedu (para memoria e analytics)
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE orch_conversations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id),
+    tenant_id UUID NOT NULL,
+    company_id UUID,
+    started_at TIMESTAMPTZ DEFAULT NOW(),
+    ended_at TIMESTAMPTZ,
+    messages JSONB NOT NULL DEFAULT '[]',
+    entities_mentioned JSONB DEFAULT '[]',
+    pages_visited TEXT[] DEFAULT '{}',
+    sentiment_avg NUMERIC(3,2) DEFAULT 0,
+    resolution_status TEXT DEFAULT 'unresolved'
+        CHECK (resolution_status IN ('resolved','partially_resolved','unresolved','escalated')),
+    summary TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE orch_feedback (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id),
+    tenant_id UUID NOT NULL,
+    conversation_id UUID REFERENCES orch_conversations(id),
+    type TEXT NOT NULL CHECK (type IN ('feature_request','bug_report','ux_issue','adjustment')),
+    description TEXT NOT NULL,
+    page_url TEXT,
+    sentiment NUMERIC(3,2),
+    priority TEXT DEFAULT 'medium' CHECK (priority IN ('low','medium','high','critical')),
+    status TEXT DEFAULT 'new' CHECK (status IN ('new','triaged','in_progress','done','wont_fix')),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE orch_analytics_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    tenant_id UUID NOT NULL,
+    event_type TEXT NOT NULL,
+    page_url TEXT,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_orch_conv_user ON orch_conversations(user_id, started_at DESC);
+CREATE INDEX idx_orch_conv_tenant ON orch_conversations(tenant_id);
+CREATE INDEX idx_orch_feedback_tenant ON orch_feedback(tenant_id, created_at DESC);
+CREATE INDEX idx_orch_analytics_user ON orch_analytics_events(user_id, created_at DESC);
+```
 
 ### Passo 1.2: Provisionar LLM
 
@@ -238,9 +310,11 @@ model:
 3. Estimar custo: ~$0.15/1M input tokens (gpt-4o-mini)
 4. Configurar rate limits e budget alerts
 
-### Passo 1.3: Criar API Backend do Orch
+### Passo 1.3: Adicionar Endpoints Orch no Monolito Cogedu
 
-Endpoints necessarios:
+**Decisao tomada:** Monolito. Os endpoints do Orch sao adicionados na API existente do Cogedu.
+
+Endpoints a criar (na mesma API Node.js do Cogedu):
 
 | Endpoint | Metodo | Descricao |
 |----------|--------|-----------|
@@ -257,14 +331,47 @@ Endpoints necessarios:
 
 ```
 1. Recebe: { message, userId, pageUrl, conversationId }
-2. Identifica modulo/pagina pela URL
-3. Busca no RAG (top_k: 5, threshold: 0.7)
-4. Carrega memoria do usuario (ultimos 30 dias)
-5. Carrega perfil zodiacal (se disponivel)
-6. Monta prompt com: system_prompt + page_context + memory + user_message
-7. Envia para LLM
-8. Salva resposta no log
-9. Retorna: { response, suggestedQuestions, alerts }
+2. Carrega memoria do usuario do PostgreSQL (ultimos 30 dias)
+3. Carrega perfil zodiacal do PostgreSQL (se birth_date disponivel)
+4. Chama Dify API: POST /v1/chat-messages
+   - inputs: { page_url, user_name, user_memory, zodiac_directive }
+   - query: message do usuario
+   - conversation_id: conversationId do Dify
+   - Dify faz RAG automatico nas 3 knowledge bases
+   - Dify chama GPT-4o-mini com contexto montado
+5. Salva resposta no orch_conversations (PostgreSQL)
+6. Registra evento no orch_analytics_events
+7. Retorna: { response, suggestedQuestions, alerts }
+```
+
+**Integracao com Dify API:**
+```typescript
+// No monolito Cogedu - apps/api/src/orch/chat.ts
+const DIFY_API_URL = process.env.DIFY_API_URL; // http://dify:5001/v1
+const DIFY_API_KEY = process.env.DIFY_API_KEY;  // app-xxx
+
+async function orchChat(message: string, context: OrchContext) {
+  const response = await fetch(`${DIFY_API_URL}/chat-messages`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${DIFY_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      inputs: {
+        page_url: context.pageUrl,
+        user_name: context.userName,
+        user_memory: context.memorySummary,
+        zodiac_directive: context.zodiacDirective || '',
+      },
+      query: message,
+      user: context.userId,
+      conversation_id: context.difyConversationId || '',
+      response_mode: 'streaming', // SSE para resposta progressiva
+    }),
+  });
+  return response; // Stream SSE
+}
 ```
 
 ### Passo 1.4: System Prompt
@@ -342,45 +449,40 @@ chunking_strategy:
     note: "NAO indexar para busca geral - carregar sob demanda"
 ```
 
-### Passo 2.3: Indexacao por plataforma
+### Passo 2.3: Indexacao no Dify
 
-**Se Dify:**
-1. Criar Knowledge Base no painel admin
-2. Upload dos 14 YAML files
-3. Configurar chunking: "Paragraph" com separador de `- name:`
-4. Embedding model: text-embedding-3-small
-5. Retrieval: Hybrid (keyword + semantic)
-6. Top-k: 5, Score threshold: 0.7
+**Procedimento no painel admin do Dify:**
 
-**Se LangChain + Chroma:**
-```python
-# Pseudo-codigo de indexacao
-from langchain.document_loaders import TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
+1. Ir em **Knowledge** > **Create Knowledge**
+2. Criar 3 knowledge bases separadas:
 
-# Para cada YAML file
-for yaml_file in knowledge_base_files:
-    docs = load_and_parse_yaml(yaml_file)
-    chunks = split_by_page_entry(docs)
-    add_metadata(chunks, module, url_pattern)
-    vectorstore.add_documents(chunks)
-```
+**KB 1: "Cogedu Admin" (paginas de gestao)**
+- Upload: `cogedu-admission-fields.yaml`, `cogedu-educational-fields.yaml`, `cogedu-exams-fields.yaml`, `cogedu-users-fields.yaml`, `cogedu-pages-guide.yaml`
+- Chunking: **Automatic** (Dify detecta estrutura YAML)
+- Embedding: `text-embedding-3-small`
+- Retrieval: **Hybrid Search** (keyword + semantic)
 
-**Se pgvector:**
-```sql
-CREATE TABLE orch_knowledge (
-    id SERIAL PRIMARY KEY,
-    content TEXT NOT NULL,
-    metadata JSONB NOT NULL,  -- {module, url, component, system}
-    embedding VECTOR(1536),   -- text-embedding-3-small
-    source_file TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+**KB 2: "Cogedu AVA" (portal do aluno)**
+- Upload: `cogedu-ava-architecture.yaml`, `cogedu-ava-pages-routes.yaml`, `cogedu-ava-api-endpoints.yaml`, `cogedu-ava-data-schema.yaml`
+- Mesmas configs de chunking/embedding
 
-CREATE INDEX ON orch_knowledge USING ivfflat (embedding vector_cosine_ops);
-```
+**KB 3: "Orch System" (workflows, schema, alertas)**
+- Upload: `cogedu-workflows.yaml`, `cogedu-data-schema.yaml`, `orch-proactive-alerts.yaml`, `orch-memory-schema.yaml`
+- Mesmas configs de chunking/embedding
+
+**NAO indexar no Dify** (carregar sob demanda via API):
+- `zodiac-personas.yaml` (carregado por signo, nao por busca)
+
+3. Em cada KB, configurar:
+   - Top-k: **5**
+   - Score threshold: **0.7**
+   - Reranking: **Habilitado** (se disponivel)
+
+4. Criar **App** tipo **Chat** no Dify:
+   - Vincular as 3 knowledge bases
+   - Colar o system prompt do `agent/page-guide.md`
+   - Configurar variaveis: `{page_url}`, `{user_name}`, `{user_memory}`
+   - Publicar e obter API endpoint + API key
 
 ### Passo 2.4: Validar indexacao
 
@@ -585,17 +687,12 @@ Toda acao de preenchimento e logada:
 Referencia: `knowledge-base/orch-memory-schema.yaml`
 Implementacao: `auto-update/orch-conversation-logger.ts`
 
-```
-Opcao A: File System (simples)
-  logs/{user_id}/
-    index.yaml              # Indice com metadados de cada conversa
-    2026/02/
-      2026-02-03_14-30.yaml # Log completo da conversa
-    archive/                 # Conversas > 90 dias
+**Decisao tomada:** PostgreSQL (monolito Cogedu). Tabelas ja definidas na FASE 1.
 
-Opcao B: Banco de Dados (recomendado para producao)
-  tabela: orch_conversations
-    id, user_id, company_id, tenant_id
+```
+Tabelas no PostgreSQL do Cogedu:
+  orch_conversations     # Logs de conversa persistentes
+    id, user_id, tenant_id, company_id
     started_at, ended_at
     messages (JSONB)
     entities_mentioned (JSONB)
@@ -967,20 +1064,33 @@ const ORCH_FEATURES = {
 
 ---
 
-## 16. Mapa de Decisoes Tecnicas
+## 16. Mapa de Decisoes Tecnicas (DECIDIDO)
 
-O CTO precisa tomar estas decisoes antes de comecar:
+Todas as decisoes tecnicas foram tomadas:
 
-| # | Decisao | Opcoes | Impacto |
-|---|---------|--------|---------|
-| D1 | Plataforma RAG | Dify / LangChain+Chroma / pgvector | Define esforco de backend |
-| D2 | Provedor de LLM | OpenAI / Azure OpenAI / Anthropic | Define custo e compliance |
-| D3 | Armazenamento de memoria | File system / PostgreSQL / MongoDB | Define escalabilidade |
-| D4 | Widget como iframe ou componente | iframe (isolado) / React component (integrado) | Define complexidade |
-| D5 | Auto-update ativo ou manual | GitHub Actions auto / Manual review | Define velocidade de atualizacao |
-| D6 | Alertas proativos via | WebSocket / SSE / Polling | Define latencia de alertas |
-| D7 | Hosting do backend Orch | Mesmo server do Cogedu / Servico separado | Define infra necessaria |
-| D8 | Engine zodiacal ativa | Sim / Nao / Futuramente | Define se precisa birth_date |
+| # | Decisao | Escolha | Status |
+|---|---------|---------|--------|
+| D1 | Plataforma RAG | **Dify (self-hosted via Docker)** | ✅ Decidido |
+| D2 | Provedor de LLM | **OpenAI (GPT-4o-mini + GPT-4o fallback)** | ✅ Decidido |
+| D3 | Armazenamento de memoria | **PostgreSQL + pgvector** | ✅ Decidido |
+| D4 | Widget como iframe ou componente | **React component (integrado no CommunicationHub)** | ✅ Decidido |
+| D5 | Auto-update ativo ou manual | **GitHub Actions automatico** | ✅ Decidido |
+| D6 | Alertas proativos via | **WebSocket (socket.io)** | ✅ Decidido |
+| D7 | Hosting do backend Orch | **Monolito (endpoints no mesmo backend Cogedu)** | ✅ Decidido |
+| D8 | Engine zodiacal ativa | **Futuramente (v4.1+)** | ✅ Decidido |
+
+### Resumo da stack definida
+
+```
+Frontend: React 19 + TypeScript (widget no CommunicationHub)
+Backend:  Monolito Cogedu (endpoints /orch/* adicionados)
+RAG:      Dify self-hosted (Docker Compose)
+LLM:      OpenAI GPT-4o-mini (principal) + GPT-4o (fallback)
+Vetores:  pgvector (extensao PostgreSQL)
+Memoria:  PostgreSQL (tabelas orch_*)
+Realtime: WebSocket via socket.io
+CI/CD:    GitHub Actions (auto-update knowledge base)
+```
 
 ---
 
