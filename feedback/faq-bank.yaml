@@ -13,7 +13,7 @@ metadata:
   description: "Banco de perguntas frequentes coletadas pelo Orch"
   created_at: "2026-02-03"
   last_updated: "2026-02-03"
-  total_entries: 0
+  total_entries: 10
   auto_generated: true
 
 # ============================================================================
@@ -51,19 +51,214 @@ categories:
 # ============================================================================
 # ENTRADAS FAQ
 # ============================================================================
-entries: []
-  # Exemplo de entrada:
-  #
-  # - id: "faq-2026-02-03-001"
-  #   question: "O que e um processo seletivo?"
-  #   answer: "Um processo seletivo e o conjunto de etapas..."
-  #   category: "concepts"
-  #   module: "admission"
-  #   page_url: "/educational/admission"
-  #   frequency: 12
-  #   first_asked: "2026-02-03T10:30:00Z"
-  #   last_asked: "2026-02-03T15:45:00Z"
-  #   asked_by_count: 8
-  #   status: "active"
-  #   tags: ["processo-seletivo", "admissao", "conceito"]
-  #   related_faqs: []
+entries:
+  # === SEED DATA (10 FAQs iniciais para dia 1) ===
+
+  # --- ADMISSAO ---
+  - id: "faq-seed-001"
+    question: "O que e um processo seletivo?"
+    answer: |
+      Um processo seletivo e o conjunto de etapas para selecionar candidatos
+      para os cursos da instituicao. Inclui criacao de ofertas (cursos disponiveis),
+      inscricao dos candidatos, avaliacao e aprovacao. Voce gerencia tudo na tela
+      **Admissoes** em Educacional > Admissoes.
+    category: "concepts"
+    module: "admission"
+    page_url: "/educational/admission"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["processo-seletivo", "admissao", "conceito"]
+    related_faqs: ["faq-seed-002"]
+
+  - id: "faq-seed-002"
+    question: "Como criar uma oferta dentro do processo seletivo?"
+    answer: |
+      1. Acesse a pagina do processo seletivo desejado
+      2. Clique na aba **Ofertas**
+      3. Clique em **Nova Oferta**
+      4. Preencha: nome do curso, vagas, datas de inscricao, valor da inscricao
+      5. Defina os estagios do pipeline (ex: Inscrito, Avaliado, Aprovado, Matriculado)
+      6. Clique em **Salvar**
+    category: "workflow"
+    module: "admission"
+    page_url: "/educational/admission/:id/offers"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["oferta", "admissao", "criar", "workflow"]
+    related_faqs: ["faq-seed-001"]
+
+  # --- TURMAS ---
+  - id: "faq-seed-003"
+    question: "Como criar uma nova turma?"
+    answer: |
+      1. Va em **Educacional > Turmas**
+      2. Clique em **Nova Turma**
+      3. Preencha os dados obrigatorios: nome, codigo, modalidade (presencial/EAD/hibrido),
+         data de inicio, data de termino, total de vagas
+      4. Associe a turma a uma disciplina/serie existente
+      5. Clique em **Salvar**
+      Depois de criar, voce pode matricular alunos na aba **Matriculas**.
+    category: "workflow"
+    module: "class-instances"
+    page_url: "/educational/class-instances"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["turma", "criar", "workflow", "matricula"]
+    related_faqs: ["faq-seed-004"]
+
+  - id: "faq-seed-004"
+    question: "Como matricular um aluno em uma turma?"
+    answer: |
+      1. Acesse a turma desejada em **Educacional > Turmas**
+      2. Clique na aba **Matriculas**
+      3. Clique em **Adicionar Aluno**
+      4. Busque o aluno pelo nome ou email
+      5. Selecione e confirme a matricula
+      O aluno passara a ver o conteudo da turma no AVA (ambiente do aluno).
+    category: "workflow"
+    module: "class-instances"
+    page_url: "/educational/class-instances/:id/enrollments"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["matricula", "aluno", "turma", "workflow"]
+    related_faqs: ["faq-seed-003"]
+
+  # --- CONTEUDO ---
+  - id: "faq-seed-005"
+    question: "Qual a diferenca entre Colecao, Trilha, Disciplina e Modulo?"
+    answer: |
+      A hierarquia de conteudo do Cogedu funciona assim:
+      - **Colecao**: agrupamento maior (ex: "Graduacao em Marketing")
+      - **Trilha (Pathway)**: sequencia de disciplinas dentro da colecao
+      - **Disciplina (Serie)**: materia/curso individual (ex: "Marketing Digital I")
+      - **Modulo (Unit)**: subdivisao da disciplina (ex: "Semana 1: Fundamentos")
+      Cada modulo contem os conteudos de aprendizagem (videos, textos, atividades).
+    category: "concepts"
+    module: "content"
+    page_url: "/educational/collections"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["colecao", "trilha", "disciplina", "modulo", "hierarquia", "conceito"]
+    related_faqs: []
+
+  - id: "faq-seed-006"
+    question: "Como publico um conteudo para os alunos verem no AVA?"
+    answer: |
+      O conteudo precisa estar vinculado a uma turma para aparecer no AVA:
+      1. Crie o conteudo na **Disciplina** (Educacional > Disciplinas)
+      2. Associe a disciplina a uma **Turma** (Educacional > Turmas)
+      3. Matricule os alunos na turma
+      4. O conteudo aparece automaticamente no AVA para os alunos matriculados
+      Nao existe botao "publicar" separado — a visibilidade depende da matricula.
+    category: "workflow"
+    module: "content"
+    page_url: "/educational/series"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["publicar", "conteudo", "ava", "visibilidade", "workflow"]
+    related_faqs: ["faq-seed-005"]
+
+  # --- AVALIACOES ---
+  - id: "faq-seed-007"
+    question: "Como criar uma avaliacao para uma turma?"
+    answer: |
+      1. Va em **Educacional > Avaliacoes > Suas Avaliacoes**
+      2. Clique em **Nova Avaliacao**
+      3. Escolha o tipo: prova, atividade, rubrica
+      4. Adicione questoes (ou importe do **Banco de Questoes**)
+      5. Configure: peso, data de entrega, tentativas permitidas
+      6. Associe a uma turma
+      7. Clique em **Salvar**
+      A avaliacao aparecera para os alunos matriculados na turma.
+    category: "workflow"
+    module: "assessments"
+    page_url: "/educational/exams/your-evaluations"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["avaliacao", "prova", "criar", "workflow", "banco-questoes"]
+    related_faqs: []
+
+  # --- USUARIOS ---
+  - id: "faq-seed-008"
+    question: "Como cadastrar um novo aluno no sistema?"
+    answer: |
+      1. Va em **Usuarios**
+      2. Clique em **Novo Usuario**
+      3. Selecione o tipo **Aluno**
+      4. Preencha: nome completo, email, CPF
+      5. Clique em **Salvar**
+      O aluno recebera um email com credenciais de acesso ao AVA.
+      Para ele ver conteudos, voce ainda precisa matricula-lo em uma turma.
+    category: "workflow"
+    module: "users"
+    page_url: "/users"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["usuario", "aluno", "cadastrar", "workflow"]
+    related_faqs: ["faq-seed-004"]
+
+  - id: "faq-seed-009"
+    question: "Qual a diferenca entre os tipos de usuario (aluno, funcionario, professor)?"
+    answer: |
+      O Cogedu tem 3 tipos principais de usuario:
+      - **Aluno**: acessa o AVA, ve conteudos, faz avaliacoes, acompanha progresso
+      - **Funcionario**: acessa o painel admin, gerencia turmas, alunos, conteudos
+      - **Professor**: funcionario com permissoes especificas para gerenciar suas turmas e notas
+      O tipo define quais menus e telas o usuario pode ver. Permissoes adicionais
+      sao controladas por **Roles** (papeis) atribuidas ao usuario.
+    category: "concepts"
+    module: "users"
+    page_url: "/users"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["usuario", "tipo", "aluno", "funcionario", "professor", "conceito", "permissao"]
+    related_faqs: ["faq-seed-008"]
+
+  # --- PERMISSOES ---
+  - id: "faq-seed-010"
+    question: "O que sao Roles e como funcionam as permissoes?"
+    answer: |
+      **Roles** (papeis) definem o que cada usuario pode fazer no sistema.
+      - Cada Role contem um conjunto de **permissoes** (ex: class.grades.read, people.users.write)
+      - Um usuario pode ter varias Roles
+      - As permissoes sao cumulativas (a soma de todas as Roles)
+      - Roles sao atribuidas por **empresa** (multi-tenancy)
+      Para ver/editar Roles: **Empresas > [empresa] > Roles & Permissoes**.
+      Para ver as permissoes de um usuario especifico: **Usuarios > [usuario] > Roles**.
+    category: "concepts"
+    module: "permissions"
+    page_url: "/companies/:id/roles"
+    frequency: 0
+    first_asked: "2026-02-05T00:00:00Z"
+    last_asked: "2026-02-05T00:00:00Z"
+    asked_by_count: 0
+    status: "active"
+    tags: ["roles", "permissao", "acesso", "rbac", "conceito"]
+    related_faqs: ["faq-seed-009"]

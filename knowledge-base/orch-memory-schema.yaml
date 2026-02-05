@@ -12,25 +12,31 @@ description: "Schema do sistema de memoria persistente do Orch baseado em logs d
 # ESTRUTURA DE ARMAZENAMENTO
 # ============================================================
 storage:
-  base_path: "logs/"
-  structure: |
-    logs/
-      {user_id}/
-        index.yaml                          # Indice de conversas do usuario
-        2026/
-          02/
-            2026-02-03_14-30-00.yaml        # Log de conversa individual
-            2026-02-03_16-45-22.yaml
-            2026-02-04_09-10-05.yaml
-          01/
-            2026-01-15_11-20-00.yaml
-        archive/                            # Logs com mais de 90 dias
-          2025-11-03_08-00-00.yaml.gz
+  # FONTE DE VERDADE: PostgreSQL (monolito Cogedu)
+  # Tabelas definidas em GUIA-IMPLANTACAO-CTO.md, FASE 1, Passo 1.1
+  primary: "postgresql"
+  tables:
+    conversations: "orch_conversations"   # messages JSONB, entities JSONB, sentiment, resolution
+    feedback: "orch_feedback"             # type, description, priority, status
+    analytics: "orch_analytics_events"    # event_type, metadata JSONB
+  indexes:
+    - "idx_orch_conv_user (user_id, started_at DESC)"
+    - "idx_orch_conv_tenant (tenant_id)"
+    - "idx_orch_feedback_tenant (tenant_id, created_at DESC)"
+    - "idx_orch_analytics_user (user_id, created_at DESC)"
 
-  naming_convention:
-    log_file: "YYYY-MM-DD_HH-MM-SS.yaml"
-    index_file: "index.yaml"
-    archive_dir: "archive/"
+  # ARCHIVE OPCIONAL: filesystem YAML para debug/auditoria
+  archive:
+    enabled: false                         # Ativar se necessario para compliance
+    format: "yaml"
+    base_path: "logs/"
+    structure: |
+      logs/
+        {user_id}/
+          YYYY/
+            MM/
+              YYYY-MM-DD_HH-MM-SS.yaml    # Export do banco para auditoria
+    note: "Export opcional. A fonte de verdade e SEMPRE o PostgreSQL."
 
 # ============================================================
 # ESTRUTURA DO LOG DE CONVERSA

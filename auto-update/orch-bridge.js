@@ -395,11 +395,40 @@
   /**
    * Escuta mensagens do widget Orch no CommunicationHub.
    */
+  // Token de canal — gerado pelo widget ao inicializar e enviado no handshake.
+  // Comandos de escrita (FILL, CLEAR) so sao aceitos com token valido.
+  let _channelToken = null;
+
   function handleMessage(event) {
     // Verificar origem
     if (event.origin !== ORCH_ORIGIN) return;
 
-    const { type, payload } = event.data || {};
+    // Verificar que event.source e uma window valida (iframe do widget ou self)
+    if (event.source !== window && !(event.source instanceof Window)) return;
+
+    const { type, payload, channelToken } = event.data || {};
+
+    // Handshake: widget envia token ao inicializar
+    if (type === 'ORCH_HANDSHAKE') {
+      _channelToken = payload?.token;
+      event.source.postMessage({
+        type: 'ORCH_HANDSHAKE_ACK',
+        payload: { status: 'ok' },
+      }, event.origin);
+      return;
+    }
+
+    // Comandos de escrita exigem token valido
+    const WRITE_COMMANDS = ['ORCH_FILL_FIELD', 'ORCH_FILL_MULTIPLE', 'ORCH_CLEAR_FIELD'];
+    if (WRITE_COMMANDS.includes(type)) {
+      if (!_channelToken || channelToken !== _channelToken) {
+        event.source.postMessage({
+          type: 'ORCH_ERROR',
+          payload: { error: 'invalid_channel_token', message: 'Write commands require valid channel token' },
+        }, event.origin);
+        return;
+      }
+    }
 
     switch (type) {
       case 'ORCH_SCAN_PAGE': {

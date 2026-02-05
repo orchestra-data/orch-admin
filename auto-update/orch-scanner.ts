@@ -9,6 +9,13 @@
  *
  * Compara com o YAML atual e gera diff com novas paginas/campos.
  *
+ * LIMITACOES CONHECIDAS:
+ * - Usa REGEX (nao AST real) para extrair rotas do router.tsx
+ * - NAO detecta: rotas em variaveis, template literals, spread operators
+ * - NAO detecta: rotas definidas em arquivos importados (re-exports)
+ * - Se o router.tsx mudar de estrutura, os regex precisam ser ajustados
+ * - Para AST real no futuro, considerar migrar para @swc/core ou ts-morph
+ *
  * Uso: npx tsx orch-scanner.ts --cogedu-path ../cogedu --output ./knowledge-base/cogedu-pages-guide.yaml
  */
 

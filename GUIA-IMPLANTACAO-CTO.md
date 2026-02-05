@@ -60,7 +60,7 @@ O Orch e um **assistente inteligente embarcado** no sistema de gestao Cogedu. El
 |--------|-----------|--------|
 | Frontend (Widget) | React 19 + TypeScript | Chat embarcado no CommunicationHub |
 | Comunicacao | postMessage API | Bridge entre widget e DOM da pagina |
-| Backend | Dify (self-hosted) + GPT-4o-mini | Orquestracao RAG + LLM |
+| Backend | Dify (self-hosted) + OpenAI gpt-4o-mini | Orquestracao RAG + LLM |
 | RAG | Dify Knowledge Base + pgvector | Busca semantica hibrida no knowledge base |
 | Knowledge Base | 14 arquivos YAML (604 KB) | Documentacao de paginas, campos, workflows |
 | Memoria | PostgreSQL (monolito Cogedu) | Logs de conversa persistentes |
@@ -102,7 +102,7 @@ O Orch e um **assistente inteligente embarcado** no sistema de gestao Cogedu. El
 |  |  |                  |   |                  |  |            |  |  |
 |  |  | POST /orch/chat  |   | - RAG Engine     |  | - orch_*   |  |  |
 |  |  | POST /orch/ctx   |   | - Knowledge Base |  | - pgvector |  |  |
-|  |  | GET  /orch/mem   |   | - GPT-4o-mini    |  | - logs     |  |  |
+|  |  | GET  /orch/mem   |   | - gpt-4o-mini    |  | - logs     |  |  |
 |  |  | POST /orch/fb    |   | - Embeddings     |  | - feedback |  |  |
 |  |  | GET  /orch/alert  |   | - top_k: 5      |  | - analytics|  |  |
 |  |  +------------------+   +------------------+  +------------+  |  |
@@ -194,7 +194,7 @@ ORCH ADMIN/                          # 1.7 MB total
 | **Cogedu Admin rodando** | React 19 + Vite + React Router v7 | Ja existe |
 | **CommunicationHub** | `apps/web/src/components/communication-hub/` | Ja existe |
 | **Keycloak** | Autenticacao SSO com JWT multi-tenant | Ja existe |
-| **LLM API** | GPT-4o-mini (primario) + GPT-4o (fallback) | Contratar |
+| **LLM API** | OpenAI gpt-4o-mini (primario) + gpt-5-mini (fallback) | Ja configurado no monolito |
 | **Dify** (self-hosted) | Orquestracao RAG + LLM com UI de admin | Instalar |
 | **PostgreSQL + pgvector** | Banco existente do Cogedu + extensao pgvector | Ativar extensao |
 
@@ -235,7 +235,7 @@ docker compose up -d
 1. Acessar `http://localhost/install` e criar conta admin
 2. Em Settings > Model Provider: adicionar OpenAI API key
 3. Modelo primario: `gpt-4o-mini` (temperature: 0.3)
-4. Modelo fallback: `gpt-4o`
+4. Modelo fallback: `gpt-5-mini`
 5. Embedding model: `text-embedding-3-small`
 
 **Integrar pgvector como storage adicional:**
@@ -298,17 +298,82 @@ CREATE INDEX idx_orch_analytics_user ON orch_analytics_events(user_id, created_a
 # Configuracao definida no page-guide.md
 model:
   provider: "openai"
-  name: "gpt-4o-mini"      # Primario: mais rapido e barato
-  temperature: 0.3          # Respostas consistentes
+  name: "gpt-4o-mini"           # Primario: mais barato ($0.15/1M input), rapido
+  temperature: 0.3               # Respostas consistentes
   max_tokens: 1024
-  fallback: "gpt-4o"        # Fallback: mais inteligente
+  fallback: "gpt-5-mini"        # Fallback: mais capaz ($0.25/1M input), ainda barato
 ```
 
 **Acoes:**
-1. Criar conta OpenAI (ou usar Azure OpenAI para compliance)
-2. Gerar API key
-3. Estimar custo: ~$0.15/1M input tokens (gpt-4o-mini)
-4. Configurar rate limits e budget alerts
+1. Reutilizar a API key OpenAI ja configurada no monolito Cogedu (`OPENAI_API_KEY`)
+2. Reutilizar o `OpenAIService` existente em `apps/api/src/app/services/openai-service.ts`
+3. Estimar custo: ~$0.15/1M input tokens (gpt-4o-mini) / ~$0.25/1M (gpt-5-mini fallback)
+4. Configurar rate limits e budget alerts no dashboard OpenAI
+
+### Integracao com o OpenAI existente (passo a passo para o dev)
+
+**Pre-requisito:** O monolito Cogedu ja tem OpenAI configurado.
+
+**Referencia existente:**
+- Service: `apps/api/src/app/services/openai-service.ts`
+- Pricing: `apps/api/src/config/ai-pricing.ts`
+- Env var: `OPENAI_API_KEY` (ja configurada)
+
+**Passo 1: Criar o OrchService estendendo o OpenAIService**
+```typescript
+// apps/api/src/orch/orch-llm.service.ts
+import { OpenAIService } from '../app/services/openai-service';
+
+const PRIMARY_MODEL = 'gpt-4o-mini';
+const FALLBACK_MODEL = 'gpt-5-mini';
+
+export class OrchLLMService {
+  private primary = new OpenAIService(PRIMARY_MODEL);
+  private fallback = new OpenAIService(FALLBACK_MODEL);
+
+  async chat(systemPrompt: string, userMessage: string, history: any[] = []) {
+    try {
+      return await this.primary.generateResponse(systemPrompt, [
+        ...history,
+        { role: 'user', content: [{ type: 'input_text', text: userMessage }] },
+      ]);
+    } catch (error) {
+      console.warn(`Orch: ${PRIMARY_MODEL} falhou, usando ${FALLBACK_MODEL}:`, error.message);
+      return await this.fallback.generateResponse(systemPrompt, [
+        ...history,
+        { role: 'user', content: [{ type: 'input_text', text: userMessage }] },
+      ]);
+    }
+  }
+}
+```
+
+**Passo 2: Configurar Dify para usar OpenAI**
+```
+1. No painel Dify, ir em Settings > Model Provider
+2. Adicionar provider "OpenAI"
+3. Colar a mesma OPENAI_API_KEY do monolito
+4. Selecionar modelos:
+   - Chat: gpt-4o-mini (primario)
+   - Embedding: text-embedding-3-small
+5. Testar conexao
+```
+
+**Custos estimados:**
+
+| Modelo | Input (1M tokens) | Output (1M tokens) | Uso estimado/mes | Custo/mes |
+|--------|-------------------|---------------------|-------------------|-----------|
+| gpt-4o-mini | $0.15 | $0.60 | ~5M tokens | ~$3.75 |
+| gpt-5-mini (fallback 10%) | $0.25 | $2.00 | ~500K tokens | ~$1.12 |
+| text-embedding-3-small | $0.02 | - | ~2M tokens | ~$0.04 |
+| **Total estimado** | | | | **~$4.91/mes** |
+
+**Vantagens de reutilizar a infra existente:**
+- Zero setup adicional (API key ja configurada)
+- Reutiliza o `OpenAIService` com tipagem, Zod e structured output
+- Pricing ja mapeado no `ai-pricing.ts` (FinOps integrado)
+- Billing unificado na mesma conta OpenAI
+- Dev nao precisa aprender SDK novo
 
 ### Passo 1.3: Adicionar Endpoints Orch no Monolito Cogedu
 
@@ -338,7 +403,7 @@ Endpoints a criar (na mesma API Node.js do Cogedu):
    - query: message do usuario
    - conversation_id: conversationId do Dify
    - Dify faz RAG automatico nas 3 knowledge bases
-   - Dify chama GPT-4o-mini com contexto montado
+   - Dify chama gpt-4o-mini com contexto montado
 5. Salva resposta no orch_conversations (PostgreSQL)
 6. Registra evento no orch_analytics_events
 7. Retorna: { response, suggestedQuestions, alerts }
@@ -574,6 +639,8 @@ function useOrchChat() {
 
   async function sendMessage(text: string) {
     setIsLoading(true);
+    setMessages(prev => [...prev, { role: 'user', content: text }]);
+
     const response = await fetch('/orch/chat', {
       method: 'POST',
       headers: {
@@ -587,11 +654,39 @@ function useOrchChat() {
         conversationId: currentConversationId,
       }),
     });
-    const data = await response.json();
-    setMessages(prev => [...prev,
-      { role: 'user', content: text },
-      { role: 'assistant', content: data.response }
-    ]);
+
+    // Streaming via SSE — exibe resposta progressivamente
+    if (response.headers.get('content-type')?.includes('text/event-stream')) {
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = '';
+
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        // Parse SSE: linhas "data: ..." separadas por \n\n
+        for (const line of chunk.split('\n')) {
+          if (line.startsWith('data: ')) {
+            const token = line.slice(6);
+            if (token === '[DONE]') break;
+            assistantContent += token;
+            setMessages(prev => {
+              const updated = [...prev];
+              updated[updated.length - 1] = { role: 'assistant', content: assistantContent };
+              return updated;
+            });
+          }
+        }
+      }
+    } else {
+      // Fallback: resposta completa (sem streaming)
+      const data = await response.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+    }
+
     setIsLoading(false);
   }
 
@@ -739,35 +834,51 @@ O Orch gerencia tokens para nao estourar o limite do LLM:
 
 ```yaml
 context_budget:
-  total_available: 4000  # tokens para contexto (de 8K total)
+  total_available: 8000  # tokens para contexto completo (alinhado com page-guide.md)
   allocation:
+    current_conversation:
+      max_tokens: 3000
+      priority: "critical"
+      compressible: false
     page_documentation:
       max_tokens: 1500
       priority: "critical"
-    user_history:
-      max_tokens: 800
-      priority: "high"
+      compressible: false
     zodiac_directive:
-      max_tokens: 200
+      max_tokens: 100
       priority: "medium"
-    faq_context:
-      max_tokens: 300
+      compressible: false
+    last_conversation:
+      max_tokens: 1500
+      priority: "high"
+      compressible: true   # resumir se overflow
+    recent_summaries:
+      max_tokens: 1000
       priority: "medium"
-    correction_context:
-      max_tokens: 200
+      compressible: true   # reduzir para top N
+    faqs:
+      max_tokens: 500
+      priority: "medium"
+      compressible: true   # reduzir para top 3
+    corrections:
+      max_tokens: 400
       priority: "high"
-    workflow_context:
-      max_tokens: 600
-      priority: "high"
-    proactive_alerts:
-      max_tokens: 300
-      priority: "low"
+      compressible: true   # manter mais recentes
   overflow_strategy: "summarize_lowest_priority_first"
 ```
 
 ---
 
 ## 10. FASE 6: Implementar Adaptacao Comportamental
+
+> **LGPD:** Esta feature usa `birth_date` (dado pessoal) para personalizar comportamento.
+> **Antes de ativar em producao**, consultar juridico e garantir:
+> 1. Consentimento explicito nos Termos de Uso
+> 2. Opt-out disponivel nas preferencias do usuario
+> 3. Signo calculado sob demanda (nao armazenado)
+> 4. Feature flag `zodiac_adaptation = false` ate aprovacao juridica
+>
+> Ver detalhes completos em `knowledge-base/zodiac-personas.yaml` → secao `lgpd_compliance`.
 
 ### Passo 6.1: Como funciona
 
@@ -1071,7 +1182,7 @@ Todas as decisoes tecnicas foram tomadas:
 | # | Decisao | Escolha | Status |
 |---|---------|---------|--------|
 | D1 | Plataforma RAG | **Dify (self-hosted via Docker)** | ✅ Decidido |
-| D2 | Provedor de LLM | **OpenAI (GPT-4o-mini + GPT-4o fallback)** | ✅ Decidido |
+| D2 | Provedor de LLM | **OpenAI (gpt-4o-mini + gpt-5-mini fallback)** | ✅ Decidido |
 | D3 | Armazenamento de memoria | **PostgreSQL + pgvector** | ✅ Decidido |
 | D4 | Widget como iframe ou componente | **React component (integrado no CommunicationHub)** | ✅ Decidido |
 | D5 | Auto-update ativo ou manual | **GitHub Actions automatico** | ✅ Decidido |
@@ -1085,12 +1196,111 @@ Todas as decisoes tecnicas foram tomadas:
 Frontend: React 19 + TypeScript (widget no CommunicationHub)
 Backend:  Monolito Cogedu (endpoints /orch/* adicionados)
 RAG:      Dify self-hosted (Docker Compose)
-LLM:      OpenAI GPT-4o-mini (principal) + GPT-4o (fallback)
+LLM:      OpenAI gpt-4o-mini (principal) + gpt-5-mini (fallback)
 Vetores:  pgvector (extensao PostgreSQL)
 Memoria:  PostgreSQL (tabelas orch_*)
 Realtime: WebSocket via socket.io
 CI/CD:    GitHub Actions (auto-update knowledge base)
 ```
+
+### Alternativa ao Dify (Plano B)
+
+Se o Dify apresentar problemas (breaking changes, licenciamento, performance), a arquitetura permite substituir sem afetar frontend, bridge ou knowledge base:
+
+| Alternativa | Esforco | Descricao |
+|-------------|---------|-----------|
+| **RAG direto com pgvector** | Medio | Embedding via OpenAI API (`text-embedding-3-small`) + busca vetorial no PostgreSQL que ja tem pgvector. Elimina dependencia externa. |
+| **LangChain.js** | Medio | Framework RAG em Node.js. Suporta OpenAI, pgvector, chunking automatico. Integra direto no monolito. |
+| **LlamaIndex.TS** | Medio | Similar ao LangChain, foco em RAG. Suporta YAML ingestion nativo. |
+
+**Por que a troca e simples:**
+O ponto de integracao com o Dify e unico: a funcao `orchChat()` no endpoint `POST /orch/chat`. Trocar o Dify por qualquer alternativa requer apenas reimplementar essa funcao — o frontend (widget), o bridge (DOM), a knowledge base (YAML) e a memoria (PostgreSQL) continuam inalterados.
+
+```
+Widget → POST /orch/chat → orchChat() → [Dify OU pgvector OU LangChain] → resposta
+                              ↑
+                     Unico ponto de troca
+```
+
+### Cache de Respostas (Reducao de Custos)
+
+Perguntas como "O que faz essa pagina?" ou "Quais campos sao obrigatorios?" geram respostas identicas para todos os usuarios. Cachear essas respostas evita chamadas desnecessarias ao LLM.
+
+**Estrategia:**
+
+| Chave de cache | TTL | Exemplo |
+|----------------|-----|---------|
+| `orch:cache:{page_url}:{intent}` | 24h | `orch:cache:/educational/admission:explain_page` |
+| `orch:cache:{page_url}:faq:{faq_id}` | 48h | `orch:cache:/users:faq:faq-seed-008` |
+| `orch:cache:{page_url}:workflow:{workflow_id}` | 24h | `orch:cache:/class-instances:workflow:create-class` |
+
+**Intents cacheáveis** (respostas iguais para todos):
+- `explain_page` — "O que faz essa pagina?"
+- `list_fields` — "Quais campos tem aqui?"
+- `required_fields` — "Quais sao obrigatorios?"
+- `explain_button` — "O que esse botao faz?"
+
+**Intents NAO cacheáveis** (dependem do usuario):
+- `query_student` — "Como ta o Joao?"
+- `fill_field` — "Preenche o campo X com Y"
+- `insight` — "Como ta a turma?"
+- Qualquer interacao com dados pessoais
+
+**Implementacao:**
+```typescript
+// No endpoint POST /orch/chat, antes de chamar o LLM:
+const cacheKey = `orch:cache:${pageUrl}:${detectedIntent}`;
+const cached = await redis.get(cacheKey); // ou Map em memoria
+if (cached) {
+  return { response: cached, source: 'cache' };
+}
+// ... chamar LLM ...
+if (CACHEABLE_INTENTS.includes(detectedIntent)) {
+  await redis.set(cacheKey, response, 'EX', 86400); // 24h
+}
+```
+
+**Economia estimada:** 40-60% das perguntas sao sobre "o que e essa pagina" ou "como funciona". Com cache, essas vao a custo zero apos a primeira resposta.
+
+---
+
+### Rate Limiting (Controle de Custos)
+
+O Orch chama a OpenAI API a cada mensagem. Sem limites, um usuario ou bot pode gerar custos inesperados.
+
+**Limites por camada:**
+
+| Camada | Limite | Acao ao exceder |
+|--------|--------|-----------------|
+| Por usuario/hora | 60 mensagens | Responder: "Voce atingiu o limite de mensagens por hora. Tente novamente em breve." |
+| Por usuario/dia | 300 mensagens | Bloquear ate meia-noite UTC |
+| Por tenant/dia | 5.000 mensagens | Notificar admin do tenant, degradar para FAQ-only (sem LLM) |
+| Por tenant/mes | 100.000 mensagens | Notificar CTO, bloquear novos chats ate reset |
+| Global (plataforma) | 50.000 mensagens/dia | Circuit breaker, modo manutencao |
+
+**Implementacao sugerida:**
+
+```typescript
+// Middleware no endpoint POST /orch/chat
+// Usar Redis (ou Map em memoria se nao tiver Redis) para contadores
+
+const LIMITS = {
+  USER_HOUR: 60,
+  USER_DAY: 300,
+  TENANT_DAY: 5000,
+  TENANT_MONTH: 100000,
+};
+
+// Chave: orch:rate:{userId}:{period}
+// TTL: hora=3600s, dia=86400s, mes=2592000s
+```
+
+**Budget de custo mensal:**
+Com gpt-4o-mini a $0.15/1M input + $0.60/1M output, estimando media de 500 tokens/mensagem:
+- 100K mensagens/mes = ~50M tokens = **~$37.50/mes** (pior caso)
+- Caso tipico (20K msgs/mes) = **~$7.50/mes**
+
+Configurar alerta no dashboard OpenAI em **$50/mes** como teto.
 
 ---
 
@@ -1099,12 +1309,12 @@ CI/CD:    GitHub Actions (auto-update knowledge base)
 | Risco | Probabilidade | Impacto | Mitigacao |
 |-------|---------------|---------|-----------|
 | LLM gera resposta incorreta | Media | Alto | Guardrails no prompt + feedback loop + correcoes |
-| Custo de LLM escala demais | Media | Medio | gpt-4o-mini (barato), cache de respostas, rate limit |
+| Custo de LLM escala demais | Media | Medio | gpt-4o-mini ($0.15/1M), cache de respostas, rate limit |
 | Bridge quebra com atualizacao do React | Baixa | Alto | Testes E2E automaticos no bridge |
 | Knowledge base desatualizado | Media | Medio | Auto-update via CI/CD + runtime fallback |
 | Usuario nao confia no Orch | Media | Alto | Sempre confirmar antes de preencher, transparencia |
 | Vazamento de PII via chat | Baixa | Critico | Guardrails de PII, hash de valores, permissoes |
-| Latencia alta na resposta | Media | Medio | Cache, streaming de resposta, gpt-4o-mini |
+| Latencia alta na resposta | Media | Medio | Cache, streaming de resposta, gpt-4o-mini (rapido) |
 
 ---
 
@@ -1119,7 +1329,7 @@ CI/CD:    GitHub Actions (auto-update knowledge base)
 | Reducao de tickets de suporte | 10% | 25% | 40% |
 | Tempo medio de resolucao | < 3 min | < 2 min | < 1.5 min |
 | NPS do Orch (satisfacao) | 30 | 50 | 65 |
-| Custo LLM por usuario/mes | < $0.50 | < $0.30 | < $0.20 |
+| Custo LLM por usuario/mes | < $0.30 | < $0.20 | < $0.10 |
 
 ### Dashboard de acompanhamento
 

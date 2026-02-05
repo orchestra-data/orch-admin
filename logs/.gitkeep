@@ -1,0 +1,3 @@
+# Diretorio para export/debug de logs de conversa (opcional).
+# Fonte de verdade: PostgreSQL (tabela orch_conversations).
+# Ver: knowledge-base/orch-memory-schema.yaml

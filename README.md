@@ -54,7 +54,7 @@ O Orch e integrado como nova aba no CommunicationHub do Cogedu:
 - **Frontend**: React 19 + TypeScript (widget no CommunicationHub)
 - **Backend**: Monolito Cogedu (endpoints `/orch/*` adicionados ao backend existente)
 - **RAG**: Dify self-hosted (Docker Compose)
-- **LLM**: OpenAI GPT-4o-mini (principal) + GPT-4o (fallback)
+- **LLM**: OpenAI gpt-4o-mini (principal) + gpt-5-mini (fallback)
 - **Vetores**: pgvector (extensao PostgreSQL)
 - **Memoria**: PostgreSQL (tabelas `orch_conversations`, `orch_feedback`, `orch_analytics_events`)
 - **Knowledge Base**: 14 YAML files (604 KB) indexados no Dify

@@ -75,7 +75,7 @@ Sistema hibrido para manter o knowledge base do Orch atualizado automaticamente.
 
 | Componente | Tipo | Descricao |
 |-----------|------|-----------|
-| `orch-scanner.ts` | Script Node.js | Escaneia codebase e extrai rotas/campos |
+| `orch-scanner.ts` | Script Node.js | Escaneia codebase via REGEX e extrai rotas/campos (ver limitacoes no arquivo) |
 | `orch-update.yml` | GitHub Action | Pipeline CI/CD que roda o scanner |
 | `orch-bridge.js` | Script browser | Runtime fallback no widget |
 | `unknown-pages-log` | API endpoint | Registra paginas desconhecidas |

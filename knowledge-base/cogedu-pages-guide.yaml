@@ -9,7 +9,8 @@
 
 metadata:
   system_name: "Cogedu - Sistema de Gestao Educacional"
-  version: "3.10.0"
+  cogedu_version: "3.10.0"
+  orch_version: "3.7.0"
   tech_stack:
     frontend: "React 19 + TypeScript + Vite"
     ui_library: "Radix UI + Tailwind CSS"

@@ -22,6 +22,22 @@ engine:
     O usuario sente que o Orch "entende" ele, sem saber por que.
 
 # ============================================================
+# LGPD COMPLIANCE
+# ============================================================
+lgpd_compliance:
+  data_used: "birth_date (data de nascimento)"
+  classification: "dado pessoal (LGPD Art. 5, I)"
+  legal_basis: "consentimento (LGPD Art. 7, I)"
+  requirements:
+    - "Incluir uso de data de nascimento para personalizacao nos Termos de Uso do Cogedu"
+    - "Permitir opt-out da adaptacao comportamental nas preferencias do usuario"
+    - "Nunca expor o signo calculado ao usuario nem a terceiros"
+    - "Nao armazenar o signo — calcular sob demanda a cada sessao"
+    - "Se usuario nao consentir ou nao tiver birth_date, usar persona padrao (neutra/didatica)"
+    - "Registrar base legal no inventario de dados pessoais da empresa"
+  note: "Consultar juridico antes de ativar em producao (feature flag zodiac_adaptation = false no lancamento)"
+
+# ============================================================
 # DATAS DOS SIGNOS
 # ============================================================
 date_ranges:
