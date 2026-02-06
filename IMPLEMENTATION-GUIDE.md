@@ -1,4 +1,4 @@
-# Guia de Implementação ORCH Ecosystem v4.0
+# Guia de Implementação ORCH Ecosystem v5.0
 
 > Documentação técnica para implementação do ecossistema de agentes ORCH (AVA + ADMIN)
 > Atualizado: 2026-02-06
@@ -8,548 +8,125 @@
 ## 1. Visão Geral da Arquitetura
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         ORCH ECOSYSTEM                               │
-├─────────────────────────────────┬───────────────────────────────────┤
-│          ORCH AVA               │          ORCH ADMIN               │
-│    (Tutoria Acadêmica)          │    (Gestão Administrativa)        │
-├─────────────────────────────────┼───────────────────────────────────┤
-│  17 Agentes Especializados      │  1 Agente Multifuncional          │
-│  - Hub (orquestrador)           │  - Orch (guia contextual)         │
-│  - Sócrates (maiêutica)         │                                   │
-│  - Aristóteles (lógica)         │  Funções:                         │
-│  - Gardner (inteligências)      │  - Explicação de páginas          │
-│  - Taylor (gestão tempo)        │  - Preenchimento de forms         │
-│  - Freire (pedagogia crítica)   │  - Coleta de feedback             │
-│  - Wittgenstein (linguagem)     │  - Consulta de dados              │
-│  - Bourdieu (capital cultural)  │  - Alertas proativos              │
-│  - Foucault (avaliação)         │  - Guia de workflows              │
-│  - + 9 especialistas            │  - Adaptação comportamental       │
-├─────────────────────────────────┴───────────────────────────────────┤
-│                          EVENT BUS                                   │
-│  Topics: orch.d7.*.parecer → Weber (agregador D7)                   │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           ORCH ECOSYSTEM v5.0                                │
+├─────────────────────────────────┬───────────────────────────────────────────┤
+│          ORCH AVA               │              ORCH ADMIN                   │
+│    (Tutoria Acadêmica)          │       (Gestão Administrativa)             │
+├─────────────────────────────────┼───────────────────────────────────────────┤
+│  14 Agentes Gold Standard       │  1 Agente v4.0.0 (20 seções)              │
+│  ┌─────────────────────────┐    │  ┌─────────────────────────────────────┐  │
+│  │ Hub (orquestrador)      │    │  │ Orch (guia contextual)              │  │
+│  │ Sócrates (maiêutica)    │    │  │ - Explicação de páginas             │  │
+│  │ Aristóteles (lógica)    │    │  │ - Preenchimento de forms            │  │
+│  │ Gardner (inteligências) │    │  │ - Coleta de feedback                │  │
+│  │ Taylor (gestão tempo)   │    │  │ - Consulta de dados                 │  │
+│  │ Freire (pedagogia)      │    │  │ - Alertas proativos                 │  │
+│  │ Wittgenstein (clareza)  │    │  │ - Guia de workflows                 │  │
+│  │ Bourdieu (capital)      │    │  │ - Adaptação zodiacal                │  │
+│  │ Foucault (avaliação)    │    │  └─────────────────────────────────────┘  │
+│  │ Weber (agregador D7)    │    │                                           │
+│  │ Dewey (casos)           │    │                                           │
+│  │ Ebbinghaus (memória)    │    │                                           │
+│  │ Heimdall (admissão)     │    │                                           │
+│  │ Sísifo (gamificação)    │    │                                           │
+│  └─────────────────────────┘    │                                           │
+├─────────────────────────────────┴───────────────────────────────────────────┤
+│                         TypeScript Runtime (src/)                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │ core/        │  │ events/      │  │ api/         │  │ cron/        │     │
+│  │ agent-reg    │  │ event-bus    │  │ routes       │  │ d7-scheduler │     │
+│  │ session-mgr  │  │ d7-publisher │  │ validators   │  │              │     │
+│  │ handoff      │  │ weber-cons   │  │ middleware   │  │              │     │
+│  │ llm-adapter  │  │ topics       │  │              │  │              │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                      RabbitMQ Event Bus (D7)                                 │
+│  Topics: orch.d7.{agent}.parecer → Weber → orch.d7.weber.agregado           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                      PostgreSQL (19 tabelas)                                 │
+│  ORCH AVA: 13 tabelas  │  ORCH ADMIN: 6 tabelas                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Migrations PostgreSQL
+## 2. Estrutura de Arquivos
 
-### 2.1 ORCH AVA - Tabelas Comuns
-
-```sql
--- ===========================================
--- ORCH AVA - Schema Base
--- ===========================================
-
--- Sessões de tutoria (compartilhada entre agentes)
-CREATE TABLE orch_ava_sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    student_id UUID NOT NULL REFERENCES users(id),
-    company_id UUID NOT NULL REFERENCES companies(id),
-    series_id UUID REFERENCES series(id),
-    unit_id UUID REFERENCES units(id),
-    agent_id VARCHAR(50) NOT NULL,
-    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    ended_at TIMESTAMPTZ,
-    messages_count INTEGER DEFAULT 0,
-    resolution_status VARCHAR(20) DEFAULT 'active',
-    learning_outcome VARCHAR(50),
-    metadata JSONB DEFAULT '{}'
-);
-
-CREATE INDEX idx_ava_sessions_student ON orch_ava_sessions(student_id);
-CREATE INDEX idx_ava_sessions_agent ON orch_ava_sessions(agent_id);
-CREATE INDEX idx_ava_sessions_series ON orch_ava_sessions(series_id);
-
--- Handoffs entre agentes
-CREATE TABLE orch_ava_handoffs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID NOT NULL REFERENCES orch_ava_sessions(id),
-    from_agent VARCHAR(50) NOT NULL,
-    to_agent VARCHAR(50) NOT NULL,
-    reason TEXT NOT NULL,
-    context_summary TEXT,
-    accepted BOOLEAN,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_ava_handoffs_session ON orch_ava_handoffs(session_id);
-
--- Intervenções pedagógicas registradas
-CREATE TABLE orch_ava_interventions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID REFERENCES orch_ava_sessions(id),
-    student_id UUID NOT NULL REFERENCES users(id),
-    agent_id VARCHAR(50) NOT NULL,
-    intervention_type VARCHAR(50) NOT NULL,
-    trigger_reason TEXT,
-    content TEXT NOT NULL,
-    student_response VARCHAR(50),
-    effectiveness_score DECIMAL(3,2),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_ava_interventions_student ON orch_ava_interventions(student_id);
-CREATE INDEX idx_ava_interventions_type ON orch_ava_interventions(intervention_type);
-
--- Perfis de aprendizagem (Gardner)
-CREATE TABLE orch_ava_learning_profiles (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    student_id UUID NOT NULL REFERENCES users(id) UNIQUE,
-    dominant_intelligences JSONB NOT NULL DEFAULT '[]',
-    learning_style VARCHAR(50),
-    preferred_formats TEXT[],
-    interaction_history JSONB DEFAULT '[]',
-    last_assessment_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Planos de estudo (Taylor)
-CREATE TABLE orch_ava_study_plans (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    student_id UUID NOT NULL REFERENCES users(id),
-    series_id UUID REFERENCES series(id),
-    plan_type VARCHAR(30) NOT NULL,
-    goals JSONB NOT NULL,
-    schedule JSONB NOT NULL,
-    status VARCHAR(20) DEFAULT 'active',
-    adherence_rate DECIMAL(5,2),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_ava_plans_student ON orch_ava_study_plans(student_id);
-
--- Diálogos socráticos
-CREATE TABLE orch_ava_socratic_dialogues (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID REFERENCES orch_ava_sessions(id),
-    student_id UUID NOT NULL REFERENCES users(id),
-    topic TEXT NOT NULL,
-    question_sequence JSONB NOT NULL DEFAULT '[]',
-    insight_reached BOOLEAN DEFAULT FALSE,
-    insight_summary TEXT,
-    turns_count INTEGER DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Análises de capital cultural (Bourdieu)
-CREATE TABLE orch_ava_cultural_analyses (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    student_id UUID NOT NULL REFERENCES users(id),
-    capital_economico JSONB,
-    capital_cultural JSONB,
-    capital_social JSONB,
-    barriers_identified TEXT[],
-    recommendations JSONB,
-    analyzed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Relatórios D7 gerados
-CREATE TABLE orch_ava_d7_reports (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    agent_id VARCHAR(50) NOT NULL,
-    company_id UUID NOT NULL REFERENCES companies(id),
-    report_date DATE NOT NULL,
-    report_data JSONB NOT NULL,
-    sent_to_weber BOOLEAN DEFAULT FALSE,
-    sent_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(agent_id, company_id, report_date)
-);
-
-CREATE INDEX idx_ava_d7_agent ON orch_ava_d7_reports(agent_id);
-CREATE INDEX idx_ava_d7_date ON orch_ava_d7_reports(report_date DESC);
-```
-
-### 2.2 ORCH ADMIN - Tabelas
-
-```sql
--- ===========================================
--- ORCH ADMIN - Schema
--- ===========================================
-
--- Sessões de interação com usuários admin
-CREATE TABLE orch_admin_sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id),
-    company_id UUID NOT NULL REFERENCES companies(id),
-    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    ended_at TIMESTAMPTZ,
-    pages_visited TEXT[] DEFAULT '{}',
-    commands_used TEXT[] DEFAULT '{}',
-    sentiment_score DECIMAL(3,2),
-    resolution_status VARCHAR(20) DEFAULT 'open',
-    metadata JSONB DEFAULT '{}'
-);
-
-CREATE INDEX idx_admin_sessions_user ON orch_admin_sessions(user_id);
-CREATE INDEX idx_admin_sessions_company ON orch_admin_sessions(company_id);
-CREATE INDEX idx_admin_sessions_started ON orch_admin_sessions(started_at DESC);
-
--- Feedbacks coletados
-CREATE TABLE orch_admin_feedbacks (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID REFERENCES orch_admin_sessions(id),
-    user_id UUID NOT NULL REFERENCES users(id),
-    company_id UUID NOT NULL REFERENCES companies(id),
-    feedback_type VARCHAR(20) NOT NULL,
-    page_context VARCHAR(255),
-    content TEXT NOT NULL,
-    sentiment VARCHAR(20),
-    priority INTEGER DEFAULT 3,
-    status VARCHAR(20) DEFAULT 'new',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    reviewed_at TIMESTAMPTZ,
-    metadata JSONB DEFAULT '{}'
-);
-
-CREATE INDEX idx_admin_feedbacks_type ON orch_admin_feedbacks(feedback_type);
-CREATE INDEX idx_admin_feedbacks_status ON orch_admin_feedbacks(status);
-CREATE INDEX idx_admin_feedbacks_created ON orch_admin_feedbacks(created_at DESC);
-
--- FAQs automáticas
-CREATE TABLE orch_admin_faqs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    question_hash VARCHAR(64) UNIQUE NOT NULL,
-    question_canonical TEXT NOT NULL,
-    answer TEXT NOT NULL,
-    page_context VARCHAR(255),
-    occurrence_count INTEGER DEFAULT 1,
-    last_asked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    promoted_to_docs BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    metadata JSONB DEFAULT '{}'
-);
-
-CREATE INDEX idx_admin_faqs_page ON orch_admin_faqs(page_context);
-CREATE INDEX idx_admin_faqs_count ON orch_admin_faqs(occurrence_count DESC);
-
--- Log de preenchimentos de formulário
-CREATE TABLE orch_admin_form_fills (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID REFERENCES orch_admin_sessions(id),
-    user_id UUID NOT NULL REFERENCES users(id),
-    page_url VARCHAR(500) NOT NULL,
-    fields_filled JSONB NOT NULL,
-    confirmed_by_user BOOLEAN NOT NULL,
-    error_fields TEXT[] DEFAULT '{}',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_admin_fills_session ON orch_admin_form_fills(session_id);
-CREATE INDEX idx_admin_fills_page ON orch_admin_form_fills(page_url);
-
--- Alertas proativos
-CREATE TABLE orch_admin_alerts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id),
-    company_id UUID NOT NULL REFERENCES companies(id),
-    alert_type VARCHAR(50) NOT NULL,
-    severity VARCHAR(20) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    entity_type VARCHAR(50),
-    entity_id UUID,
-    delivered_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    read_at TIMESTAMPTZ,
-    action_taken VARCHAR(50),
-    metadata JSONB DEFAULT '{}'
-);
-
-CREATE INDEX idx_admin_alerts_user ON orch_admin_alerts(user_id);
-CREATE INDEX idx_admin_alerts_type ON orch_admin_alerts(alert_type);
-CREATE INDEX idx_admin_alerts_severity ON orch_admin_alerts(severity);
-
--- Métricas agregadas diárias
-CREATE TABLE orch_admin_metrics (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL REFERENCES companies(id),
-    date DATE NOT NULL,
-    total_sessions INTEGER DEFAULT 0,
-    total_messages INTEGER DEFAULT 0,
-    avg_session_duration INTERVAL,
-    resolution_rate DECIMAL(5,2),
-    avg_sentiment DECIMAL(3,2),
-    feedbacks_collected INTEGER DEFAULT 0,
-    forms_filled INTEGER DEFAULT 0,
-    alerts_sent INTEGER DEFAULT 0,
-    top_pages JSONB DEFAULT '[]',
-    top_commands JSONB DEFAULT '[]',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(company_id, date)
-);
-
-CREATE INDEX idx_admin_metrics_company_date ON orch_admin_metrics(company_id, date DESC);
-```
-
----
-
-## 3. Event Bus - Topics D7
-
-### 3.1 Configuração dos Topics
-
-```yaml
-# kafka-topics.yaml ou equivalente no seu message broker
-
-topics:
-  # ORCH AVA - Um topic por agente
-  - name: orch.d7.hub.parecer
-    partitions: 3
-    retention: 30d
-
-  - name: orch.d7.socrates.parecer
-    partitions: 3
-    retention: 30d
-
-  - name: orch.d7.aristoteles.parecer
-    partitions: 3
-    retention: 30d
-
-  - name: orch.d7.gardner.parecer
-    partitions: 3
-    retention: 30d
-
-  - name: orch.d7.taylor.parecer
-    partitions: 3
-    retention: 30d
-
-  - name: orch.d7.freire.parecer
-    partitions: 3
-    retention: 30d
-
-  - name: orch.d7.wittgenstein.parecer
-    partitions: 3
-    retention: 30d
-
-  - name: orch.d7.bourdieu.parecer
-    partitions: 3
-    retention: 30d
-
-  - name: orch.d7.foucault.parecer
-    partitions: 3
-    retention: 30d
-
-  # ORCH ADMIN
-  - name: orch.d7.admin.parecer
-    partitions: 3
-    retention: 30d
-
-  # Weber agregador
-  - name: orch.d7.weber.agregado
-    partitions: 1
-    retention: 90d
-```
-
-### 3.2 Schema dos Eventos D7
-
-```typescript
-// types/d7-events.ts
-
-interface D7ReportBase {
-  agent_id: string;
-  agent_name: string;
-  company_id: string;
-  report_date: string; // ISO date
-  generated_at: string; // ISO timestamp
-  period: {
-    start: string;
-    end: string;
-  };
-}
-
-interface D7AvaReport extends D7ReportBase {
-  ecosystem: 'orch-ava';
-  metrics: {
-    sessions_count: number;
-    students_helped: number;
-    avg_session_duration_minutes: number;
-    resolution_rate: number;
-    handoffs_made: number;
-    handoffs_received: number;
-  };
-  insights: {
-    category: string;
-    observation: string;
-    recommendation: string;
-    priority: 'low' | 'medium' | 'high';
-  }[];
-  alerts: {
-    type: string;
-    count: number;
-    examples: string[];
-  }[];
-}
-
-interface D7AdminReport extends D7ReportBase {
-  ecosystem: 'orch-admin';
-  metrics: {
-    total_sessions: number;
-    total_feedbacks: number;
-    forms_filled: number;
-    alerts_sent: number;
-    resolution_rate: number;
-    avg_sentiment: number;
-  };
-  feedback_summary: {
-    features_requested: number;
-    bugs_reported: number;
-    ux_issues: number;
-    adjustments: number;
-  };
-  top_pages: {
-    path: string;
-    visits: number;
-    avg_time: number;
-  }[];
-  recommendations: string[];
-}
-```
-
----
-
-## 4. Integração com Weber (Agregador D7)
-
-### 4.1 Consumer Configuration
-
-```typescript
-// services/weber-consumer.ts
-
-import { Kafka } from 'kafkajs';
-
-const kafka = new Kafka({
-  clientId: 'weber-aggregator',
-  brokers: process.env.KAFKA_BROKERS.split(','),
-});
-
-const consumer = kafka.consumer({ groupId: 'weber-d7-group' });
-
-const D7_TOPICS = [
-  'orch.d7.hub.parecer',
-  'orch.d7.socrates.parecer',
-  'orch.d7.aristoteles.parecer',
-  'orch.d7.gardner.parecer',
-  'orch.d7.taylor.parecer',
-  'orch.d7.freire.parecer',
-  'orch.d7.wittgenstein.parecer',
-  'orch.d7.bourdieu.parecer',
-  'orch.d7.foucault.parecer',
-  'orch.d7.admin.parecer',
-];
-
-async function startWeberConsumer() {
-  await consumer.connect();
-  await consumer.subscribe({ topics: D7_TOPICS, fromBeginning: false });
-
-  await consumer.run({
-    eachMessage: async ({ topic, partition, message }) => {
-      const report = JSON.parse(message.value.toString());
-      await processD7Report(topic, report);
-    },
-  });
-}
-
-async function processD7Report(topic: string, report: D7ReportBase) {
-  // 1. Persistir relatório individual
-  await db.orch_d7_reports.insert({
-    agent_id: report.agent_id,
-    company_id: report.company_id,
-    report_date: report.report_date,
-    report_data: report,
-    received_at: new Date(),
-  });
-
-  // 2. Verificar se todos os agentes enviaram
-  const pendingAgents = await checkPendingAgents(report.company_id, report.report_date);
-
-  if (pendingAgents.length === 0) {
-    // 3. Agregar e gerar relatório consolidado
-    await generateConsolidatedReport(report.company_id, report.report_date);
-  }
-}
-```
-
-### 4.2 Cron Jobs para Geração D7
-
-```typescript
-// cron/d7-reports.ts
-
-import cron from 'node-cron';
-
-// Todos os agentes geram relatório às 23:55
-cron.schedule('55 23 * * *', async () => {
-  const companies = await db.companies.findAll({ where: { active: true } });
-
-  for (const company of companies) {
-    // Disparar geração para cada agente
-    await Promise.all([
-      generateAgentReport('hub', company.id),
-      generateAgentReport('socrates', company.id),
-      generateAgentReport('aristoteles', company.id),
-      generateAgentReport('gardner', company.id),
-      generateAgentReport('taylor', company.id),
-      generateAgentReport('freire', company.id),
-      generateAgentReport('wittgenstein', company.id),
-      generateAgentReport('bourdieu', company.id),
-      generateAgentReport('foucault', company.id),
-      generateAgentReport('admin', company.id),
-    ]);
-  }
-});
-
-// Weber agrega às 00:30 (após receber todos)
-cron.schedule('30 0 * * *', async () => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const reportDate = yesterday.toISOString().split('T')[0];
-
-  const companies = await db.companies.findAll({ where: { active: true } });
-
-  for (const company of companies) {
-    await weberAggregateAndSend(company.id, reportDate);
-  }
-});
-```
-
----
-
-## 5. Configuração dos Agentes
-
-### 5.1 Estrutura de Arquivos
+### 2.1 ORCH AVA
 
 ```
 ORCH AVA/
-├── agents/
-│   ├── hub/
-│   │   └── hub-guide.md           # Orquestrador principal
-│   ├── socrates/
-│   │   └── socrates-guide.md      # Maiêutica e questionamento
-│   ├── aristoteles/
-│   │   └── aristoteles-guide.md   # Lógica e argumentação
-│   ├── gardner/
-│   │   └── gardner-guide.md       # Inteligências múltiplas
-│   ├── taylor/
-│   │   └── taylor-guide.md        # Gestão de tempo
-│   ├── freire/
-│   │   └── freire-guide.md        # Pedagogia crítica
-│   ├── wittgenstein/
-│   │   └── wittgenstein-guide.md  # Clareza conceitual
-│   ├── bourdieu/
-│   │   └── bourdieu-guide.md      # Capital cultural
-│   └── foucault/
-│       └── foucault-guide.md      # Avaliação formativa
-├── protocols/
-│   ├── inter-agent-protocol.yaml  # Protocolo de handoff
-│   └── d7-integration.yaml        # Integração com Weber
-└── knowledge-base/
-    └── ava-*.yaml                 # Knowledge base compartilhada
+├── agents/                          # 14 agentes Gold Standard
+│   ├── _hub/hub-guide.md
+│   ├── socrates/socrates-guide.md
+│   ├── aristoteles/aristoteles-guide.md
+│   ├── gardner/gardner-guide.md
+│   ├── taylor/taylor-guide.md
+│   ├── freire/freire-guide.md
+│   ├── wittgenstein/wittgenstein-guide.md
+│   ├── bourdieu/bourdieu-guide.md
+│   ├── foucault/foucault-guide.md
+│   ├── weber/weber-guide.md
+│   ├── dewey/dewey-guide.md
+│   ├── ebbinghaus/ebbinghaus-guide.md
+│   ├── heimdall/heimdall-guide.md
+│   └── sisifo/sisifo-guide.md
+│
+├── migrations/                      # SQL para Cogedu
+│   ├── 1820000000--orch_ava_core_tables.sql
+│   └── 1820000001--orch_ava_agent_tables.sql
+│
+├── src/                             # TypeScript Runtime
+│   ├── types/
+│   │   └── agent.types.ts           # Types, enums, interfaces
+│   ├── core/
+│   │   ├── agent-registry.ts        # Carrega agentes de .md
+│   │   ├── session-manager.ts       # Lifecycle de sessões
+│   │   ├── handoff-protocol.ts      # Transferência entre agentes
+│   │   └── llm-adapter.ts           # Multi-provider LLM
+│   ├── events/
+│   │   ├── topics.ts                # D7 topics definitions
+│   │   ├── event-bus.ts             # RabbitMQ abstraction
+│   │   ├── d7-publisher.ts          # Publica relatórios D7
+│   │   ├── weber-consumer.ts        # Agrega em dossiê
+│   │   └── index.ts
+│   ├── cron/
+│   │   ├── d7-scheduler.ts          # 23:55 D7, 00:30 Weber
+│   │   └── index.ts
+│   ├── api/
+│   │   ├── routes/
+│   │   │   ├── index.ts             # Router principal
+│   │   │   ├── chat.routes.ts       # /api/orch/chat
+│   │   │   ├── agents.routes.ts     # /api/orch/agents
+│   │   │   ├── sessions.routes.ts   # /api/orch/sessions
+│   │   │   └── reports.routes.ts    # /api/orch/reports
+│   │   ├── middleware/
+│   │   │   ├── orch-auth.ts         # JWT/Keycloak
+│   │   │   ├── validate.ts          # Zod validation
+│   │   │   └── index.ts
+│   │   └── validators/
+│   │       ├── chat.validators.ts
+│   │       ├── agents.validators.ts
+│   │       ├── sessions.validators.ts
+│   │       ├── reports.validators.ts
+│   │       └── index.ts
+│   └── index.ts                     # Export principal
+│
+├── knowledge-base/                  # RAG data
+└── auto-update/                     # Scripts de atualização
+```
 
+### 2.2 ORCH ADMIN
+
+```
 ORCH ADMIN/
 ├── agent/
-│   └── page-guide.md              # Agente único v4.0.0
+│   └── page-guide.md                # Agente v4.0.0 (20 seções)
+│
+├── migrations/
+│   └── 1820000002--orch_admin_tables.sql
+│
 ├── knowledge-base/
 │   ├── cogedu-pages-guide.yaml
 │   ├── cogedu-workflows.yaml
@@ -561,114 +138,492 @@ ORCH ADMIN/
 │   ├── orch-memory-schema.yaml
 │   ├── orch-proactive-alerts.yaml
 │   └── zodiac-personas.yaml
-├── auto-update/
-│   └── orch-analytics-engine.ts
-├── feedback/
-│   ├── faq-bank.yaml
-│   ├── improvements-bank.yaml
-│   └── insight-corrections.yaml
-└── logs/
-    └── {user_id}/                 # Logs por usuário
+│
+└── IMPLEMENTATION-GUIDE.md          # Este documento
 ```
 
-### 5.2 Carregamento dos Agentes (Runtime)
+---
+
+## 3. Migrations PostgreSQL
+
+### 3.1 Arquivos de Migration (Prontos para Cogedu)
+
+Copiar para `libs/migrations/migrations/`:
+
+| Arquivo | Tabelas | Descrição |
+|---------|---------|-----------|
+| `1820000000--orch_ava_core_tables.sql` | 5 | Sessões, handoffs, intervenções, D7, dossiê |
+| `1820000001--orch_ava_agent_tables.sql` | 8 | Tabelas específicas por agente |
+| `1820000002--orch_admin_tables.sql` | 6 | Tabelas do admin |
+
+### 3.2 Tabelas ORCH AVA (13 tabelas)
+
+```sql
+-- Core Tables (1820000000)
+orch_ava_session              -- Sessões de todos os agentes
+orch_ava_handoff              -- Transferências entre agentes
+orch_ava_intervention         -- Intervenções pedagógicas
+orch_ava_d7_report            -- Relatórios D7 por agente
+orch_ava_weber_dossier        -- Dossiê consolidado Weber
+
+-- Agent-Specific Tables (1820000001)
+orch_ava_learning_profile     -- Gardner: inteligências múltiplas
+orch_ava_study_plan           -- Taylor: planos de estudo
+orch_ava_socratic_dialogue    -- Sócrates: diálogos maiêuticos
+orch_ava_cultural_analysis    -- Bourdieu: capital cultural
+orch_ava_memory_item          -- Ebbinghaus: revisão espaçada (SM-2)
+orch_ava_gamification_profile -- Sísifo: XP, badges, streaks
+orch_ava_case_study           -- Dewey: estudos de caso
+orch_ava_admission_journey    -- Heimdall: jornada admissão
+```
+
+### 3.3 Tabelas ORCH ADMIN (6 tabelas)
+
+```sql
+-- Admin Tables (1820000002)
+orch_admin_session            -- Sessões do usuário admin
+orch_admin_feedback           -- Feedbacks coletados
+orch_admin_faq                -- FAQs auto-geradas
+orch_admin_form_fill          -- Audit de formulários
+orch_admin_alert              -- Alertas proativos
+orch_admin_metric             -- Métricas diárias
+```
+
+### 3.4 Executando as Migrations
+
+```bash
+# No diretório do Cogedu monorepo
+cd cogedu-main/cogedu-main
+
+# Copiar migrations
+cp /path/to/ORCH\ AVA/migrations/*.sql libs/migrations/migrations/
+cp /path/to/ORCH\ ADMIN/migrations/*.sql libs/migrations/migrations/
+
+# Executar
+npm run migrate:dev
+```
+
+---
+
+## 4. TypeScript Runtime
+
+### 4.1 Instalação
+
+```bash
+cd "ORCH AVA"
+npm init -y
+npm install express zod gray-matter js-yaml amqplib node-cron uuid
+npm install -D typescript @types/node @types/express @types/amqplib
+```
+
+### 4.2 Módulo Core (`src/core/`)
+
+#### agent-registry.ts
+```typescript
+import { AgentRegistry } from './src/core/agent-registry';
+
+const registry = AgentRegistry.getInstance({
+  agentsPath: './agents',
+  cacheEnabled: true,
+  cacheTTL: 300000, // 5 min
+});
+
+await registry.loadAllAgents();
+
+// Buscar agente
+const socrates = registry.getAgent('socrates');
+
+// Buscar por trigger
+const agents = registry.getAgentsByTrigger('duvida conceitual');
+
+// Verificar handoff permitido
+const allowed = registry.isHandoffAllowed('hub', 'socrates');
+```
+
+#### session-manager.ts
+```typescript
+import { SessionManager } from './src/core/session-manager';
+
+const sessions = SessionManager.getInstance();
+
+// Criar sessão
+const session = await sessions.createSession({
+  userId: 'student-001',
+  companyId: 'company-001',
+  initialAgentId: 'hub',
+  pageUrl: '/cursos/programacao',
+});
+
+// Adicionar mensagem
+await sessions.addMessage(session.id, {
+  role: 'user',
+  content: 'Não entendi o conceito de recursão',
+});
+
+// Obter histórico para LLM
+const history = await sessions.getConversationHistory(session.id);
+```
+
+#### handoff-protocol.ts
+```typescript
+import { HandoffProtocol } from './src/core/handoff-protocol';
+
+const handoffs = HandoffProtocol.getInstance();
+
+// Solicitar handoff
+const request = await handoffs.requestHandoff(
+  session.id,
+  'hub',
+  'socrates',
+  'Estudante precisa de questionamento maiêutico'
+);
+
+// Aceitar/rejeitar
+await handoffs.acceptHandoff(request.id);
+// ou
+await handoffs.rejectHandoff(request.id, 'Agente ocupado');
+```
+
+#### llm-adapter.ts
+```typescript
+import { LLMAdapter } from './src/core/llm-adapter';
+
+const llm = LLMAdapter.getInstance({
+  provider: 'anthropic', // ou 'openai', 'dify'
+  model: 'claude-3-5-sonnet-20241022',
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+// Build prompt com system message do agente
+const messages = llm.buildPrompt('socrates', conversationHistory, {
+  studentName: 'João',
+  currentTopic: 'Recursão',
+});
+
+// Chat com streaming
+const response = await llm.chat({
+  messages,
+  agentId: 'socrates',
+  sessionId: session.id,
+  stream: true,
+}, (chunk) => {
+  process.stdout.write(chunk.content);
+});
+```
+
+### 4.3 Módulo Events (`src/events/`)
+
+#### Event Bus (RabbitMQ)
+```typescript
+import { getEventBus } from './src/events';
+
+const eventBus = getEventBus({
+  url: process.env.RABBITMQ_URL || 'amqp://localhost:5672',
+});
+
+await eventBus.connect();
+
+// Publicar
+await eventBus.publish('orch.d7.socrates.parecer', reportData);
+
+// Subscrever
+await eventBus.subscribe('orch.d7.*.parecer', async (topic, data) => {
+  console.log(`Received from ${topic}:`, data);
+});
+```
+
+#### D7 Publisher
+```typescript
+import { D7Publisher } from './src/events/d7-publisher';
+
+const d7 = new D7Publisher(eventBus);
+
+await d7.publishD7Report('socrates', 'company-001', {
+  status: 'ok',
+  summary: '15 diálogos socráticos hoje, 12 com insight alcançado',
+  metrics: {
+    dialogues_started: { current: 15, previous: 12 },
+    insights_reached: { current: 12, previous: 10 },
+    avg_turns: { current: 8.5, previous: 9.2 },
+  },
+  alerts: [],
+  recommendations: [
+    'Estudantes de Cálculo II com dificuldade em limites - considerar material extra',
+  ],
+});
+```
+
+#### Weber Consumer
+```typescript
+import { WeberConsumer } from './src/events/weber-consumer';
+
+const weber = new WeberConsumer(eventBus, db);
+
+// Inicia consumo de todos os topics D7
+await weber.start();
+
+// Evento quando dossiê é gerado
+weber.on('dossier:generated', (dossier) => {
+  console.log('Dossiê consolidado:', dossier);
+});
+```
+
+### 4.4 Módulo Cron (`src/cron/`)
 
 ```typescript
-// services/agent-loader.ts
+import { initializeOrchCron } from './src/cron';
 
-import { readFileSync } from 'fs';
-import yaml from 'js-yaml';
-import matter from 'gray-matter';
+await initializeOrchCron({
+  companyId: 'company-001',
+  rabbitMQUrl: process.env.RABBITMQ_URL,
+  timezone: 'America/Sao_Paulo',
+});
 
-interface AgentDefinition {
-  id: string;
-  name: string;
-  version: string;
-  role: string;
-  ecosystem: 'orch-ava' | 'orch-admin';
-  triggers: string[];
-  capabilities: string[];
-  prompt: string;
-}
-
-export function loadAgent(agentPath: string): AgentDefinition {
-  const content = readFileSync(agentPath, 'utf-8');
-  const { data: frontmatter, content: markdown } = matter(content);
-
-  return {
-    id: frontmatter.id,
-    name: frontmatter.name,
-    version: frontmatter.version,
-    role: frontmatter.role,
-    ecosystem: frontmatter.ecosystem,
-    triggers: frontmatter.trigger?.split(' + ') || [],
-    capabilities: extractCapabilities(markdown),
-    prompt: markdown,
-  };
-}
-
-export function loadAllAvaAgents(): Map<string, AgentDefinition> {
-  const agents = new Map();
-  const agentDirs = [
-    'hub', 'socrates', 'aristoteles', 'gardner',
-    'taylor', 'freire', 'wittgenstein', 'bourdieu', 'foucault'
-  ];
-
-  for (const dir of agentDirs) {
-    const path = `./ORCH AVA/agents/${dir}/${dir}-guide.md`;
-    agents.set(dir, loadAgent(path));
-  }
-
-  return agents;
-}
+// Cron jobs configurados:
+// - 23:55: Gera D7 de todos os agentes
+// - 00:30: Weber agrega em dossiê
+// - 03:00 (dom): Limpeza de logs antigos
+// - */15: Health check dos agentes
 ```
 
 ---
 
-## 6. Checklist de Implementação
+## 5. API Endpoints
 
-### 6.1 Infraestrutura
+### 5.1 Montagem no Express
 
-- [ ] PostgreSQL 14+ com extensão `pgcrypto` (para `gen_random_uuid()`)
-- [ ] Kafka/RabbitMQ para Event Bus
-- [ ] Redis para cache de sessões
-- [ ] S3/MinIO para logs arquivados
+```typescript
+// No apps/api/src/index.ts do Cogedu
+import { orchRouter } from '@orch-ava/api/routes';
 
-### 6.2 Migrations
+app.use('/api/orch', orchRouter);
+```
 
-- [ ] Executar migrations ORCH AVA (Seção 2.1)
-- [ ] Executar migrations ORCH ADMIN (Seção 2.2)
-- [ ] Criar índices de performance
-- [ ] Configurar particionamento por data (opcional)
+### 5.2 Endpoints Disponíveis
 
-### 6.3 Event Bus
+#### Chat (`/api/orch/chat`)
 
-- [ ] Criar topics D7 (Seção 3.1)
-- [ ] Configurar consumer Weber
-- [ ] Testar publicação/consumo
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | `/` | Enviar mensagem |
+| POST | `/stream` | Streaming SSE |
+| GET | `/:sessionId/history` | Histórico de mensagens |
+| POST | `/:sessionId/end` | Encerrar sessão |
 
-### 6.4 Agentes
+```typescript
+// POST /api/orch/chat
+{
+  "message": "Não entendi recursão",
+  "sessionId": "uuid-optional",  // cria nova se não existir
+  "agentId": "hub",              // opcional, usa hub por padrão
+  "context": {
+    "pageUrl": "/cursos/programacao/modulo-3",
+    "unitId": "uuid"
+  }
+}
 
-- [ ] Carregar definições dos 17+ agentes AVA
-- [ ] Carregar definição do agente ADMIN
-- [ ] Configurar knowledge bases
-- [ ] Integrar com LLM provider (Anthropic/OpenAI)
+// Response
+{
+  "success": true,
+  "data": {
+    "sessionId": "uuid",
+    "agentId": "socrates",       // pode ter mudado via handoff
+    "message": "Interessante! O que você entende por 'função chamar ela mesma'?",
+    "metadata": {
+      "handoff": true,
+      "fromAgent": "hub",
+      "reason": "Dúvida conceitual profunda"
+    }
+  }
+}
+```
 
-### 6.5 Cron Jobs
+#### Agents (`/api/orch/agents`)
 
-- [ ] Configurar geração D7 às 23:55
-- [ ] Configurar agregação Weber às 00:30
-- [ ] Configurar limpeza de logs (730 dias)
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/` | Listar agentes disponíveis |
+| GET | `/:id` | Detalhes do agente |
+| GET | `/:id/stats` | Estatísticas do agente |
+| POST | `/:id/handoff` | Solicitar handoff manual |
 
-### 6.6 Monitoramento
+#### Sessions (`/api/orch/sessions`)
 
-- [ ] Dashboards de métricas por agente
-- [ ] Alertas de falha de geração D7
-- [ ] Log aggregation (ELK/Datadog)
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/` | Listar sessões do usuário |
+| GET | `/active` | Sessão ativa atual |
+| GET | `/:id` | Detalhes da sessão |
+| PATCH | `/:id` | Atualizar sessão |
+
+#### Reports (`/api/orch/reports`)
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/d7` | Relatórios D7 (paginado) |
+| GET | `/d7/:agentId` | D7 de um agente específico |
+| GET | `/dossier/:studentId` | Dossiê Weber do aluno |
+| GET | `/metrics` | Métricas agregadas |
+
+### 5.3 Autenticação
+
+```typescript
+// Middleware orch-auth.ts
+// Extrai do JWT Keycloak:
+// - tenant_id
+// - company_id
+// - user_id
+// - roles (para verificar permissões ORCH)
+
+// Headers requeridos:
+Authorization: Bearer <jwt>
+X-Tenant-Id: <uuid>      // opcional, extraído do JWT
+X-Company-Id: <uuid>     // opcional, extraído do JWT
+```
+
+### 5.4 Permissões ORCH
+
+```typescript
+// Permissões verificadas pelo middleware
+'orch.chat.send'          // Enviar mensagens
+'orch.chat.stream'        // Usar streaming
+'orch.sessions.view'      // Ver sessões
+'orch.sessions.manage'    // Gerenciar sessões
+'orch.agents.view'        // Ver agentes
+'orch.agents.handoff'     // Solicitar handoff manual
+'orch.reports.d7'         // Ver relatórios D7
+'orch.reports.dossier'    // Ver dossiês
+'orch.reports.metrics'    // Ver métricas
+'orch.admin'              // Acesso administrativo total
+```
 
 ---
 
-## 7. KPIs de Sucesso
+## 6. Event Bus D7
+
+### 6.1 Topics
+
+```
+orch.d7.hub.parecer
+orch.d7.socrates.parecer
+orch.d7.aristoteles.parecer
+orch.d7.gardner.parecer
+orch.d7.taylor.parecer
+orch.d7.freire.parecer
+orch.d7.wittgenstein.parecer
+orch.d7.bourdieu.parecer
+orch.d7.foucault.parecer
+orch.d7.weber.parecer
+orch.d7.dewey.parecer
+orch.d7.ebbinghaus.parecer
+orch.d7.heimdall.parecer
+orch.d7.sisifo.parecer
+orch.d7.admin.parecer
+
+orch.d7.weber.agregado     # Dossiê consolidado
+```
+
+### 6.2 Fluxo D7
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        FLUXO D7 DIÁRIO                          │
+├─────────────────────────────────────────────────────────────────┤
+│  23:55  Cron dispara geração D7 para todos os agentes           │
+│         │                                                        │
+│         ├──→ Hub publica em orch.d7.hub.parecer                 │
+│         ├──→ Sócrates publica em orch.d7.socrates.parecer       │
+│         ├──→ ... (todos os 14 agentes)                          │
+│         └──→ Admin publica em orch.d7.admin.parecer             │
+│                                                                  │
+│  00:00  Weber Consumer recebe todos os relatórios               │
+│         │                                                        │
+│         └──→ Armazena em orch_ava_d7_report                     │
+│                                                                  │
+│  00:30  Cron dispara agregação Weber                            │
+│         │                                                        │
+│         ├──→ Agrupa relatórios por company_id                   │
+│         ├──→ Calcula health score                               │
+│         ├──→ Identifica alertas críticos                        │
+│         ├──→ Gera dossiê consolidado                            │
+│         └──→ Publica em orch.d7.weber.agregado                  │
+│                                                                  │
+│  00:35  Dossiê disponível para consulta                         │
+│         GET /api/orch/reports/dossier/:studentId                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 7. Checklist de Implementação
+
+### 7.1 Infraestrutura
+- [ ] PostgreSQL 14+ com `uuid-ossp` extension
+- [ ] RabbitMQ para Event Bus
+- [ ] Redis para cache de sessões (opcional)
+- [ ] S3/MinIO para logs arquivados (opcional)
+
+### 7.2 Migrations
+- [ ] Copiar `1820000000--orch_ava_core_tables.sql`
+- [ ] Copiar `1820000001--orch_ava_agent_tables.sql`
+- [ ] Copiar `1820000002--orch_admin_tables.sql`
+- [ ] Executar `npm run migrate:dev`
+
+### 7.3 TypeScript Runtime
+- [ ] Copiar `src/` para o projeto
+- [ ] Instalar dependências
+- [ ] Configurar variáveis de ambiente
+- [ ] Testar agent-registry com agentes .md
+
+### 7.4 API Endpoints
+- [ ] Montar router em `/api/orch`
+- [ ] Configurar middleware de auth
+- [ ] Testar endpoints com Postman/Insomnia
+
+### 7.5 Event Bus
+- [ ] Criar exchange e queues no RabbitMQ
+- [ ] Iniciar Weber Consumer
+- [ ] Testar publicação/consumo D7
+
+### 7.6 Cron Jobs
+- [ ] Configurar crons no servidor
+- [ ] Testar geração D7 manual
+- [ ] Testar agregação Weber manual
+
+### 7.7 Integração Frontend
+- [ ] Widget de chat no AVA
+- [ ] Widget de ajuda no Admin
+- [ ] Streaming SSE funcionando
+
+---
+
+## 8. Variáveis de Ambiente
+
+```bash
+# LLM Provider
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+LLM_PROVIDER=anthropic  # anthropic | openai | dify
+LLM_MODEL=claude-3-5-sonnet-20241022
+
+# RabbitMQ
+RABBITMQ_URL=amqp://localhost:5672
+
+# Database (já configurado no Cogedu)
+DATABASE_URL=postgresql://...
+
+# Redis (opcional)
+REDIS_URL=redis://localhost:6379
+
+# Orch Config
+ORCH_AGENTS_PATH=./agents
+ORCH_SESSION_TIMEOUT=1800000  # 30 min em ms
+ORCH_D7_TIMEZONE=America/Sao_Paulo
+```
+
+---
+
+## 9. KPIs de Sucesso
 
 | Métrica | Meta | Frequência |
 |---------|------|------------|
@@ -679,45 +634,45 @@ export function loadAllAvaAgents(): Map<string, AgentDefinition> {
 | Cobertura D7 | 100% agentes | Diária |
 | Uptime agentes | >= 99.5% | Mensal |
 | Redução tickets suporte | >= 30% | Mensal |
+| Insights gerados (Sócrates) | >= 80% | Semanal |
+| Handoffs bem-sucedidos | >= 90% | Semanal |
 
 ---
 
-## 8. Próximos Passos
+## 10. Repositórios GitHub
 
-### Fase 1: MVP (2-4 semanas)
-1. Deploy ORCH ADMIN (agente único)
-2. Migrations básicas
-3. Integração com widget existente
-4. Coleta de feedback
+| Repositório | Conteúdo |
+|-------------|----------|
+| `orchestra-data/orch-ava` | 14 agentes + runtime + migrations |
+| `orchestra-data/orch-admin` | 1 agente + migrations + este guia |
 
-### Fase 2: ORCH AVA Básico (4-6 semanas)
-1. Deploy Hub + 3 agentes core (Sócrates, Gardner, Taylor)
-2. Protocolo de handoff
-3. Integração com player de vídeo
+### Commits Recentes
 
-### Fase 3: Expansão (6-8 semanas)
-1. Deploy agentes restantes
-2. Sistema D7 completo
-3. Weber agregador
-4. Dashboards analytics
+```
+# ORCH AVA
+a41ab7b feat: add complete TypeScript runtime (26 files, 9717 lines)
+de9765e feat: add PostgreSQL migrations (13 tables)
+79df473 feat: apply Genesis 6-Phase to 5 remaining agents
 
-### Fase 4: Otimização (ongoing)
-1. Fine-tuning de prompts
-2. A/B testing
-3. Novos agentes especializados
+# ORCH ADMIN
+cd77f51 feat: add PostgreSQL migrations (6 tables)
+6ab8b0e feat: apply Genesis 6-Phase improvement v4.0.0
+```
 
 ---
 
-## 9. Contatos e Recursos
+## 11. Suporte
 
 | Recurso | Localização |
 |---------|-------------|
-| Agentes AVA | `C:\Projetos IA\ORCH AVA\agents\` |
-| Agente ADMIN | `C:\Projetos IA\ORCH ADMIN\agent\` |
+| Agentes AVA | `ORCH AVA/agents/` |
+| Agente ADMIN | `ORCH ADMIN/agent/page-guide.md` |
+| Runtime TypeScript | `ORCH AVA/src/` |
+| Migrations | `*/migrations/*.sql` |
 | Knowledge Bases | `*/knowledge-base/*.yaml` |
-| Este documento | `C:\Projetos IA\ORCH-IMPLEMENTATION-GUIDE.md` |
 
 ---
 
-*Documento gerado automaticamente após aplicação do Genesis 6-Phase Improvement Plan*
-*Versão: 4.0.0 | Data: 2026-02-06*
+*Documento atualizado após implementação completa do runtime TypeScript*
+*Versão: 5.0.0 | Data: 2026-02-06*
+*Total: 44 arquivos | 26 TypeScript | 3 SQL | 15 Agent Guides*
