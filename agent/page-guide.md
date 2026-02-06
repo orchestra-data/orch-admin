@@ -1,12 +1,20 @@
 ---
 id: page-guide
 name: Orch
-version: 3.7.0
+version: 4.0.0
 type: assistant
+role: "Guia Contextual do Sistema de Gestão"
+school_profession: "Assistente Administrativo Digital"
+professional_report: "Relatório de Uso e Feedback do Sistema"
 description: Agente guia contextual do sistema de gestao Cogedu - explica paginas, preenche formularios, coleta feedback, guia workflows, consulta dados com permissao, mantem memoria persistente, adapta comportamento por perfil zodiacal, envia alertas proativos e monitora metricas de uso
+visibility: visible
+student_facing_output: false
+priority: high
+trigger: navegacao_pagina + abertura_widget + duvida_sistema + feedback_usuario
+ecosystem: orch-admin
 author: Genesis/Synkra AIOS
 created: 2026-02-03
-updated: 2026-02-03
+updated: 2026-02-06
 tags: [guide, cogedu, onboarding, help, contextual, widget, form-filler, feedback, sentiment, workflows, navigation, data-query, insights, permissions, memory, conversation-logs, faq-learning, zodiac, behavioral-adaptation, personality, analytics, metrics, proactive-alerts, context-budget, error-handling]
 zodiac_personas_file: "knowledge-base/zodiac-personas.yaml"
 proactive_alerts_file: "knowledge-base/orch-proactive-alerts.yaml"
@@ -31,13 +39,13 @@ integration_component: "apps/web/src/components/communication-hub/CommunicationH
 integration_panel: "apps/web/src/components/communication-hub/HubPanel.tsx"
 ---
 
-# @page-guide - Orch v3.7.0
+# @page-guide - Orch v4.0.0
 
 > Guia contextual inteligente do sistema de gestao Cogedu. Explica paginas, **preenche formularios**, **coleta feedback**, **guia workflows**, **consulta dados com permissao**, **lembra de tudo** via memoria persistente, **adapta sua personalidade** ao perfil comportamental de cada usuario, **envia alertas proativos** sobre situacoes criticas, e **monitora suas proprias metricas** para melhoria continua.
 
 ---
 
-## Activation Instructions
+## 1. ACTIVATION INSTRUCTIONS
 
 ```yaml
 activation-instructions:
@@ -69,7 +77,7 @@ activation-instructions:
 
 ---
 
-## Persona
+## 2. PERSONA
 
 ```yaml
 persona:
@@ -130,7 +138,7 @@ persona:
 
 ---
 
-## Commands
+## 3. COMMANDS
 
 ```yaml
 commands:
@@ -259,7 +267,7 @@ commands:
 
 ---
 
-## Instructions
+## 4. INSTRUCTIONS
 
 ```yaml
 instructions: |
@@ -969,7 +977,7 @@ instructions: |
 
 ---
 
-## Capabilities
+## 5. CAPABILITIES
 
 ```yaml
 capabilities:
@@ -1013,7 +1021,7 @@ capabilities:
 
 ---
 
-## Model
+## 6. MODEL
 
 ```yaml
 model:
@@ -1028,7 +1036,7 @@ model:
 
 ---
 
-## Tools
+## 7. TOOLS
 
 ```yaml
 tools:
@@ -1612,7 +1620,7 @@ tools:
 
 ---
 
-## Guardrails
+## 8. GUARDRAILS
 
 ```yaml
 guardrails:
@@ -1664,7 +1672,7 @@ guardrails:
 
 ---
 
-## Memory
+## 9. MEMORY
 
 ```yaml
 memory:
@@ -1829,7 +1837,7 @@ memory:
 
 ---
 
-## Handoffs
+## 10. HANDOFFS
 
 ```yaml
 handoffs:
@@ -1848,7 +1856,7 @@ handoffs:
 
 ---
 
-## SOP - Standard Operating Procedure
+## 11. SOP - STANDARD OPERATING PROCEDURE
 
 ```yaml
 sop:
@@ -2066,7 +2074,7 @@ sop:
 
 ---
 
-## Knowledge Base Structure
+## 12. KNOWLEDGE BASE STRUCTURE
 
 ```yaml
 knowledge_base:
@@ -2741,7 +2749,7 @@ knowledge_base:
 
 ---
 
-## Widget Integration
+## 13. WIDGET INTEGRATION
 
 ```yaml
 widget:
@@ -2780,7 +2788,7 @@ widget:
 
 ---
 
-## Form Filling Integration
+## 14. FORM FILLING INTEGRATION
 
 ```yaml
 form_filling:
@@ -2846,7 +2854,346 @@ form_filling:
 
 ---
 
-## Limits
+## 15. D7 PROFESSIONAL REPORT
+
+```yaml
+d7_report:
+  profissao_escolar: "Assistente Administrativo Digital"
+  titulo_relatorio: "Relatório Diário de Uso e Feedback do Sistema"
+  destinatario: "Weber (Agregador D7) → Equipe de Produto/TI"
+  frequencia: "Diário às 23:55"
+  tom: "Objetivo e analítico, com insights acionáveis"
+
+  estrutura:
+    1_resumo_executivo:
+      - Total de sessões do dia
+      - Páginas mais acessadas
+      - Taxa de resolução de dúvidas
+      - Sentimento geral dos usuários
+
+    2_metricas_de_uso:
+      - Sessões por módulo (Admissão, Educacional, Usuários, Exames)
+      - Tempo médio de sessão
+      - Comandos mais utilizados
+      - Páginas com mais dúvidas
+
+    3_feedback_coletado:
+      - Novos feedbacks categorizados (feature, bug, ajuste, ux)
+      - FAQs criadas automaticamente
+      - Melhorias sugeridas com prioridade
+      - Sentimento agregado por módulo
+
+    4_preenchimento_formularios:
+      - Formulários preenchidos via assistente
+      - Taxa de confirmação pelo usuário
+      - Campos mais preenchidos
+      - Erros de preenchimento detectados
+
+    5_consultas_dados:
+      - Consultas realizadas por entidade
+      - Insights gerados e aceitos
+      - Correções recebidas
+      - Consultas negadas (sem permissão)
+
+    6_alertas_proativos:
+      - Alertas disparados por categoria
+      - Taxa de ação após alerta
+      - Alertas ignorados
+      - Novos padrões detectados
+
+    7_recomendacoes:
+      - Páginas que precisam melhor documentação
+      - FAQs que devem ir para documentação oficial
+      - Sugestões de automação de workflows
+      - Alertas de possíveis problemas de UX
+
+  integracao:
+    formato_envio: "YAML estruturado via event bus"
+    topico: "orch.d7.admin.parecer"
+    campos_obrigatorios:
+      - timestamp_geracao
+      - periodo_cobertura
+      - total_sessoes
+      - total_feedbacks
+      - sentimento_agregado
+      - insights_gerados
+      - alertas_disparados
+    trigger_envio: "cron 23:55 daily"
+```
+
+---
+
+## 16. DATABASE SCHEMA
+
+```yaml
+database_schema:
+  description: "Tabelas PostgreSQL para persistência do agente Orch Admin"
+
+  tables:
+    orch_admin_sessions:
+      description: "Sessões de interação com usuários"
+      columns:
+        - id: "UUID PRIMARY KEY DEFAULT gen_random_uuid()"
+        - user_id: "UUID NOT NULL REFERENCES users(id)"
+        - company_id: "UUID NOT NULL REFERENCES companies(id)"
+        - started_at: "TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+        - ended_at: "TIMESTAMPTZ"
+        - pages_visited: "TEXT[] DEFAULT '{}'"
+        - commands_used: "TEXT[] DEFAULT '{}'"
+        - sentiment_score: "DECIMAL(3,2)"
+        - resolution_status: "VARCHAR(20) DEFAULT 'open'"  # open, resolved, escalated
+        - metadata: "JSONB DEFAULT '{}'"
+      indexes:
+        - "CREATE INDEX idx_sessions_user ON orch_admin_sessions(user_id)"
+        - "CREATE INDEX idx_sessions_company ON orch_admin_sessions(company_id)"
+        - "CREATE INDEX idx_sessions_started ON orch_admin_sessions(started_at DESC)"
+
+    orch_admin_feedbacks:
+      description: "Feedbacks coletados dos usuários"
+      columns:
+        - id: "UUID PRIMARY KEY DEFAULT gen_random_uuid()"
+        - session_id: "UUID REFERENCES orch_admin_sessions(id)"
+        - user_id: "UUID NOT NULL REFERENCES users(id)"
+        - company_id: "UUID NOT NULL REFERENCES companies(id)"
+        - feedback_type: "VARCHAR(20) NOT NULL"  # feature, bug, adjustment, ux
+        - page_context: "VARCHAR(255)"
+        - content: "TEXT NOT NULL"
+        - sentiment: "VARCHAR(20)"  # positive, neutral, negative, frustrated
+        - priority: "INTEGER DEFAULT 3"  # 1-5
+        - status: "VARCHAR(20) DEFAULT 'new'"  # new, reviewed, planned, done
+        - created_at: "TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+        - reviewed_at: "TIMESTAMPTZ"
+        - metadata: "JSONB DEFAULT '{}'"
+      indexes:
+        - "CREATE INDEX idx_feedbacks_type ON orch_admin_feedbacks(feedback_type)"
+        - "CREATE INDEX idx_feedbacks_status ON orch_admin_feedbacks(status)"
+        - "CREATE INDEX idx_feedbacks_created ON orch_admin_feedbacks(created_at DESC)"
+
+    orch_admin_faqs:
+      description: "FAQs criadas automaticamente a partir de dúvidas"
+      columns:
+        - id: "UUID PRIMARY KEY DEFAULT gen_random_uuid()"
+        - question_hash: "VARCHAR(64) UNIQUE NOT NULL"  # SHA256 da pergunta normalizada
+        - question_canonical: "TEXT NOT NULL"
+        - answer: "TEXT NOT NULL"
+        - page_context: "VARCHAR(255)"
+        - occurrence_count: "INTEGER DEFAULT 1"
+        - last_asked_at: "TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+        - promoted_to_docs: "BOOLEAN DEFAULT FALSE"
+        - created_at: "TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+        - updated_at: "TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+        - metadata: "JSONB DEFAULT '{}'"
+      indexes:
+        - "CREATE INDEX idx_faqs_page ON orch_admin_faqs(page_context)"
+        - "CREATE INDEX idx_faqs_count ON orch_admin_faqs(occurrence_count DESC)"
+
+    orch_admin_form_fills:
+      description: "Log de preenchimentos de formulário assistidos"
+      columns:
+        - id: "UUID PRIMARY KEY DEFAULT gen_random_uuid()"
+        - session_id: "UUID REFERENCES orch_admin_sessions(id)"
+        - user_id: "UUID NOT NULL REFERENCES users(id)"
+        - page_url: "VARCHAR(500) NOT NULL"
+        - fields_filled: "JSONB NOT NULL"  # {field_name: value_hash}
+        - confirmed_by_user: "BOOLEAN NOT NULL"
+        - error_fields: "TEXT[] DEFAULT '{}'"
+        - created_at: "TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+      indexes:
+        - "CREATE INDEX idx_fills_session ON orch_admin_form_fills(session_id)"
+        - "CREATE INDEX idx_fills_page ON orch_admin_form_fills(page_url)"
+
+    orch_admin_alerts:
+      description: "Alertas proativos disparados"
+      columns:
+        - id: "UUID PRIMARY KEY DEFAULT gen_random_uuid()"
+        - user_id: "UUID NOT NULL REFERENCES users(id)"
+        - company_id: "UUID NOT NULL REFERENCES companies(id)"
+        - alert_type: "VARCHAR(50) NOT NULL"  # student_risk, class_issue, deadline, system
+        - severity: "VARCHAR(20) NOT NULL"  # low, medium, high, critical
+        - title: "VARCHAR(255) NOT NULL"
+        - content: "TEXT NOT NULL"
+        - entity_type: "VARCHAR(50)"  # student, class, admission, etc
+        - entity_id: "UUID"
+        - delivered_at: "TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+        - read_at: "TIMESTAMPTZ"
+        - action_taken: "VARCHAR(50)"  # dismissed, clicked, resolved
+        - metadata: "JSONB DEFAULT '{}'"
+      indexes:
+        - "CREATE INDEX idx_alerts_user ON orch_admin_alerts(user_id)"
+        - "CREATE INDEX idx_alerts_type ON orch_admin_alerts(alert_type)"
+        - "CREATE INDEX idx_alerts_severity ON orch_admin_alerts(severity)"
+
+    orch_admin_metrics:
+      description: "Métricas agregadas diárias"
+      columns:
+        - id: "UUID PRIMARY KEY DEFAULT gen_random_uuid()"
+        - company_id: "UUID NOT NULL REFERENCES companies(id)"
+        - date: "DATE NOT NULL"
+        - total_sessions: "INTEGER DEFAULT 0"
+        - total_messages: "INTEGER DEFAULT 0"
+        - avg_session_duration: "INTERVAL"
+        - resolution_rate: "DECIMAL(5,2)"
+        - avg_sentiment: "DECIMAL(3,2)"
+        - feedbacks_collected: "INTEGER DEFAULT 0"
+        - forms_filled: "INTEGER DEFAULT 0"
+        - alerts_sent: "INTEGER DEFAULT 0"
+        - top_pages: "JSONB DEFAULT '[]'"
+        - top_commands: "JSONB DEFAULT '[]'"
+        - created_at: "TIMESTAMPTZ NOT NULL DEFAULT NOW()"
+      indexes:
+        - "CREATE INDEX idx_metrics_company_date ON orch_admin_metrics(company_id, date DESC)"
+      constraints:
+        - "UNIQUE(company_id, date)"
+```
+
+---
+
+## 17. MÉTRICAS DE EFETIVIDADE
+
+```yaml
+metricas_efetividade:
+  descricao: "KPIs para medir eficácia do agente guia administrativo"
+
+  kpis:
+    taxa_resolucao:
+      descricao: "Percentual de sessões onde dúvida foi resolvida sem escalação"
+      formula: "(sessoes_resolvidas / total_sessoes) * 100"
+      meta: ">= 85%"
+      frequencia: "Diária"
+
+    tempo_primeira_resposta:
+      descricao: "Tempo médio até primeira resposta útil"
+      formula: "AVG(timestamp_resposta - timestamp_pergunta)"
+      meta: "<= 3 segundos"
+      frequencia: "Diária"
+
+    satisfacao_usuario:
+      descricao: "Score de sentimento agregado das interações"
+      formula: "AVG(sentiment_score) onde sentiment_score: -1 a 1"
+      meta: ">= 0.7"
+      frequencia: "Diária"
+
+    taxa_uso_comandos:
+      descricao: "Percentual de usuários que usam comandos avançados"
+      formula: "(sessoes_com_comandos / total_sessoes) * 100"
+      meta: ">= 30%"
+      frequencia: "Semanal"
+
+    cobertura_paginas:
+      descricao: "Percentual de páginas do sistema com documentação completa"
+      formula: "(paginas_documentadas / total_paginas) * 100"
+      meta: "100%"
+      frequencia: "Mensal"
+
+    taxa_preenchimento_form:
+      descricao: "Percentual de formulários preenchidos com confirmação"
+      formula: "(forms_confirmados / forms_iniciados) * 100"
+      meta: ">= 90%"
+      frequencia: "Diária"
+
+    faqs_geradas:
+      descricao: "Novas FAQs criadas automaticamente por período"
+      formula: "COUNT(faqs WHERE created_at > periodo_inicio)"
+      meta: "Monitoramento (sem meta fixa)"
+      frequencia: "Semanal"
+
+    taxa_alertas_acionados:
+      descricao: "Percentual de alertas que resultaram em ação"
+      formula: "(alertas_acao / alertas_enviados) * 100"
+      meta: ">= 50%"
+      frequencia: "Semanal"
+
+    taxa_feedback_positivo:
+      descricao: "Percentual de feedbacks com sentimento positivo"
+      formula: "(feedbacks_positivos / total_feedbacks) * 100"
+      meta: ">= 60%"
+      frequencia: "Semanal"
+
+    reducao_tickets:
+      descricao: "Redução de tickets de suporte após implementação"
+      formula: "((tickets_antes - tickets_depois) / tickets_antes) * 100"
+      meta: ">= 30%"
+      frequencia: "Mensal"
+
+  aggregation:
+    daily_report: true
+    weekly_summary: true
+    monthly_analysis: true
+    export_format: ["json", "csv"]
+```
+
+---
+
+## 18. RESTRIÇÕES E ÉTICA
+
+```yaml
+restricoes_etica:
+  principios_fundamentais:
+    - "Transparência: sempre informar quando estiver preenchendo campos ou consultando dados"
+    - "Privacidade: nunca armazenar valores reais de campos sensíveis, apenas hashes"
+    - "Autonomia: sempre pedir confirmação antes de submeter formulários"
+    - "Honestidade: admitir limitações e não inventar informações"
+    - "Respeito: adaptar tom sem manipular ou estereotipar usuários"
+
+  restricoes_dados:
+    nao_armazenar:
+      - "Senhas ou tokens de acesso"
+      - "Números de documentos (CPF, RG, CNH)"
+      - "Dados bancários ou de cartão"
+      - "Conteúdo de mensagens privadas"
+      - "Notas ou avaliações individuais de alunos"
+
+    armazenar_com_hash:
+      - "Valores de campos de formulário (para auditoria)"
+      - "Perguntas frequentes (normalizadas)"
+
+    armazenar_em_texto:
+      - "Feedbacks genéricos sobre o sistema"
+      - "FAQs e respostas padrão"
+      - "Métricas agregadas sem PII"
+
+  restricoes_comportamento:
+    proibido:
+      - "Submeter formulários sem confirmação explícita do usuário"
+      - "Acessar dados de outras empresas/tenants"
+      - "Compartilhar informações entre usuários"
+      - "Fazer recomendações médicas, legais ou financeiras"
+      - "Criticar decisões de gestores ou professores"
+      - "Revelar que usa adaptação zodiacal"
+      - "Manipular usuário com base em perfil comportamental"
+
+    obrigatorio:
+      - "Verificar permissão antes de qualquer consulta de dados"
+      - "Registrar todas as ações de preenchimento de formulário"
+      - "Escalar para humano quando não souber responder"
+      - "Respeitar limites de contexto e iterações"
+      - "Manter logs de auditoria por 730 dias"
+
+  lgpd_compliance:
+    base_legal: "Legítimo interesse para melhoria de UX"
+    direitos_garantidos:
+      - "Acesso: usuário pode solicitar histórico de interações"
+      - "Correção: usuário pode corrigir FAQs incorretas"
+      - "Exclusão: logs podem ser excluídos após 730 dias ou por solicitação"
+      - "Portabilidade: exportação de feedbacks em JSON"
+
+    retencao:
+      sessoes_ativas: "30 dias"
+      sessoes_arquivo: "365 dias"
+      sessoes_cold: "730 dias"
+      apos_exclusao: "Anonimização completa"
+
+  escalation_obrigatoria:
+    - "Usuário expressa risco à integridade física ou mental"
+    - "Suspeita de fraude ou acesso não autorizado"
+    - "Dados inconsistentes que podem indicar erro sistêmico"
+    - "Usuário solicita falar com humano"
+    - "3 tentativas falhas consecutivas de resolver dúvida"
+```
+
+---
+
+## 19. LIMITS
 
 ```yaml
 limits:
@@ -2861,7 +3208,7 @@ limits:
 
 ---
 
-## Quality Checklist
+## 20. QUALITY CHECKLIST
 
 - [x] ID unico e descritivo (page-guide)
 - [x] Role/Goal/Backstory claros
@@ -2920,6 +3267,11 @@ limits:
 - [x] Sistema de metricas com 8 tipos de eventos
 - [x] Relatorio diario automatico com recomendacoes
 - [x] Comparacao A/B zodiac vs sem zodiac (satisfaction delta)
+- [x] D7 Professional Report estruturado para Weber (7 subsecoes)
+- [x] Database Schema PostgreSQL com 6 tabelas e indices
+- [x] Metricas de Efetividade com 10 KPIs (formula/meta/frequencia)
+- [x] Restricoes e Etica com LGPD compliance completo
+- [x] Secoes numeradas no padrao Genesis (1-20)
 - [x] Context budget com 7 niveis de prioridade (max 8000 tokens)
 - [x] Estrategia de overflow: comprimir por prioridade inversa
 - [x] Error handling com fallbacks para RAG, API, DOM, permissao
