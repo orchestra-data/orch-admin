@@ -1683,38 +1683,53 @@ memory:
     feedback_given: true
     entities_detected: true  # alunos, turmas, etc mencionados na sessao
 
-  # === MEMORIA PERSISTENTE (logs em disco) ===
+  # === MEMORIA PERSISTENTE (PostgreSQL) ===
+  # Source of truth: tabela orch_conversations no banco Cogedu
+  # Schema definido em: GUIA-IMPLANTACAO-CTO.md secao 5.1
   persistent:
     enabled: true
-    storage_dir: "logs/"
-    log_format: "yaml"
-    structure: "logs/{user_id}/YYYY/MM/YYYY-MM-DD_HH-MM-SS.yaml"
-    index_file: "logs/{user_id}/index.yaml"
+    storage: "postgresql"
+    table: "orch_conversations"
+    schema: |
+      id UUID PRIMARY KEY
+      user_id UUID NOT NULL
+      tenant_id UUID NOT NULL
+      company_id UUID
+      started_at TIMESTAMPTZ
+      ended_at TIMESTAMPTZ
+      messages JSONB (array de turnos)
+      entities_mentioned JSONB
+      pages_visited TEXT[]
+      sentiment_avg NUMERIC(3,2)
+      resolution_status ENUM (resolved, partially_resolved, unresolved, escalated)
+      summary TEXT
 
-    # O que registrar em cada log
+    # O que registrar em cada conversa
     log_fields:
-      - conversation_id
+      - conversation_id (UUID)
       - user_id
-      - user_name
-      - user_role
+      - user_name (via join users)
+      - user_role (via join user_roles)
+      - tenant_id
       - company_id
-      - timestamps (start/end)
-      - duration_seconds
-      - total_messages
-      - pages_visited
-      - primary_intent
-      - overall_sentiment
+      - timestamps (started_at, ended_at)
+      - duration_seconds (calculado)
+      - total_messages (count messages[])
+      - pages_visited (TEXT[])
+      - primary_intent (extraido do primeiro turno)
+      - sentiment_avg (media de sentiment dos turnos)
       - resolution_status
-      - entities_mentioned (type, id, name, context)
-      - summary (short_summary, topics, actions, issues)
-      - messages (turn, role, content truncado, page_url, intent, sentiment, entities, action)
+      - entities_mentioned JSONB (type, id, name, context)
+      - summary (gerado por LLM ao fim da sessao)
+      - messages JSONB (role, content, page_url, intent, sentiment, entities, action)
 
     # Politica de retencao
     retention:
       active_window_days: 30       # carregado como contexto automatico
       searchable_archive_days: 365  # pesquisavel sob demanda
-      cold_archive_days: 730        # comprimido, somente busca por ID
+      cold_archive_days: 730        # particionamento/archive table
       auto_archive: true
+      archive_disabled: true        # Mantido no PostgreSQL (sem exportar para filesystem)
 
   # === CARREGAMENTO DE CONTEXTO ===
   context_loading:

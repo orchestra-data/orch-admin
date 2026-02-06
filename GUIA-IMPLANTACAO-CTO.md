@@ -167,7 +167,7 @@ ORCH ADMIN/                          # 1.7 MB total
 │   └── zodiac-personas.yaml         # 12 perfis comportamentais (26 KB)
 │
 ├── auto-update/                     # 200 KB - Sistema de autoatualizacao
-│   ├── orch-scanner.ts              # Parser AST do codigo (35 KB)
+│   ├── orch-scanner.ts              # REGEX-based scanner do codigo (35 KB)
 │   ├── orch-bridge.js               # Bridge DOM runtime (18 KB)
 │   ├── orch-conversation-logger.ts  # Logger de conversas (26 KB)
 │   ├── orch-data-query.ts           # Consulta de dados (40 KB)
@@ -180,6 +180,9 @@ ORCH ADMIN/                          # 1.7 MB total
 └── feedback/                        # 20 KB - Banco de feedback
     ├── faq-bank.yaml                # Perguntas frequentes
     ├── improvements-bank.yaml       # Sugestoes e bugs reportados
+    ├── insight-corrections.yaml     # Correcoes de insights por usuario
+    ├── reports/                     # Relatorios de feedback
+    │   └── .gitkeep
     └── README.md                    # Documentacao do feedback
 ```
 
@@ -1375,7 +1378,7 @@ O `orch-analytics-engine.ts` gera metricas que devem alimentar um dashboard com:
 
 ## Resumo Executivo para o CTO
 
-**O Orch Admin e um sistema pronto para implementacao** que transforma o suporte do Cogedu de reativo para proativo. Os 30 arquivos do repositorio contem:
+**O Orch Admin e um sistema pronto para implementacao** que transforma o suporte do Cogedu de reativo para proativo. Os 33 arquivos do repositorio contem:
 
 1. **Toda a inteligencia** (604 KB de knowledge base documentando 100% das paginas)
 2. **Todo o codigo de suporte** (200 KB de auto-update, memoria, analytics)
