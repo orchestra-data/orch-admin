@@ -1007,3 +1007,538 @@ enums:
   question_types: ["multipla_escolha:Multipla Escolha", "verdadeiro_falso:Verdadeiro/Falso", "dissertativa:Dissertativa", "associacao:Associacao", "ordenacao:Ordenacao", "oral:Oral", "mista:Mista"]
   certificate_status: ["issued:Emitido", "signed:Assinado", "revoked:Revogado", "expired:Expirado"]
   enrollment_modes: ["single_inherited:Matricula Unica", "multiple_choice:Escolha Multipla"]
+
+# ============================================================================
+# AUTO-DISCOVERED PAGES (2026-02-07) - AST Scan v2.0
+# Status: PENDING REVIEW - Validate fields and descriptions
+# ============================================================================
+  auth_set_password:
+    url_pattern: "/auth/set-password"
+    page_name: "SetPasswordRoute"
+    description: "Page: SetPasswordRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  companies_companyId:
+    url_pattern: "/companies/:companyId"
+    page_name: "CompanyDetailRoute"
+    description: "Page: CompanyDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  companies_companyId_events_new:
+    url_pattern: "/companies/:companyId/events/new"
+    page_name: "EventCreateRoute"
+    description: "Page: EventCreateRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  companies_companyId_events_eventId:
+    url_pattern: "/companies/:companyId/events/:eventId"
+    page_name: "EventDetailRoute"
+    description: "Page: EventDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  companies_companyId_events_eventId_edit:
+    url_pattern: "/companies/:companyId/events/:eventId/edit"
+    page_name: "EventEditRoute"
+    description: "Page: EventEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  users_newStudent:
+    url_pattern: "/users/newStudent"
+    page_name: "StudentCreateRoute"
+    description: "Page: StudentCreateRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  users_newEmployee:
+    url_pattern: "/users/newEmployee"
+    page_name: "EmployeeCreateRoute"
+    description: "Page: EmployeeCreateRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  users_userId:
+    url_pattern: "/users/:userId"
+    page_name: "UserDetailRoute"
+    description: "Page: UserDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational:
+    url_pattern: "/educational"
+    page_name: "ContentLayout"
+    description: "Page: ContentLayout"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_collections_collectionId:
+    url_pattern: "/educational/collections/:collectionId"
+    page_name: "CollectionDetailRoute"
+    description: "Page: CollectionDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_collections_collectionId_edit:
+    url_pattern: "/educational/collections/:collectionId/edit"
+    page_name: "CollectionEditRoute"
+    description: "Page: CollectionEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_pathways:
+    url_pattern: "/educational/pathways"
+    page_name: "PathwayListRoute"
+    description: "Page: PathwayListRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_pathways_pathwayId:
+    url_pattern: "/educational/pathways/:pathwayId"
+    page_name: "PathwayDetailRoute"
+    description: "Page: PathwayDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_pathways_pathwayId_edit:
+    url_pattern: "/educational/pathways/:pathwayId/edit"
+    page_name: "PathwayEditRoute"
+    description: "Page: PathwayEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_series:
+    url_pattern: "/educational/series"
+    page_name: "SeriesListRoute"
+    description: "Page: SeriesListRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_series_seriesId:
+    url_pattern: "/educational/series/:seriesId"
+    page_name: "SeriesDetailRoute"
+    description: "Page: SeriesDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_series_seriesId_edit:
+    url_pattern: "/educational/series/:seriesId/edit"
+    page_name: "SeriesEditRoute"
+    description: "Page: SeriesEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_units:
+    url_pattern: "/educational/units"
+    page_name: "UnitListRoute"
+    description: "Page: UnitListRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_units_unitId:
+    url_pattern: "/educational/units/:unitId"
+    page_name: "UnitDetailRoute"
+    description: "Page: UnitDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_units_unitId_edit:
+    url_pattern: "/educational/units/:unitId/edit"
+    page_name: "UnitEditRoute"
+    description: "Page: UnitEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_units_unitId_builder:
+    url_pattern: "/educational/units/:unitId/builder"
+    page_name: "ComponentBuilderRoute"
+    description: "Page: ComponentBuilderRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams:
+    url_pattern: "/educational/exams"
+    page_name: "ExamsLayout"
+    description: "Page: ExamsLayout"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams:
+    url_pattern: "/educational/exams"
+    page_name: "Navigate"
+    description: "Page: Navigate"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams_your_activities:
+    url_pattern: "/educational/exams/your-activities"
+    page_name: "YourActivitiesRoute"
+    description: "Page: YourActivitiesRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams_questions_new:
+    url_pattern: "/educational/exams/questions/new"
+    page_name: "QuestionCreateRoute"
+    description: "Page: QuestionCreateRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams_rubrics_rubricId_edit:
+    url_pattern: "/educational/exams/rubrics/:rubricId/edit"
+    page_name: "RubricEditRoute"
+    description: "Page: RubricEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams_blockly_games_new:
+    url_pattern: "/educational/exams/blockly-games/new"
+    page_name: "BlocklyGameCreateRoute"
+    description: "Page: BlocklyGameCreateRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams_blockly_games_gameId_edit:
+    url_pattern: "/educational/exams/blockly-games/:gameId/edit"
+    page_name: "BlocklyGameEditRoute"
+    description: "Page: BlocklyGameEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams_broker:
+    url_pattern: "/educational/exams/broker"
+    page_name: "BrokerRoute"
+    description: "Page: BrokerRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_exams_activity_grade_attemptId:
+    url_pattern: "/educational/exams/activity-grade/:attemptId"
+    page_name: "ActivityGradingRoute"
+    description: "Page: ActivityGradingRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_certificates:
+    url_pattern: "/educational/certificates"
+    page_name: "Unknown"
+    description: "Page: Unknown"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_certificates:
+    url_pattern: "/educational/certificates"
+    page_name: "Navigate"
+    description: "Page: Navigate"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_certificates_templates_new:
+    url_pattern: "/educational/certificates/templates/new"
+    page_name: "CertificateTemplateEditorRoute"
+    description: "Page: CertificateTemplateEditorRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_certificates_templates_templateId:
+    url_pattern: "/educational/certificates/templates/:templateId"
+    page_name: "CertificateTemplateEditorRoute"
+    description: "Page: CertificateTemplateEditorRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_certificates_templates_templateId_edit:
+    url_pattern: "/educational/certificates/templates/:templateId/edit"
+    page_name: "CertificateTemplateEditorRoute"
+    description: "Page: CertificateTemplateEditorRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_certificates_issued_certificateId:
+    url_pattern: "/educational/certificates/issued/:certificateId"
+    page_name: "CertificateDetailRoute"
+    description: "Page: CertificateDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational:
+    url_pattern: "/educational"
+    page_name: "OffersLayout"
+    description: "Page: OffersLayout"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances:
+    url_pattern: "/educational/class-instances"
+    page_name: "Unknown"
+    description: "Page: Unknown"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances:
+    url_pattern: "/educational/class-instances"
+    page_name: "ClassInstanceListRoute"
+    description: "Page: ClassInstanceListRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances_id:
+    url_pattern: "/educational/class-instances/:id"
+    page_name: "ClassInstanceDetailStudentView"
+    description: "Page: ClassInstanceDetailStudentView (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances_id_newEdit:
+    url_pattern: "/educational/class-instances/:id/newEdit"
+    page_name: "ClassInstanceDetailStudentView"
+    description: "Page: ClassInstanceDetailStudentView (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances_id_simple:
+    url_pattern: "/educational/class-instances/:id/simple"
+    page_name: "ClassInstanceDetailRoute"
+    description: "Page: ClassInstanceDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances_id_edit:
+    url_pattern: "/educational/class-instances/:id/edit"
+    page_name: "ClassInstanceEditRoute"
+    description: "Page: ClassInstanceEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances_id_recommendations:
+    url_pattern: "/educational/class-instances/:id/recommendations"
+    page_name: "RecommendationsRoute"
+    description: "Page: RecommendationsRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances_classInstanceId_enrollments:
+    url_pattern: "/educational/class-instances/:classInstanceId/enrollments"
+    page_name: "ClassEnrollmentListRoute"
+    description: "Page: ClassEnrollmentListRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances_classInstanceId_enrollments_new:
+    url_pattern: "/educational/class-instances/:classInstanceId/enrollments/new"
+    page_name: "ClassEnrollmentCreateRoute"
+    description: "Page: ClassEnrollmentCreateRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_class_instances_classInstanceId_activities:
+    url_pattern: "/educational/class-instances/:classInstanceId/activities"
+    page_name: "ActivityManagementRoute"
+    description: "Page: ActivityManagementRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_admission_id:
+    url_pattern: "/educational/admission/:id"
+    page_name: "AdmissionDetailRoute"
+    description: "Page: AdmissionDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_admission_id_edit:
+    url_pattern: "/educational/admission/:id/edit"
+    page_name: "AdmissionEditRoute"
+    description: "Page: AdmissionEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_admission_admissionId_offers_new:
+    url_pattern: "/educational/admission/:admissionId/offers/new"
+    page_name: "OfferCreateRoute"
+    description: "Page: OfferCreateRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_admission_offers_offerId:
+    url_pattern: "/educational/admission/offers/:offerId"
+    page_name: "OfferDetailRoute"
+    description: "Page: OfferDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_admission_offers_offerId_edit:
+    url_pattern: "/educational/admission/offers/:offerId/edit"
+    page_name: "OfferEditRoute"
+    description: "Page: OfferEditRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_admission_offers_offerId_form_builder:
+    url_pattern: "/educational/admission/offers/:offerId/form-builder"
+    page_name: "FormBuilderRoute"
+    description: "Page: FormBuilderRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  educational_admission_candidates_candidateId:
+    url_pattern: "/educational/admission/candidates/:candidateId"
+    page_name: "CandidateDetailRoute"
+    description: "Page: CandidateDetailRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  apply_offerId:
+    url_pattern: "/apply/:offerId"
+    page_name: "PublicApplicationRoute"
+    description: "Page: PublicApplicationRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  application_status_accessToken:
+    url_pattern: "/application/status/:accessToken"
+    page_name: "PublicApplicationStatusRoute"
+    description: "Page: PublicApplicationStatusRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  application_resume_accessToken:
+    url_pattern: "/application/resume/:accessToken"
+    page_name: "ResumeApplicationRoute"
+    description: "Page: ResumeApplicationRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  validate_code:
+    url_pattern: "/validate/:code"
+    page_name: "PublicValidationRoute"
+    description: "Page: PublicValidationRoute (dynamic)"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
+
+  validate:
+    url_pattern: "/validate"
+    page_name: "PublicValidationRoute"
+    description: "Page: PublicValidationRoute"
+    auto_discovered: true
+    discovered_at: "2026-02-07T17:27:22.865Z"
+    status: "pending_review"
+    scan_version: "2.0-ast"
