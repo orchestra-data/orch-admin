@@ -1,4 +1,4 @@
-# Guia de Implementação ORCH Ecosystem v5.0
+# Guia de Implementação ORCH Ecosystem v6.0
 
 > Documentação técnica para implementação do ecossistema de agentes ORCH (AVA + ADMIN)
 > Atualizado: 2026-02-06
@@ -9,12 +9,12 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           ORCH ECOSYSTEM v5.0                                │
+│                           ORCH ECOSYSTEM v6.0                                │
 ├─────────────────────────────────┬───────────────────────────────────────────┤
 │          ORCH AVA               │              ORCH ADMIN                   │
 │    (Tutoria Acadêmica)          │       (Gestão Administrativa)             │
 ├─────────────────────────────────┼───────────────────────────────────────────┤
-│  14 Agentes Gold Standard       │  1 Agente v4.0.0 (20 seções)              │
+│  15 Agentes Gold Standard       │  1 Agente v4.0.0 (20 seções)              │
 │  ┌─────────────────────────┐    │  ┌─────────────────────────────────────┐  │
 │  │ Hub (orquestrador)      │    │  │ Orch (guia contextual)              │  │
 │  │ Sócrates (maiêutica)    │    │  │ - Explicação de páginas             │  │
@@ -30,7 +30,8 @@
 │  │ Ebbinghaus (memória)    │    │                                           │
 │  │ Heimdall (admissão)     │    │                                           │
 │  │ Sísifo (gamificação)    │    │                                           │
-│  └─────────────────────────┘    │                                           │
+│  │ Comenius (recap diário) │ ★  │  ★ NOVO: Daily Knowledge Recap           │
+│  └─────────────────────────┘    │    (Duolingo-style, Agent4Edu research)   │
 ├─────────────────────────────────┴───────────────────────────────────────────┤
 │                         TypeScript Runtime (src/)                            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
@@ -44,8 +45,8 @@
 │                      RabbitMQ Event Bus (D7)                                 │
 │  Topics: orch.d7.{agent}.parecer → Weber → orch.d7.weber.agregado           │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                      PostgreSQL (19 tabelas)                                 │
-│  ORCH AVA: 13 tabelas  │  ORCH ADMIN: 6 tabelas                             │
+│                      PostgreSQL (27 tabelas)                                 │
+│  ORCH AVA: 21 tabelas  │  ORCH ADMIN: 6 tabelas                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -57,7 +58,7 @@
 
 ```
 ORCH AVA/
-├── agents/                          # 14 agentes Gold Standard
+├── agents/                          # 15 agentes Gold Standard
 │   ├── _hub/hub-guide.md
 │   ├── socrates/socrates-guide.md
 │   ├── aristoteles/aristoteles-guide.md
@@ -71,11 +72,13 @@ ORCH AVA/
 │   ├── dewey/dewey-guide.md
 │   ├── ebbinghaus/ebbinghaus-guide.md
 │   ├── heimdall/heimdall-guide.md
-│   └── sisifo/sisifo-guide.md
+│   ├── sisifo/sisifo-guide.md
+│   └── comenius.md                  # ★ NEW: Daily Knowledge Recap
 │
 ├── migrations/                      # SQL para Cogedu
 │   ├── 1820000000--orch_ava_core_tables.sql
-│   └── 1820000001--orch_ava_agent_tables.sql
+│   ├── 1820000001--orch_ava_agent_tables.sql
+│   └── 1820000003--orch_ava_comenius_tables.sql  # ★ NEW: 8 tabelas
 │
 ├── src/                             # TypeScript Runtime
 │   ├── types/
@@ -155,8 +158,9 @@ Copiar para `libs/migrations/migrations/`:
 | `1820000000--orch_ava_core_tables.sql` | 5 | Sessões, handoffs, intervenções, D7, dossiê |
 | `1820000001--orch_ava_agent_tables.sql` | 8 | Tabelas específicas por agente |
 | `1820000002--orch_admin_tables.sql` | 6 | Tabelas do admin |
+| `1820000003--orch_ava_comenius_tables.sql` | 8 | ★ Comenius: daily recap Duolingo-style |
 
-### 3.2 Tabelas ORCH AVA (13 tabelas)
+### 3.2 Tabelas ORCH AVA (21 tabelas)
 
 ```sql
 -- Core Tables (1820000000)
@@ -175,6 +179,16 @@ orch_ava_memory_item          -- Ebbinghaus: revisão espaçada (SM-2)
 orch_ava_gamification_profile -- Sísifo: XP, badges, streaks
 orch_ava_case_study           -- Dewey: estudos de caso
 orch_ava_admission_journey    -- Heimdall: jornada admissão
+
+-- Comenius Tables (1820000003) - ★ NEW
+orch_ava_daily_recap          -- Sessões de recap diário (Duolingo-style)
+orch_ava_recap_question       -- Questões com parâmetros IRT
+orch_ava_recap_response       -- Respostas dos alunos
+orch_ava_recap_streak         -- Gamificação: streaks e freezes
+orch_ava_concept_memory       -- Estado de memória por conceito
+orch_ava_curated_concept      -- Conceitos curados da aula
+orch_ava_diagnostic_result    -- Resultados do diagnóstico IRT
+orch_ava_recap_achievement    -- Badges e conquistas
 ```
 
 ### 3.3 Tabelas ORCH ADMIN (6 tabelas)
@@ -518,6 +532,7 @@ orch.d7.dewey.parecer
 orch.d7.ebbinghaus.parecer
 orch.d7.heimdall.parecer
 orch.d7.sisifo.parecer
+orch.d7.comenius.parecer   # ★ NEW: Daily Recap metrics
 orch.d7.admin.parecer
 
 orch.d7.weber.agregado     # Dossiê consolidado
@@ -567,6 +582,7 @@ orch.d7.weber.agregado     # Dossiê consolidado
 - [ ] Copiar `1820000000--orch_ava_core_tables.sql`
 - [ ] Copiar `1820000001--orch_ava_agent_tables.sql`
 - [ ] Copiar `1820000002--orch_admin_tables.sql`
+- [ ] Copiar `1820000003--orch_ava_comenius_tables.sql`
 - [ ] Executar `npm run migrate:dev`
 
 ### 7.3 TypeScript Runtime
@@ -636,6 +652,9 @@ ORCH_D7_TIMEZONE=America/Sao_Paulo
 | Redução tickets suporte | >= 30% | Mensal |
 | Insights gerados (Sócrates) | >= 80% | Semanal |
 | Handoffs bem-sucedidos | >= 90% | Semanal |
+| **Comenius: Completion rate** | >= 80% | Diária |
+| **Comenius: Avg streak length** | >= 7 dias | Semanal |
+| **Comenius: Concept retention** | >= 80% | Semanal |
 
 ---
 
@@ -643,13 +662,14 @@ ORCH_D7_TIMEZONE=America/Sao_Paulo
 
 | Repositório | Conteúdo |
 |-------------|----------|
-| `orchestra-data/orch-ava` | 14 agentes + runtime + migrations |
+| `orchestra-data/orch-ava` | 15 agentes + runtime + migrations |
 | `orchestra-data/orch-admin` | 1 agente + migrations + este guia |
 
 ### Commits Recentes
 
 ```
 # ORCH AVA
+b7e3f2a feat: add Comenius agent - Daily Knowledge Recap (Duolingo-style)
 a41ab7b feat: add complete TypeScript runtime (26 files, 9717 lines)
 de9765e feat: add PostgreSQL migrations (13 tables)
 79df473 feat: apply Genesis 6-Phase to 5 remaining agents
@@ -661,7 +681,83 @@ cd77f51 feat: add PostgreSQL migrations (6 tables)
 
 ---
 
-## 11. Suporte
+## 11. Comenius - Daily Knowledge Recap (NEW)
+
+### 11.1 Visão Geral
+
+O **Comenius** é o 15º agente do ORCH AVA, inspirado em Jan Amos Comenius (pai da educação moderna). Funciona como um **Duolingo acadêmico**, medindo diariamente o conhecimento do aluno sobre o que foi aprendido nas aulas.
+
+### 11.2 Arquitetura de Sub-Agentes
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    COMENIUS PIPELINE                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   AULA (presencial/online)                                       │
+│         │                                                        │
+│         ▼                                                        │
+│   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
+│   │  CURATOR    │──▶│ SYNTHESIZER │──▶│ DIAGNOSTIC  │          │
+│   │             │   │             │   │             │          │
+│   │ Normaliza   │   │ Gera recap  │   │ Detecta     │          │
+│   │ conceitos   │   │ personaliz. │   │ déficits    │          │
+│   └─────────────┘   └─────────────┘   └─────────────┘          │
+│                                              │                   │
+│                                              ▼                   │
+│                                        ┌─────────────┐          │
+│                                        │   TUTOR     │          │
+│                                        │             │          │
+│                                        │ Feedback +  │          │
+│                                        │ remediação  │          │
+│                                        └─────────────┘          │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 11.3 Base de Pesquisa
+
+- **Agent4Edu** (Cornell/USTC) - arXiv:2501.10332v1
+- Memory module com decay temporal (Ebbinghaus)
+- Perfis de estudante (atividade, diversidade, taxa de sucesso, habilidade)
+- Mecanismo de reflexão corretiva
+- Suporte zero-shot para novos alunos
+
+### 11.4 Gamificação Duolingo-Style
+
+| Mecânica | Descrição |
+|----------|-----------|
+| **Deadline** | 23:59:59 diário |
+| **Streak** | Sequência de dias consecutivos |
+| **XP** | 50 (completo) + 50 (perfeito) + 25 (streak) |
+| **Freeze** | Protege streak por 1 dia (ganho com XP) |
+| **Badges** | Conquistas por marcos (7 dias, 30 dias, etc.) |
+
+### 11.5 Endpoints Específicos
+
+```
+GET  /api/orch/comenius/recap/today      # Recap de hoje
+POST /api/orch/comenius/recap/:id/start  # Iniciar recap
+POST /api/orch/comenius/recap/:id/answer # Submeter resposta
+POST /api/orch/comenius/recap/:id/complete # Finalizar
+GET  /api/orch/comenius/streak           # Status do streak
+POST /api/orch/comenius/streak/freeze    # Usar freeze
+GET  /api/orch/comenius/stats            # Estatísticas
+GET  /api/orch/comenius/leaderboard      # Ranking
+```
+
+### 11.6 Integrações
+
+| Agente | Integração |
+|--------|------------|
+| Ebbinghaus | Sincroniza dados de memória e decay |
+| Sísifo | Sincroniza XP, badges e streaks |
+| Gardner | Usa perfil de aprendizagem para adaptar conteúdo |
+| Weber | Envia D7 com métricas de completion e retention |
+
+---
+
+## 12. Suporte
 
 | Recurso | Localização |
 |---------|-------------|
@@ -673,6 +769,6 @@ cd77f51 feat: add PostgreSQL migrations (6 tables)
 
 ---
 
-*Documento atualizado após implementação completa do runtime TypeScript*
-*Versão: 5.0.0 | Data: 2026-02-06*
-*Total: 44 arquivos | 26 TypeScript | 3 SQL | 15 Agent Guides*
+*Documento atualizado com Comenius (15º agente) - Daily Knowledge Recap*
+*Versão: 6.0.0 | Data: 2026-02-06*
+*Total: 46 arquivos | 26 TypeScript | 4 SQL | 16 Agent Guides | 27 tabelas DB*

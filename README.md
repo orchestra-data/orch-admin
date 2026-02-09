@@ -15,13 +15,21 @@ O Orch e um assistente embeddado no sistema Cogedu que ajuda funcionarios a:
 ## Estrutura
 
 ```
-ORCH ADMIN/                              # 1.7 MB total - 33 arquivos
+ORCH ADMIN/                              # 2.0 MB total - 40 arquivos
 ├── README.md                            # Este arquivo
 ├── GUIA-IMPLANTACAO-CTO.md              # Guia completo de implantacao
 ├── genesis-validate-corrections.md      # Historico de correcoes
 │
 ├── agent/                               # Definicao do agente
 │   └── page-guide.md                    # Agente UAF completo (v3.7.0)
+│
+├── dify/                                # RAG backend setup
+│   ├── docker-compose.yml               # Stack Dify completa
+│   ├── nginx.conf                       # Reverse proxy
+│   ├── .env.example                     # Variaveis de ambiente
+│   ├── setup-knowledge-base.ts          # Script de upload
+│   ├── orch-admin-app.json              # Config do app Dify
+│   └── README.md                        # Instrucoes de setup
 │
 ├── knowledge-base/                      # 604 KB - Base de conhecimento RAG
 │   ├── cogedu-pages-guide.yaml          # Indice de paginas
@@ -58,6 +66,9 @@ ORCH ADMIN/                              # 1.7 MB total - 33 arquivos
 │   │   └── .gitkeep
 │   └── README.md                        # Documentacao do feedback
 │
+├── migrations/                          # SQL migrations
+│   └── 1820000002--orch_admin_tables.sql  # 6 tabelas PostgreSQL
+│
 └── logs/                                # Logs de conversa (runtime)
     └── .gitkeep
 ```
@@ -77,10 +88,16 @@ ORCH ADMIN/                              # 1.7 MB total - 33 arquivos
 
 ## Integracao
 
-O Orch e integrado como nova aba no CommunicationHub do Cogedu:
+O Orch e integrado como aba no FloatingChat do Cogedu Admin:
 
-- `apps/web/src/components/communication-hub/CommunicationHub.tsx`
-- `apps/web/src/components/communication-hub/HubPanel.tsx`
+**Frontend:**
+- `apps/web/src/components/FloatingChat.tsx` - UI com abas Chat | ORCH
+- `apps/web/src/contexts/OrchAdminContext.tsx` - Estado e API calls
+- `apps/web/src/app.tsx` - Provider wrapper
+
+**Backend:**
+- `apps/api/src/endpoints/orchAdmin*/` - 7 endpoints REST
+- `migrations/1820000002--orch_admin_tables.sql` - 6 tabelas PostgreSQL
 
 ## Funcionalidades
 
@@ -89,14 +106,55 @@ O Orch e integrado como nova aba no CommunicationHub do Cogedu:
 3. **Resolucao de erros** - Ajuda a entender e resolver mensagens de erro
 4. **Passo a passo** - Guia numerado para tarefas comuns
 
+## API Endpoints
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| POST | `/orch-admin/sessions` | Inicia nova sessao de chat |
+| POST | `/orch-admin/chat` | Envia mensagem e recebe resposta AI |
+| POST | `/orch-admin/sessions/:id/end` | Encerra sessao ativa |
+| GET | `/orch-admin/alerts` | Lista alertas proativos do usuario |
+| POST | `/orch-admin/alerts/:id/read` | Marca alerta como lido |
+| POST | `/orch-admin/feedback` | Envia feedback do usuario |
+| GET | `/orch-admin/context/*` | Retorna contexto da pagina atual |
+
+### Variaveis de Ambiente
+
+```bash
+# Dify RAG Integration
+DIFY_API_URL=http://localhost/v1
+DIFY_ORCH_ADMIN_API_KEY=app-xxx
+
+# Database (usa a mesma do Cogedu)
+DATABASE_URL=postgresql://...
+```
+
+### Exemplo de Uso
+
+```typescript
+// Iniciar sessao
+POST /orch-admin/sessions
+{ "initialPage": "/admission" }
+// Response: { "sessionId": "uuid", "resumed": false }
+
+// Enviar mensagem
+POST /orch-admin/chat
+{
+  "sessionId": "uuid",
+  "message": "Como criar uma nova oferta?",
+  "pageContext": "/admission"
+}
+// Response: { "message": "Para criar uma oferta...", "metadata": {} }
+```
+
 ## Tech Stack
 
-- **Frontend**: React 19 + TypeScript (widget no CommunicationHub)
-- **Backend**: Monolito Cogedu (endpoints `/orch/*` adicionados ao backend existente)
+- **Frontend**: React 19 + TypeScript (aba ORCH no FloatingChat)
+- **Backend**: Express.js (endpoints `/orch-admin/*` no monolito Cogedu)
 - **RAG**: Dify self-hosted (Docker Compose)
-- **LLM**: OpenAI gpt-4o-mini (principal) + gpt-5-mini (fallback)
+- **LLM**: OpenAI gpt-4o-mini (principal) + gpt-4o (fallback)
 - **Vetores**: pgvector (extensao PostgreSQL)
-- **Memoria**: PostgreSQL (tabelas `orch_conversations`, `orch_feedback`, `orch_analytics_events`)
+- **Memoria**: PostgreSQL (6 tabelas `orch_admin_*`)
 - **Knowledge Base**: 14 YAML files (604 KB) indexados no Dify
-- **Comunicacao**: postMessage entre widget e DOM (orch-bridge.js)
+- **Comunicacao**: React Context + REST API
 - **CI/CD**: GitHub Actions para auto-update da knowledge base
