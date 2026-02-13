@@ -1,0 +1,1424 @@
+# =============================================================================
+# GUIA COMPLETO: PROCESSO SELETIVO E ADMISSAO DO COGEDU
+# Base de conhecimento para o assistente Orch Admin
+# Versao: 2.0.0
+# Atualizado: 2026-02-12
+# =============================================================================
+
+glossario:
+  Admissao: "Processo Seletivo - uma campanha completa de captacao de novos alunos para a instituicao. Exemplo: 'Vestibular 2025.1', 'Processo Seletivo de Inverno 2025'."
+
+  Oferta: "Vaga ou conjunto de vagas dentro de um processo seletivo. Uma admissao pode ter varias ofertas (ex: uma para cada curso ou turma). A oferta e onde o candidato se inscreve."
+
+  Candidato: "Pessoa que se inscreveu em uma ou mais ofertas de um processo seletivo. O candidato passa por etapas do pipeline ate ser aprovado ou reprovado."
+
+  Inscricao: "Ato de preencher o formulario de candidatura em uma oferta especifica. Tambem chamado de 'Application'."
+
+  Pipeline: "Conjunto de etapas que o candidato percorre durante o processo seletivo. Exemplo: Inscrito → Documentacao → Avaliacao → Aprovado → Matriculado."
+
+  Status_Admissao: "Estado atual do processo seletivo: 'Rascunho' (em configuracao), 'Ativa' (recebendo inscricoes), 'Encerrada' (finalizada), 'Cancelada'."
+
+  Modo_Matricula: "Define como funciona a matricula dos candidatos aprovados: Turma Unica (todos vao para a mesma turma) ou Escolha Multipla (candidato escolhe entre varias turmas)."
+
+  Formulario_Publico: "Formulario que o candidato preenche para se inscrever. Configuravel com campos personalizados, upload de documentos, avaliacoes, contratos, etc."
+
+  Taxa_Inscricao: "Valor cobrado do candidato para participar do processo seletivo. Pode ter desconto percentual."
+
+  Vaga: "Numero de posicoes disponiveis em uma oferta. Pode ter vagas totais e vagas reservadas (cotas)."
+
+  Etapa_Formulario: "Secao do formulario de inscricao. Cada etapa pode conter varios componentes (campos, documentos, avaliacoes, etc)."
+
+  Componente: "Elemento dentro de uma etapa do formulario. Tipos: Campos, Documentos, Pagamento, Avaliacao, Contrato."
+
+  Kanban: "Quadro visual que mostra candidatos organizados por etapa do pipeline (Inscrito, Em Analise, Aprovado, Reprovado, Matriculado)."
+
+  Link_Publico: "URL gerada automaticamente para cada oferta. O candidato acessa esse link para se inscrever."
+
+# =============================================================================
+# FLUXO COMPLETO DO PROCESSO SELETIVO
+# =============================================================================
+
+fluxo_completo:
+  titulo: "Como funciona o processo seletivo do inicio ao fim"
+
+  etapas:
+    - numero: 1
+      nome: "Criar Processo Seletivo (Admissao)"
+      responsavel: "Coordenador/Administrador"
+      descricao: "Crie uma nova admissao definindo empresa, turma(s), datas e configuracoes basicas."
+      onde: "Menu Educacional > Admissoes > Nova Admissao"
+      status_inicial: "Rascunho"
+
+    - numero: 2
+      nome: "Criar Ofertas"
+      responsavel: "Coordenador/Administrador"
+      descricao: "Dentro da admissao, crie uma ou mais ofertas (vagas). Cada oferta tem seu proprio formulario de inscricao."
+      onde: "Detalhes da Admissao > Adicionar Oferta"
+      exemplo: "Oferta para Engenharia, Oferta para Administracao"
+
+    - numero: 3
+      nome: "Configurar Formulario de Inscricao"
+      responsavel: "Coordenador/Administrador"
+      descricao: "Personalize o formulario que o candidato vai preencher: adicione campos, documentos obrigatorios, avaliacoes, contratos."
+      onde: "Detalhes da Oferta > Editar Formulario"
+
+    - numero: 4
+      nome: "Publicar Admissao"
+      responsavel: "Coordenador/Administrador"
+      descricao: "Mude o status de 'Rascunho' para 'Ativa'. Isso libera as inscricoes."
+      onde: "Detalhes da Admissao > Botao 'Publicar'"
+
+    - numero: 5
+      nome: "Divulgar Link de Inscricao"
+      responsavel: "Marketing/Secretaria"
+      descricao: "Copie o link publico de cada oferta e divulgue nas redes sociais, site, etc."
+      onde: "Detalhes da Oferta > Copiar Link"
+      formato_link: "https://seudominio.com/apply/{id-da-oferta}"
+
+    - numero: 6
+      nome: "Candidatos se Inscrevem"
+      responsavel: "Candidatos"
+      descricao: "Candidatos acessam o link publico, preenchem o formulario e enviam a inscricao."
+
+    - numero: 7
+      nome: "Acompanhar Candidatos"
+      responsavel: "Coordenador/Secretaria"
+      descricao: "Visualize todos os candidatos no Kanban, mova entre etapas, aprove/reprove, analise documentos."
+      onde: "Menu Educacional > Candidatos > Filtrar por Oferta"
+
+    - numero: 8
+      nome: "Aprovar/Reprovar Candidatos"
+      responsavel: "Coordenador/Banca"
+      descricao: "Avalie documentos, notas de provas e aprove ou reprove cada candidato."
+
+    - numero: 9
+      nome: "Matricular Aprovados"
+      responsavel: "Secretaria"
+      descricao: "Candidatos aprovados sao matriculados na turma vinculada a oferta."
+
+    - numero: 10
+      nome: "Encerrar Admissao"
+      responsavel: "Coordenador"
+      descricao: "Quando o processo terminar, mude o status para 'Encerrada'."
+
+# =============================================================================
+# FEATURE: CRIAR PROCESSO SELETIVO (ADMISSAO)
+# =============================================================================
+
+criar_admissao:
+  o_que_e: "Criar um novo processo seletivo (Admissao) e o primeiro passo para captar novos alunos. Voce define as configuracoes principais como empresa, turma(s), datas de inscricao e resultado."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Admissoes"
+    url: "/educational/admission"
+    botao: "Nova Admissao"
+    url_criacao: "/educational/admission/new"
+
+  quando_usar: "Use quando for abrir um novo processo seletivo (vestibular, processo seletivo de inverno, processo de transferencia, etc)."
+
+  como_criar:
+    - passo: 1
+      acao: "Acesse o menu Educacional > Admissoes"
+
+    - passo: 2
+      acao: "Clique no botao 'Nova Admissao' (canto superior direito)"
+
+    - passo: 3
+      acao: "Preencha os campos obrigatorios (marcados com *)"
+
+    - passo: 4
+      acao: "Escolha o Modo de Matricula: Turma Unica ou Escolha Multipla"
+
+    - passo: 5
+      acao: "Se Turma Unica: selecione a turma. Se Escolha Multipla: selecione pelo menos 2 turmas"
+
+    - passo: 6
+      acao: "Clique em 'Criar Admissao'"
+
+    - passo: 7
+      acao: "Voce sera redirecionado para a pagina de detalhes da admissao criada (status: Rascunho)"
+
+  campos:
+    empresa:
+      label: "Empresa"
+      tipo: "Dropdown (selecao)"
+      obrigatorio: true
+      descricao: "Selecione a empresa/instituicao responsavel por este processo seletivo. Exemplo: 'Universidade XYZ', 'Faculdade ABC'."
+      exemplo: "Universidade Federal de Minas Gerais"
+
+    codigo:
+      label: "Codigo (preview)"
+      tipo: "Texto (desabilitado)"
+      obrigatorio: false
+      descricao: "Codigo gerado automaticamente pelo sistema. Formato: ADM-{NOME}-{ANO}-{ALEATORIO}. Voce nao pode editar este campo."
+      exemplo: "ADM-VEST-2025-8F3A"
+
+    modo_matricula:
+      label: "Modo de Matricula"
+      tipo: "Selecao de botoes"
+      obrigatorio: true
+      descricao: "Define como os candidatos aprovados serao matriculados."
+      opcoes:
+        - valor: "single_inherited"
+          label: "Turma Unica (herdada)"
+          quando_usar: "Quando TODOS os candidatos aprovados vao para a MESMA turma. Exemplo: Vestibular para Engenharia Civil - Turma 2025.1."
+
+        - valor: "multiple_choice"
+          label: "Escolha Multipla"
+          quando_usar: "Quando o candidato pode ESCOLHER entre varias turmas na hora da inscricao. Exemplo: Processo seletivo geral com opcoes de Engenharia, Administracao, Direito."
+
+    turma_unica:
+      label: "Turma"
+      tipo: "Dropdown (selecao)"
+      obrigatorio: true
+      descricao: "Aparece SOMENTE quando Modo de Matricula = Turma Unica. Selecione a turma onde os candidatos aprovados serao matriculados."
+      exemplo: "Engenharia Civil - 2025.1 (Noturno)"
+      visivel_quando: "modo_matricula === 'single_inherited'"
+
+    turmas_multiplas:
+      label: "Turmas Disponiveis"
+      tipo: "Selecao multipla com ordenacao"
+      obrigatorio: true
+      descricao: "Aparece SOMENTE quando Modo de Matricula = Escolha Multipla. Selecione pelo menos 2 turmas. O candidato podera escolher uma delas na inscricao."
+      exemplo: "Engenharia Civil 2025.1, Administracao 2025.1, Direito 2025.1"
+      validacao: "Minimo de 2 turmas"
+      visivel_quando: "modo_matricula === 'multiple_choice'"
+
+    nome:
+      label: "Nome"
+      tipo: "Texto"
+      obrigatorio: true
+      descricao: "Nome do processo seletivo. Seja claro e especifico."
+      exemplo: "Processo Seletivo 2025.1 - Vestibular de Verao"
+      dica: "Use um nome que identifique claramente o periodo e tipo do processo."
+
+    descricao:
+      label: "Descricao"
+      tipo: "Area de texto"
+      obrigatorio: false
+      descricao: "Descricao detalhada do processo seletivo. Pode incluir informacoes sobre criterios, etapas, etc."
+      exemplo: "Processo seletivo para ingresso em cursos de graduacao no primeiro semestre de 2025. Aberto para vestibulandos e portadores de diploma."
+
+    inicio_inscricoes:
+      label: "Inicio das Inscricoes"
+      tipo: "Data e hora"
+      obrigatorio: false
+      descricao: "Data e hora em que as inscricoes serao abertas. Deixe em branco se nao houver restricao de data inicial."
+      exemplo: "15/01/2025 00:00"
+      dica: "Candidatos so poderao se inscrever DEPOIS desta data."
+
+    termino_inscricoes:
+      label: "Termino das Inscricoes"
+      tipo: "Data e hora"
+      obrigatorio: false
+      descricao: "Data e hora em que as inscricoes serao encerradas. Deixe em branco se nao houver prazo final."
+      exemplo: "15/02/2025 23:59"
+      validacao: "Deve ser posterior a data de inicio"
+      dica: "Candidatos NAO poderao se inscrever DEPOIS desta data."
+
+    divulgacao_resultado:
+      label: "Divulgacao do Resultado"
+      tipo: "Data e hora"
+      obrigatorio: false
+      descricao: "Data e hora prevista para divulgacao dos resultados finais."
+      exemplo: "01/03/2025 18:00"
+      validacao: "Deve ser posterior ao termino das inscricoes"
+
+    permitir_multiplas_candidaturas:
+      label: "Permitir multiplas candidaturas"
+      tipo: "Checkbox (sim/nao)"
+      obrigatorio: false
+      descricao: "Se marcado, um candidato pode se inscrever em multiplas ofertas dentro deste processo seletivo."
+      exemplo_uso: "Marque se o candidato pode tentar vaga em Engenharia E Administracao simultaneamente."
+      padrao: false
+
+    requer_pagamento:
+      label: "Requer pagamento"
+      tipo: "Checkbox (sim/nao)"
+      obrigatorio: false
+      descricao: "Se marcado, o candidato devera pagar uma taxa de inscricao. O valor sera configurado em cada oferta."
+      padrao: false
+
+  status_apos_criacao: "Rascunho"
+
+  proximos_passos:
+    - "Criar ofertas dentro desta admissao"
+    - "Configurar formularios de inscricao de cada oferta"
+    - "Publicar a admissao para liberar as inscricoes"
+
+  erros_comuns:
+    - erro: "Nao consigo selecionar turma"
+      causa: "Voce ainda nao selecionou uma empresa"
+      solucao: "Primeiro selecione a empresa, depois o campo de turma sera habilitado"
+
+    - erro: "Data de termino invalida"
+      causa: "Data de termino esta antes da data de inicio"
+      solucao: "A data de termino deve ser POSTERIOR a data de inicio das inscricoes"
+
+    - erro: "Preciso de pelo menos 2 turmas (Escolha Multipla)"
+      causa: "Modo Escolha Multipla exige minimo de 2 turmas"
+      solucao: "Selecione pelo menos 2 turmas diferentes ou mude para Turma Unica"
+
+# =============================================================================
+# FEATURE: EDITAR ADMISSAO
+# =============================================================================
+
+editar_admissao:
+  o_que_e: "Modificar configuracoes de um processo seletivo existente (nome, datas, turmas vinculadas, etc)."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Admissoes > [Selecionar Admissao] > Editar"
+    url: "/educational/admission/:id/edit"
+
+  como_editar:
+    - passo: 1
+      acao: "Acesse a lista de admissoes e clique na admissao desejada"
+
+    - passo: 2
+      acao: "Clique no botao 'Editar' (canto superior direito)"
+
+    - passo: 3
+      acao: "Altere os campos desejados"
+
+    - passo: 4
+      acao: "Clique em 'Salvar Alteracoes'"
+
+  campos_editaveis:
+    - nome
+    - descricao
+    - inicio_inscricoes
+    - termino_inscricoes
+    - divulgacao_resultado
+    - permitir_multiplas_candidaturas
+    - requer_pagamento
+    - turmas_vinculadas (somente no modo Escolha Multipla)
+
+  campos_nao_editaveis:
+    - empresa: "Nao pode ser alterada apos criacao"
+    - codigo: "Gerado automaticamente, nao editavel"
+    - modo_matricula: "Nao pode ser alterado apos criacao"
+
+  gerenciar_turmas_multiplas:
+    descricao: "Se a admissao foi criada no modo Escolha Multipla, voce pode adicionar, remover e reordenar turmas vinculadas."
+    acoes:
+      - "Adicionar turma: selecione uma turma nova e clique em 'Adicionar'"
+      - "Remover turma: clique no icone de lixeira ao lado da turma"
+      - "Reordenar: arraste as turmas para mudar a ordem de exibicao"
+    restricao: "Desabilitado quando a admissao esta publicada"
+
+  erros_comuns:
+    - erro: "Nao consigo adicionar/remover turmas"
+      causa: "A admissao ja esta publicada"
+      solucao: "Turmas nao podem ser alteradas apos publicacao para manter integridade das ofertas e inscricoes"
+
+# =============================================================================
+# FEATURE: PUBLICAR ADMISSAO
+# =============================================================================
+
+publicar_admissao:
+  o_que_e: "Mudar o status da admissao de 'Rascunho' para 'Ativa', liberando as inscricoes publicas."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Admissoes > [Selecionar Admissao] > Publicar"
+    url: "/educational/admission/:id"
+    botao: "Publicar"
+
+  como_publicar:
+    - passo: 1
+      acao: "Acesse os detalhes da admissao"
+
+    - passo: 2
+      acao: "Verifique se todas as ofertas foram criadas e configuradas"
+
+    - passo: 3
+      acao: "Clique no botao 'Publicar' (visivel apenas se status = Rascunho)"
+
+    - passo: 4
+      acao: "O status muda para 'Ativa' e as inscricoes sao liberadas"
+
+  requisitos:
+    - "Admissao deve estar em status 'Rascunho'"
+    - "Recomendado ter pelo menos 1 oferta criada"
+
+  o_que_acontece:
+    - "Status muda de 'Rascunho' para 'Ativa'"
+    - "Links publicos de inscricao ficam acessiveis aos candidatos"
+    - "Algumas configuracoes ficam bloqueadas (ex: turmas vinculadas)"
+
+  reversao:
+    descricao: "Nao ha botao para 'despublicar'. Para encerrar, use status 'Encerrada' ou 'Cancelada'."
+
+# =============================================================================
+# FEATURE: EXCLUIR ADMISSAO
+# =============================================================================
+
+excluir_admissao:
+  o_que_e: "Remover permanentemente um processo seletivo e todas as suas ofertas e candidatos."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Admissoes > [Selecionar Admissao] > Excluir"
+    url: "/educational/admission/:id"
+    botao: "Excluir"
+
+  como_excluir:
+    - passo: 1
+      acao: "Acesse os detalhes da admissao"
+
+    - passo: 2
+      acao: "Clique no botao 'Excluir' (icone de lixeira)"
+
+    - passo: 3
+      acao: "Confirme a exclusao no dialogo de confirmacao"
+
+    - passo: 4
+      acao: "A admissao e removida permanentemente"
+
+  avisos:
+    - "CUIDADO: Esta acao e irreversivel!"
+    - "Todas as ofertas vinculadas serao excluidas"
+    - "Todos os candidatos inscritos serao removidos"
+    - "Dados de pagamento, documentos e avaliacoes serao perdidos"
+
+  quando_usar: "Apenas para remover admissoes criadas por engano ou testes. Para processos concluidos, prefira mudar status para 'Encerrada'."
+
+# =============================================================================
+# FEATURE: CRIAR OFERTA
+# =============================================================================
+
+criar_oferta:
+  o_que_e: "Criar uma vaga ou conjunto de vagas dentro de um processo seletivo. E na oferta que o candidato se inscreve."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Admissoes > [Selecionar Admissao] > Adicionar Oferta"
+    url: "/educational/admission/:admissionId/offers/new"
+
+  quando_usar: "Depois de criar a admissao, crie uma ou mais ofertas. Exemplo: uma oferta para cada curso (Engenharia, Administracao, Direito)."
+
+  como_criar:
+    - passo: 1
+      acao: "Acesse os detalhes de uma admissao"
+
+    - passo: 2
+      acao: "Clique no botao 'Adicionar Oferta'"
+
+    - passo: 3
+      acao: "Preencha os campos da oferta"
+
+    - passo: 4
+      acao: "Configure etapas do pipeline (marque as que deseja usar)"
+
+    - passo: 5
+      acao: "Clique em 'Criar Oferta'"
+
+    - passo: 6
+      acao: "O link publico de inscricao sera gerado automaticamente"
+
+  campos:
+    nome:
+      label: "Nome da Oferta"
+      tipo: "Texto"
+      obrigatorio: true
+      descricao: "Nome da oferta. Seja especifico sobre curso, modalidade ou periodo."
+      exemplo: "Engenharia Civil - Vestibular 2025.1"
+
+    descricao:
+      label: "Descricao"
+      tipo: "Area de texto"
+      obrigatorio: false
+      descricao: "Informacoes adicionais sobre a oferta, como requisitos ou diferenciais."
+      exemplo: "Curso presencial, com duracao de 5 anos. Aulas no periodo noturno."
+
+    tipo_oferta:
+      label: "Tipo de Oferta"
+      tipo: "Texto"
+      obrigatorio: false
+      descricao: "Categoria da oferta. Use para organizar e filtrar."
+      exemplo: "Vestibular, ENEM, Transferencia, Segunda Graduacao"
+
+    turma_herdada:
+      label: "Turma (herdada da Admissao)"
+      tipo: "Texto (desabilitado)"
+      obrigatorio: false
+      descricao: "Campo somente leitura. Se a admissao foi criada no modo Turma Unica, a turma e exibida aqui automaticamente."
+      visivel_quando: "admission.enrollmentMode === 'single_inherited'"
+
+    turmas_vinculadas:
+      label: "Turmas Vinculadas (Escolha Multipla)"
+      tipo: "Lista (somente leitura)"
+      obrigatorio: false
+      descricao: "Campo somente leitura. Se a admissao foi criada no modo Escolha Multipla, todas as turmas disponiveis sao exibidas aqui. O candidato escolhera uma na inscricao."
+      visivel_quando: "admission.enrollmentMode === 'multiple_choice'"
+
+    taxa_inscricao:
+      label: "Taxa de Inscricao"
+      tipo: "Numero (decimal)"
+      obrigatorio: false
+      descricao: "Valor em Reais (R$) que o candidato devera pagar para se inscrever nesta oferta."
+      exemplo: "150.00"
+      formato: "0.00"
+
+    desconto:
+      label: "Desconto"
+      tipo: "Numero (percentual)"
+      obrigatorio: false
+      descricao: "Percentual de desconto sobre a taxa de inscricao. Valor entre 0 e 100."
+      exemplo: "20 (para 20% de desconto)"
+      formato: "0 a 100"
+
+    vagas_totais:
+      label: "Vagas Totais"
+      tipo: "Numero inteiro"
+      obrigatorio: false
+      descricao: "Numero total de vagas disponiveis nesta oferta."
+      exemplo: "50"
+      minimo: 1
+
+    vagas_reservadas:
+      label: "Vagas Reservadas"
+      tipo: "Numero inteiro"
+      obrigatorio: false
+      descricao: "Numero de vagas reservadas (cotas). Exemplo: vagas para PCD, cota racial, etc."
+      exemplo: "10"
+      minimo: 0
+
+    etapas_pipeline:
+      label: "Etapas do Pipeline"
+      tipo: "Checkboxes (selecao multipla)"
+      obrigatorio: true
+      descricao: "Selecione quais etapas do processo seletivo serao usadas nesta oferta. Por padrao, todas vem marcadas."
+      exemplo: "Inscrito, Documentacao Pendente, Em Analise, Aprovado, Reprovado, Matriculado"
+      validacao: "Minimo de 1 etapa obrigatoria"
+
+    link_publico:
+      label: "Link Publico de Inscricao"
+      tipo: "Texto (desabilitado)"
+      obrigatorio: false
+      descricao: "Link gerado automaticamente apos criacao da oferta. Compartilhe este link com os candidatos."
+      exemplo: "https://seudominio.com/apply/abc123-def456"
+      formato: "{origem}/apply/{id-da-oferta}"
+
+  apos_criacao:
+    - "O sistema gera um link publico de inscricao"
+    - "Um formulario padrao e criado automaticamente com a etapa 'Dados Pessoais'"
+    - "Voce pode copiar o link e divulgar"
+    - "Voce pode editar o formulario de inscricao clicando em 'Editar Formulario'"
+
+  erros_comuns:
+    - erro: "Nao vejo o link publico"
+      causa: "O link so e gerado DEPOIS de criar a oferta"
+      solucao: "Clique em 'Criar Oferta' primeiro, depois o link aparecera"
+
+# =============================================================================
+# FEATURE: EDITAR OFERTA
+# =============================================================================
+
+editar_oferta:
+  o_que_e: "Modificar configuracoes de uma oferta existente (nome, vagas, taxa, desconto, etc)."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Admissoes > Ofertas > [Selecionar Oferta] > Editar"
+    url: "/educational/admission/offers/:offerId/edit"
+
+  como_editar:
+    - passo: 1
+      acao: "Acesse os detalhes da oferta"
+
+    - passo: 2
+      acao: "Clique em 'Editar'"
+
+    - passo: 3
+      acao: "Altere os campos desejados"
+
+    - passo: 4
+      acao: "Clique em 'Salvar Alteracoes'"
+
+  campos_editaveis:
+    - nome
+    - descricao
+    - tipo_oferta
+    - taxa_inscricao
+    - desconto
+    - vagas_totais
+    - vagas_reservadas
+    - classInstanceId (ID da turma - campo texto livre)
+
+  erros_comuns:
+    - erro: "Nao consigo mudar as turmas vinculadas"
+      causa: "Turmas sao herdadas da admissao pai"
+      solucao: "Edite as turmas na propria admissao (se modo Escolha Multipla)"
+
+# =============================================================================
+# FEATURE: EXCLUIR OFERTA
+# =============================================================================
+
+excluir_oferta:
+  o_que_e: "Remover permanentemente uma oferta e todos os candidatos inscritos nela."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Admissoes > Ofertas > [Selecionar Oferta] > Excluir"
+    url: "/educational/admission/offers/:offerId"
+
+  como_excluir:
+    - passo: 1
+      acao: "Acesse os detalhes da oferta"
+
+    - passo: 2
+      acao: "Clique no botao 'Excluir'"
+
+    - passo: 3
+      acao: "Confirme a exclusao no dialogo de alerta"
+
+    - passo: 4
+      acao: "A oferta e removida permanentemente"
+
+  avisos:
+    - "CUIDADO: Esta acao e irreversivel!"
+    - "Todos os candidatos inscritos nesta oferta serao excluidos"
+    - "Dados de pagamento, documentos e avaliacoes serao perdidos"
+
+  quando_usar: "Apenas para remover ofertas criadas por engano. Se ja houver candidatos inscritos, considere desativar ao inves de excluir."
+
+# =============================================================================
+# FEATURE: CONFIGURAR FORMULARIO DE INSCRICAO (Form Builder)
+# =============================================================================
+
+configurar_formulario:
+  o_que_e: "Personalizar o formulario que o candidato preenchera para se inscrever na oferta. Voce pode adicionar campos personalizados, solicitar documentos, configurar avaliacoes e contratos."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Admissoes > Ofertas > [Selecionar Oferta] > Editar Formulario"
+    url: "/educational/admission/offers/:offerId/form-builder"
+
+  quando_usar: "Apos criar a oferta, configure o formulario para coletar exatamente as informacoes que voce precisa dos candidatos."
+
+  como_funciona:
+    - "O formulario e dividido em ETAPAS (ex: Dados Pessoais, Documentos, Avaliacao)"
+    - "Cada etapa contem COMPONENTES (Campos, Documentos, Pagamento, Avaliacao, Contrato)"
+    - "Voce arrasta componentes da paleta para as etapas"
+    - "Cada componente pode ser configurado individualmente"
+
+  como_usar:
+    - passo: 1
+      acao: "Acesse os detalhes da oferta"
+
+    - passo: 2
+      acao: "Clique em 'Editar Formulario'"
+
+    - passo: 3
+      acao: "Adicione novas etapas clicando em 'Nova Etapa'"
+
+    - passo: 4
+      acao: "Arraste componentes da paleta (lateral esquerda) para as etapas"
+
+    - passo: 5
+      acao: "Clique em cada componente para configurar (painel lateral direito)"
+
+    - passo: 6
+      acao: "Clique em 'Salvar Formulario'"
+
+  etapa_fixa:
+    nome: "Dados Pessoais"
+    descricao: "Esta etapa e criada automaticamente e NAO pode ser excluida. Ela coleta informacoes basicas do candidato (nome, email, CPF, telefone, etc)."
+    editavel: "Voce pode adicionar mais campos personalizados nesta etapa, mas nao pode remove-la."
+
+  componentes_disponiveis:
+    campos:
+      nome: "Campos"
+      descricao: "Campos personalizados para coletar informacoes adicionais do candidato."
+      icone: "FormInput"
+      exemplo: "Nome da mae, endereco, profissao, escolaridade anterior, etc"
+      tipos_suportados:
+        - "Texto (text)"
+        - "Numero (number)"
+        - "E-mail (email)"
+        - "Telefone (tel)"
+        - "Data (date)"
+        - "Selecao Dropdown (select)"
+        - "Selecao Radio (radio)"
+        - "Multipla Escolha (checkbox)"
+        - "Area de texto (textarea)"
+
+    documentos:
+      nome: "Documentos"
+      descricao: "Solicita upload de arquivos (PDFs, imagens) do candidato."
+      icone: "FileText"
+      exemplo: "RG, CPF, Historico escolar, Comprovante de residencia"
+      cada_documento_tem:
+        - "Nome do documento"
+        - "Descricao/instrucoes"
+        - "Se e obrigatorio ou opcional"
+
+    pagamento:
+      nome: "Pagamento"
+      descricao: "Cobranca de taxa de inscricao. ATENCAO: Este componente esta em desenvolvimento e pode nao funcionar completamente."
+      icone: "CreditCard"
+      status: "Em desenvolvimento (disabled: true)"
+      provedores_suportados:
+        - "Stripe"
+        - "PayPal"
+        - "Mercado Pago"
+        - "PagSeguro"
+        - "Asaas"
+        - "Outro"
+
+    avaliacao:
+      nome: "Avaliacao"
+      descricao: "Prova, teste ou entrevista que o candidato deve completar."
+      icone: "ClipboardCheck"
+      modos:
+        - valor: "internal"
+          nome: "Avaliacao Interna"
+          descricao: "Prova aplicada dentro do proprio sistema (modal)."
+          configuracoes:
+            - "ID da avaliacao no sistema externo"
+            - "Duracao em minutos"
+
+        - valor: "external"
+          nome: "Link Externo"
+          descricao: "Redireciona candidato para um link externo (ex: Google Forms, Zoom, Google Meet)."
+          configuracoes:
+            - "URL do link externo"
+
+        - valor: "scheduled"
+          nome: "Avaliacao Agendada"
+          descricao: "Candidato deve agendar horario para prova ou entrevista."
+          configuracoes:
+            - "Instrucoes de agendamento"
+            - "Link de agendamento (ex: Calendly)"
+      opcoes_adicionais:
+        - "Email do avaliador (para notificacoes)"
+        - "Permitir pular avaliacao (candidato pode continuar sem fazer)"
+
+    contrato:
+      nome: "Contrato"
+      descricao: "Contrato ou termo de compromisso que o candidato deve ler e assinar."
+      icone: "FileSignature"
+      configuracoes:
+        - "Template do contrato (editor de texto rico CKEditor 5)"
+        - "Assinatura digital obrigatoria (com verificacao OTP)"
+      exemplo: "Termo de compromisso, Contrato de matricula, LGPD"
+
+  configurar_componente:
+    aba_parametros:
+      titulo: "Parametros"
+      descricao: "Configuracoes especificas de cada tipo de componente."
+      campos_comuns:
+        titulo:
+          label: "Titulo do Componente"
+          descricao: "Titulo exibido para o candidato nesta etapa."
+          exemplo: "Documentos Obrigatorios"
+
+        descricao:
+          label: "Descricao do Componente"
+          descricao: "Instrucoes ou orientacoes exibidas para o candidato."
+          exemplo: "Por favor, envie copias legíveis dos documentos solicitados abaixo."
+
+        obrigatorio:
+          label: "Etapa Obrigatoria"
+          descricao: "Define se o candidato DEVE completar esta etapa antes de prosseguir."
+
+    aba_comunicacao:
+      titulo: "Comunicacao"
+      descricao: "Configure mensagens automaticas e webhooks para integracoes externas."
+
+      gatilhos_email:
+        ao_iniciar:
+          label: "Gatilho - Ao Iniciar Etapa"
+          descricao: "Mensagem enviada quando o candidato INICIA esta etapa."
+          exemplo: "Ola! Voce iniciou a etapa de documentacao. Por favor, envie os documentos listados."
+
+        ao_concluir:
+          label: "Gatilho - Ao Concluir Etapa"
+          descricao: "Mensagem enviada quando o candidato CONCLUI esta etapa."
+          exemplo: "Parabens! Voce concluiu a etapa de documentacao."
+
+        ao_aprovar:
+          label: "Gatilho - Ao Aprovar"
+          descricao: "Mensagem enviada quando o candidato e APROVADO nesta etapa."
+          exemplo: "Seus documentos foram aprovados!"
+          disponivel_para: "Documentos, Avaliacao"
+
+        ao_rejeitar:
+          label: "Gatilho - Ao Rejeitar"
+          descricao: "Mensagem enviada quando o candidato e REPROVADO nesta etapa."
+          exemplo: "Seus documentos foram reprovados. Por favor, reenvie."
+          disponivel_para: "Documentos, Avaliacao"
+
+      webhooks:
+        ativar:
+          label: "Ativar Webhook"
+          descricao: "Envia dados desta etapa para uma ferramenta externa (CRM, automacao, etc)."
+
+        url:
+          label: "URL do Webhook"
+          descricao: "Endpoint da API externa que recebera os dados."
+          exemplo: "https://api.meucrm.com/webhook/candidate"
+
+        gatilho:
+          label: "Gatilho do Webhook"
+          descricao: "Quando o webhook sera disparado."
+          opcoes:
+            - "Ao Iniciar Etapa (on_start)"
+            - "Ao Concluir Etapa (on_complete)"
+            - "Ao Aprovar (on_approve)"
+            - "Ao Rejeitar (on_reject)"
+
+        metodo:
+          label: "Metodo HTTP do Webhook"
+          opcoes:
+            - "POST"
+            - "PUT"
+            - "PATCH"
+
+        headers:
+          label: "Headers Customizados (JSON)"
+          descricao: "Headers HTTP adicionais para autenticacao ou configuracao."
+          exemplo: '{"Authorization": "Bearer TOKEN123", "Content-Type": "application/json"}'
+
+  gerenciar_etapas:
+    adicionar:
+      acao: "Clique em 'Nova Etapa'"
+      resultado: "Uma nova etapa vazia e adicionada ao final"
+
+    renomear:
+      acao: "Clique no nome da etapa ou no icone de editar"
+      resultado: "Campo de texto se torna editavel"
+
+    duplicar:
+      acao: "Clique no icone de copiar"
+      resultado: "Uma copia da etapa (com todos os componentes) e criada"
+
+    excluir:
+      acao: "Clique no icone de lixeira"
+      resultado: "Etapa e todos os componentes sao removidos"
+      restricao: "A etapa 'Dados Pessoais' NAO pode ser excluida"
+
+    reordenar:
+      acao: "Arraste a etapa para cima ou para baixo"
+      resultado: "Ordem das etapas e alterada"
+
+  gerenciar_componentes:
+    adicionar:
+      acao: "Arraste um componente da paleta (esquerda) para dentro de uma etapa"
+      resultado: "Componente e adicionado a etapa"
+
+    configurar:
+      acao: "Clique no componente adicionado"
+      resultado: "Painel lateral direito abre com configuracoes"
+
+    excluir:
+      acao: "Clique no icone de lixeira do componente"
+      resultado: "Componente e removido da etapa"
+      restricao: "Componentes fixos (ex: campos padroes de Dados Pessoais) NAO podem ser excluidos"
+
+  exemplo_pratico:
+    cenario: "Processo seletivo de graduacao que exige documentos, prova online e contrato"
+
+    etapa_1:
+      nome: "Dados Pessoais"
+      componentes:
+        - tipo: "Campos (fixo)"
+          descricao: "Nome, CPF, email, telefone (campos padrao do sistema)"
+        - tipo: "Campos (personalizado)"
+          descricao: "Nome da mae, escolaridade anterior, profissao"
+
+    etapa_2:
+      nome: "Documentacao"
+      componentes:
+        - tipo: "Documentos"
+          documentos:
+            - "RG (obrigatorio)"
+            - "CPF (obrigatorio)"
+            - "Historico escolar (obrigatorio)"
+            - "Comprovante de residencia (opcional)"
+
+    etapa_3:
+      nome: "Prova Online"
+      componentes:
+        - tipo: "Avaliacao"
+          modo: "external"
+          link: "https://forms.google.com/prova-vestibular-2025"
+
+    etapa_4:
+      nome: "Contrato de Matricula"
+      componentes:
+        - tipo: "Contrato"
+          template: "Eu, [NOME], declaro estar ciente das condicoes..."
+          assinatura_digital: true
+
+  erros_comuns:
+    - erro: "Nao consigo arrastar componentes"
+      causa: "Navegador nao suporta drag-and-drop"
+      solucao: "Use um navegador moderno (Chrome, Firefox, Edge)"
+
+    - erro: "Componente Pagamento esta desabilitado"
+      causa: "Funcionalidade em desenvolvimento"
+      solucao: "Use outros metodos de pagamento por enquanto (Asaas, Stripe externo, etc)"
+
+    - erro: "Nao consigo excluir a etapa 'Dados Pessoais'"
+      causa: "Esta etapa e obrigatoria e fixa"
+      solucao: "Voce pode adicionar mais campos nela, mas nao pode remove-la"
+
+# =============================================================================
+# FEATURE: ACOMPANHAR CANDIDATOS (Kanban Pipeline)
+# =============================================================================
+
+acompanhar_candidatos:
+  o_que_e: "Visualizar todos os candidatos inscritos em um quadro Kanban organizado por etapas do pipeline (Inscrito, Em Analise, Aprovado, Reprovado, Matriculado)."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Candidatos"
+    url: "/educational/admission/candidates"
+    filtro_por_oferta: "/educational/admission/candidates?offerId={id}"
+
+  quando_usar: "Para acompanhar o progresso dos candidatos, mover entre etapas, aprovar/reprovar e gerenciar o funil do processo seletivo."
+
+  como_usar:
+    - passo: 1
+      acao: "Acesse o menu Educacional > Candidatos"
+
+    - passo: 2
+      acao: "Filtre por oferta especifica (se necessario)"
+
+    - passo: 3
+      acao: "Visualize candidatos organizados por colunas (etapas do pipeline)"
+
+    - passo: 4
+      acao: "Arraste candidatos entre colunas para mover de etapa"
+
+    - passo: 5
+      acao: "Clique em um candidato para ver detalhes, documentos, respostas e avaliacoes"
+
+  etapas_pipeline_padrao:
+    - nome: "Inscrito"
+      descricao: "Candidato completou a inscricao inicial"
+      cor: "Azul"
+
+    - nome: "Documentacao Pendente"
+      descricao: "Candidato precisa enviar ou corrigir documentos"
+      cor: "Amarelo"
+
+    - nome: "Em Analise"
+      descricao: "Documentos e dados estao sendo avaliados pela banca"
+      cor: "Roxo"
+
+    - nome: "Aprovado"
+      descricao: "Candidato foi aprovado no processo seletivo"
+      cor: "Verde"
+
+    - nome: "Reprovado"
+      descricao: "Candidato foi reprovado"
+      cor: "Vermelho"
+
+    - nome: "Matriculado"
+      descricao: "Candidato foi matriculado na turma"
+      cor: "Verde escuro"
+
+  acoes_disponiveis:
+    mover_candidato:
+      acao: "Arrastar e soltar candidato entre colunas"
+      resultado: "Candidato muda de etapa"
+
+    ver_detalhes:
+      acao: "Clicar no card do candidato"
+      resultado: "Modal abre com informacoes completas: dados pessoais, documentos enviados, respostas do formulario, avaliacoes"
+
+    aprovar_documentos:
+      acao: "No modal de detalhes, marcar documentos como aprovados"
+      resultado: "Documento recebe status 'Aprovado'"
+
+    reprovar_documentos:
+      acao: "No modal de detalhes, marcar documentos como reprovados"
+      resultado: "Documento recebe status 'Reprovado' e candidato e notificado para reenviar"
+
+    aprovar_candidato:
+      acao: "Mover candidato para coluna 'Aprovado'"
+      resultado: "Candidato fica apto a matricula"
+
+    reprovar_candidato:
+      acao: "Mover candidato para coluna 'Reprovado'"
+      resultado: "Candidato e desclassificado do processo"
+
+    matricular:
+      acao: "Mover candidato para coluna 'Matriculado'"
+      resultado: "Candidato e matriculado na turma vinculada a oferta"
+
+  filtros_disponiveis:
+    - "Por oferta especifica"
+    - "Por etapa do pipeline"
+    - "Por status de pagamento"
+    - "Por data de inscricao"
+
+  erros_comuns:
+    - erro: "Nao vejo nenhum candidato"
+      causa: "Nenhum candidato se inscreveu ainda OU filtro esta ativo"
+      solucao: "Verifique se o link publico foi divulgado. Remova filtros ativos."
+
+    - erro: "Nao consigo mover candidato entre etapas"
+      causa: "Permissoes insuficientes"
+      solucao: "Contate o administrador para verificar suas permissoes"
+
+# =============================================================================
+# FEATURE: GERENCIAR DOCUMENTOS DE CANDIDATOS
+# =============================================================================
+
+gerenciar_documentos:
+  o_que_e: "Visualizar, baixar, aprovar ou reprovar documentos enviados pelos candidatos durante o processo de inscricao."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Candidatos > [Selecionar Candidato] > Aba Documentos"
+    acesso: "Dentro do modal de detalhes do candidato"
+
+  quando_usar: "Para validar se os documentos enviados estao corretos, legiveis e atendem aos requisitos."
+
+  como_usar:
+    - passo: 1
+      acao: "Acesse o Kanban de candidatos"
+
+    - passo: 2
+      acao: "Clique em um candidato"
+
+    - passo: 3
+      acao: "Acesse a aba 'Documentos'"
+
+    - passo: 4
+      acao: "Visualize ou baixe cada documento"
+
+    - passo: 5
+      acao: "Marque como 'Aprovado' ou 'Reprovado'"
+
+    - passo: 6
+      acao: "Se reprovado, adicione comentario explicando o motivo"
+
+  status_documento:
+    - nome: "Pendente"
+      descricao: "Documento ainda nao foi analisado"
+      cor: "Amarelo"
+
+    - nome: "Aprovado"
+      descricao: "Documento foi validado e esta correto"
+      cor: "Verde"
+
+    - nome: "Reprovado"
+      descricao: "Documento foi rejeitado (ilegivel, incorreto, etc)"
+      cor: "Vermelho"
+
+  acoes_disponiveis:
+    visualizar:
+      descricao: "Abrir documento em nova aba ou modal de visualizacao"
+
+    baixar:
+      descricao: "Download do arquivo para seu computador"
+
+    aprovar:
+      descricao: "Marcar documento como valido"
+      notificacao: "Candidato recebe email de confirmacao (se configurado)"
+
+    reprovar:
+      descricao: "Rejeitar documento"
+      campo_adicional: "Motivo da reprovacao (opcional mas recomendado)"
+      notificacao: "Candidato recebe email solicitando reenvio"
+
+  boas_praticas:
+    - "Sempre adicione comentario ao reprovar (ajuda o candidato a entender o erro)"
+    - "Verifique legibilidade: se a foto/scan esta clara"
+    - "Confirme que o documento pertence ao candidato (confira nome e CPF)"
+    - "Analise todos os documentos antes de aprovar o candidato para proxima etapa"
+
+  erros_comuns:
+    - erro: "Documento nao carrega"
+      causa: "Arquivo corrompido ou formato nao suportado"
+      solucao: "Solicite reenvio do candidato"
+
+    - erro: "Nao consigo reprovar documento"
+      causa: "Permissoes insuficientes"
+      solucao: "Contate o administrador"
+
+# =============================================================================
+# FEATURE: ACOMPANHAR PAGAMENTOS
+# =============================================================================
+
+acompanhar_pagamentos:
+  o_que_e: "Verificar quais candidatos pagaram a taxa de inscricao e quais ainda estao pendentes."
+
+  onde_fica_no_sistema:
+    menu: "Educacional > Candidatos > [Filtro por Status de Pagamento]"
+    acesso: "Filtro dentro do Kanban de candidatos"
+
+  quando_usar: "Quando a admissao tem 'Requer Pagamento' ativado e voce precisa validar pagamentos."
+
+  status_pagamento:
+    - nome: "Pendente"
+      descricao: "Candidato ainda nao pagou a taxa de inscricao"
+
+    - nome: "Pago"
+      descricao: "Pagamento confirmado"
+
+    - nome: "Isento"
+      descricao: "Candidato foi isento da taxa (bolsa, desconto 100%, etc)"
+
+    - nome: "Cancelado"
+      descricao: "Pagamento foi cancelado ou estornado"
+
+  como_verificar:
+    - passo: 1
+      acao: "Acesse o Kanban de candidatos"
+
+    - passo: 2
+      acao: "Use o filtro 'Status de Pagamento'"
+
+    - passo: 3
+      acao: "Visualize apenas candidatos com pagamento pendente/pago"
+
+  integracao_provedor:
+    descricao: "O status de pagamento e atualizado automaticamente via webhook do provedor de pagamento (Stripe, Mercado Pago, etc)."
+    manual: "Caso a integracao nao funcione, o administrador pode atualizar o status manualmente."
+
+  erros_comuns:
+    - erro: "Pagamento nao atualiza automaticamente"
+      causa: "Webhook nao configurado ou provedor de pagamento offline"
+      solucao: "Verifique configuracao do webhook no provedor. Atualize manualmente se necessario."
+
+# =============================================================================
+# FEATURE: CONFIGURACAO DE OFERTAS - DATAS E VAGAS
+# =============================================================================
+
+configuracao_ofertas:
+  datas:
+    inicio_inscricoes:
+      descricao: "Data/hora a partir da qual candidatos podem se inscrever"
+      comportamento: "Antes desta data, o link publico exibe mensagem 'Inscricoes ainda nao abertas'"
+
+    termino_inscricoes:
+      descricao: "Data/hora limite para inscricoes"
+      comportamento: "Apos esta data, o link publico exibe mensagem 'Inscricoes encerradas'"
+
+    divulgacao_resultado:
+      descricao: "Data/hora prevista para publicacao dos resultados"
+      comportamento: "Informativo para candidatos. Nao bloqueia acoes no sistema."
+
+  vagas:
+    vagas_totais:
+      descricao: "Numero total de vagas disponiveis na oferta"
+      exemplo: "50 vagas"
+
+    vagas_reservadas:
+      descricao: "Numero de vagas reservadas (cotas: PCD, racial, social, etc)"
+      exemplo: "10 vagas reservadas de um total de 50"
+
+    vagas_disponiveis:
+      calculo: "vagas_totais - vagas_reservadas - candidatos_aprovados"
+      descricao: "Numero de vagas ainda disponiveis para novos candidatos"
+
+  controle_vagas:
+    descricao: "O sistema NAO bloqueia inscricoes automaticamente quando vagas esgotam."
+    recomendacao: "Configure 'Termino das Inscricoes' ou mude status da oferta para 'Inativa' manualmente quando atingir o limite."
+
+# =============================================================================
+# FEATURE: STATUS E TRANSICOES DE ADMISSAO
+# =============================================================================
+
+status_admissao:
+  rascunho:
+    nome: "Rascunho"
+    descricao: "Admissao em configuracao. Inscricoes NAO estao abertas."
+    quando_usar: "Status inicial apos criacao. Use para testar e configurar antes de abrir para o publico."
+    acoes_permitidas:
+      - "Editar configuracoes"
+      - "Criar/editar/excluir ofertas"
+      - "Configurar formularios"
+      - "Publicar admissao"
+    links_publicos: "Inativos (nao aceitam inscricoes)"
+
+  ativa:
+    nome: "Ativa"
+    descricao: "Admissao publicada. Inscricoes ABERTAS."
+    quando_usar: "Quando estiver pronto para receber candidatos."
+    acoes_permitidas:
+      - "Editar configuracoes (limitadas)"
+      - "Criar/editar ofertas (limitado)"
+      - "Acompanhar candidatos"
+      - "Aprovar/reprovar candidatos"
+    acoes_bloqueadas:
+      - "Alterar turmas vinculadas"
+      - "Alterar modo de matricula"
+    links_publicos: "Ativos (aceitam inscricoes)"
+
+  encerrada:
+    nome: "Encerrada"
+    descricao: "Admissao finalizada. Inscricoes FECHADAS."
+    quando_usar: "Quando o processo seletivo terminou e todos os candidatos foram processados."
+    acoes_permitidas:
+      - "Visualizar dados"
+      - "Exportar relatorios"
+    acoes_bloqueadas:
+      - "Editar configuracoes"
+      - "Receber novas inscricoes"
+    links_publicos: "Inativos (nao aceitam inscricoes)"
+
+  cancelada:
+    nome: "Cancelada"
+    descricao: "Admissao foi cancelada. Inscricoes FECHADAS."
+    quando_usar: "Quando o processo seletivo foi suspenso ou cancelado por decisao institucional."
+    acoes_permitidas:
+      - "Visualizar dados"
+    acoes_bloqueadas:
+      - "Todas as edicoes"
+      - "Receber inscricoes"
+    links_publicos: "Inativos (nao aceitam inscricoes)"
+
+  transicoes_permitidas:
+    - origem: "Rascunho"
+      destino: "Ativa"
+      acao: "Publicar"
+
+    - origem: "Ativa"
+      destino: "Encerrada"
+      acao: "Encerrar"
+
+    - origem: "Ativa"
+      destino: "Cancelada"
+      acao: "Cancelar"
+
+    - origem: "Encerrada"
+      destino: "Ativa"
+      acao: "Reabrir (manualmente via API)"
+      observacao: "Nao ha botao na UI. Contate suporte."
+
+# =============================================================================
+# FEATURE: LINK PUBLICO DE INSCRICAO
+# =============================================================================
+
+link_publico:
+  o_que_e: "URL gerada automaticamente para cada oferta. O candidato acessa este link para se inscrever no processo seletivo."
+
+  formato: "{dominio}/apply/{id-da-oferta}"
+  exemplo: "https://universidade.com/apply/abc123-def456-ghi789"
+
+  onde_encontrar:
+    - "Detalhes da Oferta > Copiar Link"
+    - "Criacao da Oferta > Link gerado apos salvar"
+
+  como_divulgar:
+    - passo: 1
+      acao: "Copie o link publico"
+
+    - passo: 2
+      acao: "Compartilhe em redes sociais, site, email, WhatsApp, etc"
+
+    - passo: 3
+      acao: "Candidatos acessam o link e preenchem o formulario"
+
+  comportamento:
+    antes_inicio:
+      descricao: "Se acessado antes da data de inicio das inscricoes"
+      mensagem: "Inscricoes ainda nao abertas. Aguarde ate {data}."
+
+    durante_inscricoes:
+      descricao: "Durante o periodo de inscricoes"
+      comportamento: "Formulario e exibido normalmente. Candidato pode se inscrever."
+
+    apos_termino:
+      descricao: "Se acessado apos data de termino das inscricoes"
+      mensagem: "Inscricoes encerradas. Prazo limite: {data}."
+
+    admissao_inativa:
+      descricao: "Se admissao nao estiver publicada (status != Ativa)"
+      mensagem: "Este processo seletivo nao esta mais disponivel."
+
+  personalizacao:
+    descricao: "O link publico NAO e personalizavel (usa ID gerado automaticamente)."
+    recomendacao: "Use um encurtador de links (Bitly, TinyURL) para criar URLs amigaveis como 'bit.ly/vestibular2025'."
+
+  erros_comuns:
+    - erro: "Link retorna erro 404"
+      causa: "Oferta foi excluida"
+      solucao: "Verifique se a oferta ainda existe. Gere novo link."
+
+    - erro: "Link nao aceita inscricoes"
+      causa: "Admissao nao esta publicada ou fora do periodo de inscricoes"
+      solucao: "Publique a admissao e verifique as datas de inicio/termino"
+
+# =============================================================================
+# PERGUNTAS FREQUENTES (FAQ)
+# =============================================================================
+
+faq:
+  - pergunta: "Qual a diferenca entre Admissao e Oferta?"
+    resposta: "Admissao e o processo seletivo completo (ex: Vestibular 2025.1). Oferta e uma vaga especifica dentro desse processo (ex: vaga para Engenharia Civil). Uma admissao pode ter varias ofertas."
+
+  - pergunta: "Posso ter ofertas diferentes para cursos diferentes?"
+    resposta: "Sim! Crie varias ofertas dentro da mesma admissao. Exemplo: Oferta para Engenharia, Oferta para Administracao, Oferta para Direito. Cada oferta pode ter formulario, vagas e taxa diferentes."
+
+  - pergunta: "Como funciona o Modo de Matricula 'Turma Unica'?"
+    resposta: "Todos os candidatos aprovados serao matriculados na mesma turma. Exemplo: Vestibular para Engenharia Civil turma 2025.1. Use quando ha apenas uma turma de destino."
+
+  - pergunta: "Como funciona o Modo de Matricula 'Escolha Multipla'?"
+    resposta: "O candidato escolhe uma turma entre varias opcoes no momento da inscricao. Exemplo: Processo seletivo geral com opcoes de Engenharia, Administracao, Direito. O candidato seleciona o curso desejado."
+
+  - pergunta: "Posso mudar o Modo de Matricula depois de criar a admissao?"
+    resposta: "Nao. O Modo de Matricula nao pode ser alterado apos criacao para manter integridade das ofertas e inscricoes."
+
+  - pergunta: "O que acontece quando publico uma admissao?"
+    resposta: "O status muda de 'Rascunho' para 'Ativa'. Os links publicos de inscricao ficam ativos e candidatos podem se inscrever. Algumas configuracoes ficam bloqueadas (ex: turmas vinculadas)."
+
+  - pergunta: "Posso despublicar uma admissao?"
+    resposta: "Nao ha botao para despublicar. Se precisar pausar, mude o status para 'Encerrada' ou 'Cancelada'. Para reabrir, contate o suporte tecnico."
+
+  - pergunta: "Como adiciono campos personalizados ao formulario de inscricao?"
+    resposta: "Acesse Editar Formulario > Arraste o componente 'Campos' para uma etapa > Clique em 'Adicionar Campo Personalizado' > Configure nome, tipo e se e obrigatorio."
+
+  - pergunta: "Como solicito documentos dos candidatos?"
+    resposta: "Acesse Editar Formulario > Arraste o componente 'Documentos' para uma etapa > Clique em 'Adicionar Documento' > Configure nome, descricao e se e obrigatorio. O candidato fara upload do arquivo."
+
+  - pergunta: "Posso cobrar taxa de inscricao?"
+    resposta: "Sim. Ao criar a admissao, marque 'Requer Pagamento'. Depois configure o valor da taxa em cada oferta. ATENCAO: O componente de pagamento integrado esta em desenvolvimento. Use provedores externos (Asaas, Stripe, Mercado Pago) por enquanto."
+
+  - pergunta: "Como aplico desconto na taxa de inscricao?"
+    resposta: "Ao criar/editar a oferta, preencha o campo 'Desconto' com um percentual (ex: 20 para 20% de desconto). O desconto e aplicado sobre o valor da Taxa de Inscricao."
+
+  - pergunta: "Como acompanho o progresso dos candidatos?"
+    resposta: "Acesse Educacional > Candidatos. Visualize o Kanban com candidatos organizados por etapas. Arraste candidatos entre colunas para mover de etapa. Clique em um candidato para ver detalhes completos."
+
+  - pergunta: "Como aprovo ou reprovo um candidato?"
+    resposta: "No Kanban de candidatos, arraste o candidato para a coluna 'Aprovado' ou 'Reprovado'. Ou clique no candidato e use os botoes de aprovar/reprovar dentro do modal de detalhes."
+
+  - pergunta: "Como valido documentos enviados pelos candidatos?"
+    resposta: "Acesse o Kanban > Clique em um candidato > Aba 'Documentos' > Visualize cada documento > Marque como 'Aprovado' ou 'Reprovado'. Se reprovar, adicione comentario explicando o motivo."
+
+  - pergunta: "Posso excluir uma oferta que ja tem candidatos inscritos?"
+    resposta: "Tecnicamente sim, mas CUIDADO: todos os candidatos e dados serao excluidos permanentemente. Prefira desativar a oferta ou mudar status da admissao para 'Encerrada'."
+
+  - pergunta: "Como encerro um processo seletivo?"
+    resposta: "Acesse os detalhes da admissao e mude o status para 'Encerrada'. As inscricoes serao fechadas, mas voce ainda podera visualizar dados e exportar relatorios."
+
+  - pergunta: "Candidato reporta que o link de inscricao nao funciona. O que fazer?"
+    resposta: "Verifique se: 1) Admissao esta publicada (status Ativa). 2) Data de inicio das inscricoes ja passou. 3) Data de termino das inscricoes ainda nao passou. 4) Link copiado esta correto e completo."
+
+  - pergunta: "Como crio uma prova/avaliacao no formulario?"
+    resposta: "Editar Formulario > Arraste componente 'Avaliacao' > Escolha modo (Interna, Link Externo ou Agendada) > Configure duracao, link externo ou instrucoes de agendamento. Para provas complexas, use integracao externa (Google Forms, Moodle, etc)."
+
+  - pergunta: "Posso enviar emails automaticos para candidatos?"
+    resposta: "Sim. No Editar Formulario, clique em cada componente > Aba 'Comunicacao' > Configure gatilhos de email (Ao Iniciar, Ao Concluir, Ao Aprovar, Ao Rejeitar)."
+
+  - pergunta: "Como integro com CRM ou ferramenta externa?"
+    resposta: "Editar Formulario > Clique em componente > Aba 'Comunicacao' > Ative Webhook > Configure URL, gatilho, metodo HTTP e headers. Dados do candidato serao enviados automaticamente para sua ferramenta externa."
+
+# =============================================================================
+# ERROS COMUNS E SOLUCOES
+# =============================================================================
+
+erros_comuns:
+  - codigo: "ERR_ADMISSAO_001"
+    erro: "Nao consigo selecionar turma ao criar admissao"
+    causa: "Empresa ainda nao foi selecionada"
+    solucao: "Primeiro selecione a empresa. O campo de turma so e habilitado apos selecao da empresa."
+
+  - codigo: "ERR_ADMISSAO_002"
+    erro: "Data de termino invalida"
+    causa: "Data de termino esta antes da data de inicio"
+    solucao: "A data de termino das inscricoes deve ser POSTERIOR a data de inicio."
+
+  - codigo: "ERR_ADMISSAO_003"
+    erro: "Modo Escolha Multipla exige minimo de 2 turmas"
+    causa: "Selecionou menos de 2 turmas no modo Escolha Multipla"
+    solucao: "Selecione pelo menos 2 turmas diferentes ou mude para modo Turma Unica."
+
+  - codigo: "ERR_OFERTA_001"
+    erro: "Link publico nao aparece"
+    causa: "Oferta ainda nao foi criada"
+    solucao: "O link publico so e gerado DEPOIS de salvar a oferta. Clique em 'Criar Oferta' primeiro."
+
+  - codigo: "ERR_OFERTA_002"
+    erro: "Link de inscricao retorna erro 404"
+    causa: "Oferta foi excluida"
+    solucao: "Verifique se a oferta ainda existe na lista. Se foi excluida, crie nova oferta."
+
+  - codigo: "ERR_FORM_001"
+    erro: "Nao consigo arrastar componentes no Form Builder"
+    causa: "Navegador nao suporta drag-and-drop OU cache/cookies corrompidos"
+    solucao: "1) Use navegador moderno (Chrome, Firefox, Edge). 2) Limpe cache e cookies. 3) Tente em janela anonima."
+
+  - codigo: "ERR_FORM_002"
+    erro: "Componente Pagamento esta desabilitado"
+    causa: "Funcionalidade em desenvolvimento"
+    solucao: "Use provedores externos (Asaas, Stripe, Mercado Pago) por enquanto. Configure webhook para receber notificacoes de pagamento."
+
+  - codigo: "ERR_FORM_003"
+    erro: "Nao consigo excluir etapa 'Dados Pessoais'"
+    causa: "Esta etapa e fixa e obrigatoria"
+    solucao: "A etapa 'Dados Pessoais' nao pode ser excluida. Voce pode adicionar mais campos nela, mas nao remove-la."
+
+  - codigo: "ERR_CANDIDATO_001"
+    erro: "Nao vejo candidatos no Kanban"
+    causa: "Nenhum candidato se inscreveu OU filtro esta ativo"
+    solucao: "1) Verifique se link publico foi divulgado. 2) Remova filtros ativos. 3) Confirme que admissao esta publicada."
+
+  - codigo: "ERR_CANDIDATO_002"
+    erro: "Nao consigo mover candidato entre etapas"
+    causa: "Permissoes insuficientes OU candidato ja esta na etapa final"
+    solucao: "1) Verifique suas permissoes com administrador. 2) Candidatos em 'Matriculado' nao podem ser movidos."
+
+  - codigo: "ERR_DOCUMENTO_001"
+    erro: "Documento do candidato nao carrega"
+    causa: "Arquivo corrompido, formato nao suportado OU servidor de arquivos offline"
+    solucao: "1) Solicite reenvio do candidato. 2) Verifique se servidor de arquivos esta online. 3) Formatos suportados: PDF, JPG, PNG."
+
+  - codigo: "ERR_PAGAMENTO_001"
+    erro: "Status de pagamento nao atualiza automaticamente"
+    causa: "Webhook nao configurado OU provedor de pagamento offline"
+    solucao: "1) Verifique configuracao do webhook no provedor (Asaas, Stripe, etc). 2) Atualize status manualmente se necessario. 3) Teste webhook com ferramenta como Webhook.site."
+
+  - codigo: "ERR_PUBLICACAO_001"
+    erro: "Botao Publicar nao aparece"
+    causa: "Admissao ja esta publicada (status != Rascunho)"
+    solucao: "Botao 'Publicar' so aparece para admissoes em status Rascunho."
+
+  - codigo: "ERR_EDICAO_001"
+    erro: "Nao consigo editar turmas vinculadas"
+    causa: "Admissao ja foi publicada"
+    solucao: "Turmas vinculadas nao podem ser alteradas apos publicacao para manter integridade das inscricoes."
+
+  - codigo: "ERR_LINK_001"
+    erro: "Candidato reporta 'Inscricoes nao abertas'"
+    causa: "Data de inicio das inscricoes ainda nao chegou OU admissao nao esta publicada"
+    solucao: "1) Verifique se admissao esta em status 'Ativa'. 2) Confirme se data de inicio ja passou."
+
+  - codigo: "ERR_LINK_002"
+    erro: "Candidato reporta 'Inscricoes encerradas'"
+    causa: "Data de termino das inscricoes ja passou"
+    solucao: "1) Verifique data de termino configurada. 2) Estenda prazo se necessario. 3) Ou oriente candidato a aguardar proximo processo."
+
+# =============================================================================
+# GLOSSARIO TECNICO (Para Referencia)
+# =============================================================================
+
+glossario_tecnico:
+  AdmissionListRoute: "Pagina de listagem de admissoes (/educational/admission)"
+  AdmissionCreateRoute: "Pagina de criacao de admissao (/educational/admission/new)"
+  AdmissionDetailRoute: "Pagina de detalhes de uma admissao (/educational/admission/:id)"
+  AdmissionEditRoute: "Pagina de edicao de admissao (/educational/admission/:id/edit)"
+  OfferCreateRoute: "Pagina de criacao de oferta (/educational/admission/:admissionId/offers/new)"
+  OfferDetailRoute: "Pagina de detalhes de oferta (/educational/admission/offers/:offerId)"
+  OfferEditRoute: "Pagina de edicao de oferta (/educational/admission/offers/:offerId/edit)"
+  FormBuilderRoute: "Pagina de configuracao de formulario (/educational/admission/offers/:offerId/form-builder)"
+
+  enrollmentMode: "Modo de matricula (single_inherited ou multiple_choice)"
+  single_inherited: "Turma Unica - todos candidatos vao para a mesma turma"
+  multiple_choice: "Escolha Multipla - candidato escolhe entre varias turmas"
+
+  formConfig: "Configuracao do formulario de inscricao (JSON com etapas e componentes)"
+  FormStepGroup: "Etapa do formulario (ex: Dados Pessoais, Documentos)"
+  FormComponent: "Componente dentro de uma etapa (campos, documentos, avaliacao, contrato, pagamento)"
+
+  pipelineStages: "Etapas do pipeline do candidato (Inscrito, Em Analise, Aprovado, etc)"
+
+  vacancyConfig: "Configuracao de vagas (total, reserved, available)"
+
+  publicUrl: "Link publico de inscricao ({origin}/apply/{offerId})"
+
+  webhookUrl: "URL de webhook para integracoes externas"
+
+  requirePayment: "Flag que indica se admissao exige pagamento"
+
+  allowMultipleApplications: "Flag que permite candidato se inscrever em multiplas ofertas"

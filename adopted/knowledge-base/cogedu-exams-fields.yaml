@@ -1,0 +1,2072 @@
+# =============================================================================
+# GUIA COMPLETO: AVALIACOES E PROVAS DO COGEDU
+# Base de conhecimento para o assistente Orch Admin
+# Versao: 2.0.0
+# Atualizado: 2026-02-12
+# =============================================================================
+
+# =============================================================================
+# GLOSSARIO DE TERMOS
+# =============================================================================
+glossario:
+  Assessment: "Avaliacao - qualquer tipo de prova, teste ou atividade que avalia o conhecimento do aluno"
+  Exam: "Prova - avaliacao formal com nota, geralmente mais extensa"
+  Quiz: "Questionario - avaliacao rapida, menos formal"
+  Assignment: "Atividade/Tarefa - trabalho que o aluno deve entregar"
+  QuestionBank: "Banco de Questoes - repositorio central onde todas as questoes criadas ficam armazenadas e podem ser reutilizadas em multiplas avaliacoes"
+  Rubric: "Rubrica - matriz de criterios detalhados usada para avaliar respostas dissertativas ou trabalhos complexos de forma padronizada"
+  Grading: "Correcao - processo de atribuir nota e feedback a uma tentativa de avaliacao do aluno"
+  Alternative: "Alternativa - cada opcao de resposta em uma questao de multipla escolha"
+  Attempt: "Tentativa - cada vez que um aluno faz uma avaliacao (uma avaliacao pode permitir multiplas tentativas)"
+  TRI: "Teoria de Resposta ao Item - sistema avancado de pontuacao que considera a dificuldade das questoes"
+  Blockly: "Editor visual de programacao por blocos, tipo Scratch"
+  Proctoring: "Supervisao/Monitoramento - sistema para fiscalizar provas online e prevenir cola"
+  BNCC: "Base Nacional Comum Curricular - codigo de referencia curricular brasileiro"
+  MUFA: "Codigo de referencia curricular interno do sistema"
+
+# =============================================================================
+# 1. BANCO DE QUESTOES (QUESTION BANK)
+# =============================================================================
+banco_de_questoes:
+
+  o_que_e: >
+    O Banco de Questoes e o repositorio central onde todas as questoes criadas
+    ficam armazenadas. E como uma biblioteca de questoes que pode ser reutilizada
+    em multiplas avaliacoes. Uma vez que voce cria uma questao e salva no banco,
+    ela fica disponivel para sempre e pode ser usada em quantas provas voce quiser.
+
+  onde_fica_no_sistema:
+    menu: "Menu Educacional > Avaliacoes > Banco de Questoes"
+    url: "/educational/exams/bank"
+
+  como_acessar:
+    passo_1: "Clique no menu principal em 'Educacional'"
+    passo_2: "Selecione 'Avaliacoes'"
+    passo_3: "Clique em 'Banco de Questoes'"
+
+  o_que_voce_pode_fazer:
+    - "Criar novas questoes manualmente"
+    - "Gerar questoes automaticamente usando IA"
+    - "Editar questoes existentes"
+    - "Deletar questoes que nao sao mais necessarias"
+    - "Buscar questoes por texto, dificuldade, tipo ou tags"
+    - "Visualizar detalhes completos de cada questao"
+    - "Filtrar questoes por categoria, assunto ou criador"
+
+  filtros_disponiveis:
+    busca_por_texto:
+      o_que_e: "Procura questoes pelo texto do enunciado"
+      exemplo: "Digite 'fotossintese' para encontrar questoes sobre o tema"
+      dica: "Use palavras-chave importantes do assunto que voce procura"
+
+    dificuldade:
+      o_que_e: "Filtra questoes pelo nivel de dificuldade"
+      opcoes:
+        - valor: "all"
+          nome: "Todas"
+          quando_usar: "Para ver questoes de todos os niveis"
+        - valor: "easy"
+          nome: "Facil"
+          quando_usar: "Questoes basicas, conceitos introdutorios"
+        - valor: "medium"
+          nome: "Medio"
+          quando_usar: "Questoes intermediarias, aplicacao de conceitos"
+        - valor: "hard"
+          nome: "Dificil"
+          quando_usar: "Questoes avancadas, analise e sintese"
+
+    tipo_de_questao:
+      o_que_e: "Filtra pelo formato da questao"
+      opcoes:
+        - valor: "all"
+          nome: "Todos"
+        - valor: "multipla_escolha"
+          nome: "Multipla Escolha"
+        - valor: "verdadeiro_falso"
+          nome: "Verdadeiro/Falso"
+        - valor: "dissertativa"
+          nome: "Dissertativa"
+        - valor: "oral"
+          nome: "Oral"
+        - valor: "associacao"
+          nome: "Associacao (Likert)"
+        - valor: "ordenacao"
+          nome: "Ordenacao (Ranking)"
+        - valor: "mista"
+          nome: "Mista"
+
+    tags:
+      o_que_e: "Palavras-chave que categorizam a questao por assunto/tema"
+      como_funciona: "Voce pode selecionar multiplas tags ao mesmo tempo"
+      exemplo: "Tags como 'matematica', 'algebra', 'funcoes' para organizar por assunto"
+      dica: "Use tags consistentes para facilitar a busca depois"
+
+# =============================================================================
+# 2. TIPOS DE QUESTOES
+# =============================================================================
+tipos_de_questoes:
+
+  multipla_escolha:
+    o_que_e: >
+      Questao com varias alternativas (opcoes de resposta) onde o aluno
+      escolhe uma ou mais corretas. E o tipo mais comum de questao objetiva.
+
+    quando_usar: "Para avaliar conhecimento de conceitos, fatos e aplicacao direta"
+
+    como_criar:
+      passo_1: "Escreva o enunciado da questao (ex: 'Qual e a capital do Brasil?')"
+      passo_2: "Clique em 'Adicionar Alternativa' para criar cada opcao"
+      passo_3: "Digite o texto de cada alternativa"
+      passo_4: "Marque a checkbox 'Correta' na(s) alternativa(s) certa(s)"
+      passo_5: "Adicione pelo menos 2 alternativas (recomendado 4-5)"
+      passo_6: "Defina a pontuacao (quanto vale a questao)"
+
+    configuracoes:
+      minimo_de_alternativas: 2
+      recomendado: "4 a 5 alternativas"
+      pelo_menos_uma_correta: "Obrigatorio marcar pelo menos uma como correta"
+      multiplas_corretas: "Permitido (o aluno deve marcar todas para acertar)"
+
+    exemplo:
+      enunciado: "Qual e a formula da agua?"
+      alternativas:
+        - texto: "H2O"
+          correta: true
+          peso: 10
+        - texto: "CO2"
+          correta: false
+          peso: 0
+        - texto: "O2"
+          correta: false
+          peso: 0
+        - texto: "H2O2"
+          correta: false
+          peso: 0
+
+    dicas:
+      - "Crie distratores plausíveis (alternativas erradas que parecem corretas)"
+      - "Evite 'nenhuma das anteriores' ou 'todas as anteriores'"
+      - "Mantenha o tamanho das alternativas similar"
+      - "Evite palavras absolutas (sempre, nunca) nas alternativas erradas"
+
+  verdadeiro_falso:
+    o_que_e: >
+      Questao onde o aluno decide se uma afirmacao e verdadeira ou falsa.
+      E um caso especial de multipla escolha com apenas 2 opcoes.
+
+    quando_usar: "Para testar conceitos fundamentais, definicoes e fatos"
+
+    como_criar:
+      passo_1: "Escreva uma afirmacao clara (ex: 'A Terra e plana')"
+      passo_2: "O sistema cria automaticamente 2 alternativas: Verdadeiro e Falso"
+      passo_3: "Marque qual e a resposta correta"
+      passo_4: "Defina a pontuacao"
+
+    exemplo:
+      enunciado: "O Brasil foi colonizado por Portugal"
+      alternativas:
+        - texto: "Verdadeiro"
+          correta: true
+          peso: 5
+        - texto: "Falso"
+          correta: false
+          peso: 0
+
+    dicas:
+      - "Evite afirmacoes ambiguas ou com dupla negacao"
+      - "Seja especifico - evite generalidades"
+      - "Nao use pegadinhas - foque no conhecimento real"
+
+  dissertativa:
+    o_que_e: >
+      Questao aberta onde o aluno escreve uma resposta em texto livre.
+      Requer correcao manual do professor.
+
+    quando_usar: >
+      Para avaliar capacidade de argumentacao, analise, sintese e pensamento
+      critico. Ideal para respostas que nao podem ser reduzidas a multipla escolha.
+
+    como_criar:
+      passo_1: "Escreva o enunciado da questao"
+      passo_2: "Selecione o tipo 'Dissertativa'"
+      passo_3: "Defina a pontuacao maxima"
+      passo_4: "Opcional: Adicione uma justificativa com criterios de avaliacao"
+      passo_5: "Opcional: Configure uma rubrica de correcao (veja secao Rubricas)"
+
+    exemplo:
+      enunciado: "Explique as causas da Segunda Guerra Mundial (minimo 200 palavras)"
+      pontuacao_maxima: 10
+      justificativa: >
+        Avaliar: (1) Mencao a Tratado de Versalhes, (2) Crise de 1929,
+        (3) Ascensao do fascismo, (4) Coerencia argumentativa
+
+    correcao:
+      tipo: "Manual pelo professor"
+      onde: "Menu 'Suas Avaliacoes' > Selecionar tentativa > Atribuir nota e feedback"
+      pode_usar_rubrica: true
+
+    dicas:
+      - "Seja claro sobre o que espera na resposta"
+      - "Defina criterios objetivos de avaliacao (use rubrica)"
+      - "Indique extensao esperada (numero de palavras/linhas)"
+      - "Forneça contexto suficiente no enunciado"
+
+  oral:
+    o_que_e: >
+      Questao onde o aluno grava uma resposta em audio/video.
+      Similar a dissertativa, mas em formato de midia.
+
+    quando_usar: "Para avaliar habilidades de comunicacao oral, pronuncia, apresentacao"
+
+    como_criar:
+      passo_1: "Escreva o enunciado (ex: 'Grave um video apresentando seu projeto')"
+      passo_2: "Selecione o tipo 'Oral'"
+      passo_3: "Defina a pontuacao maxima"
+      passo_4: "Opcional: Configure tempo maximo de gravacao"
+
+    correcao:
+      tipo: "Manual - professor assiste/ouve a gravacao e atribui nota"
+      formato_aceito: "Audio e/ou video (depende da configuracao do sistema)"
+
+  associacao:
+    o_que_e: >
+      Questao tipo Likert onde o aluno associa niveis/graus a afirmacoes.
+      Exemplo: "Concordo totalmente / Concordo / Neutro / Discordo / Discordo totalmente"
+
+    quando_usar: >
+      Para pesquisas de opiniao, autoavaliacao, avaliacao de atitudes e percepcoes.
+      Menos comum em provas formais.
+
+    exemplo:
+      enunciado: "O quanto voce concorda com a afirmacao: 'Matematica e facil'"
+      opcoes:
+        - "Discordo totalmente"
+        - "Discordo"
+        - "Neutro"
+        - "Concordo"
+        - "Concordo totalmente"
+
+  ordenacao:
+    o_que_e: >
+      Questao onde o aluno deve colocar itens em uma ordem especifica (ranking).
+      Exemplo: ordenar eventos historicos cronologicamente.
+
+    quando_usar: "Para testar sequencias, cronologia, prioridades, processos"
+
+    exemplo:
+      enunciado: "Ordene os planetas do mais proximo ao mais distante do Sol"
+      itens_para_ordenar:
+        - "Mercurio"
+        - "Venus"
+        - "Terra"
+        - "Marte"
+        - "Jupiter"
+        - "Saturno"
+        - "Urano"
+        - "Netuno"
+      ordem_correta: [1, 2, 3, 4, 5, 6, 7, 8]
+
+  mista:
+    o_que_e: >
+      Questao que combina multiplos formatos ou possui caracteristicas hibridas.
+
+    quando_usar: "Casos especiais que nao se encaixam nos tipos padrao"
+
+# =============================================================================
+# 3. CRIANDO QUESTOES
+# =============================================================================
+criando_questoes:
+
+  metodo_manual:
+    titulo: "Criando Questoes Manualmente"
+
+    onde_criar:
+      opcao_1:
+        local: "Banco de Questoes > Botao 'Nova Questao'"
+        resultado: "Abre modal de criacao"
+      opcao_2:
+        local: "Menu > Questoes > Nova Questao"
+        resultado: "Abre pagina completa de criacao"
+
+    passo_a_passo:
+      passo_1:
+        titulo: "Escrever o Enunciado"
+        campo: "questionText"
+        tipo: "Texto longo (textarea)"
+        obrigatorio: true
+        o_que_fazer: "Digite a pergunta ou afirmacao que sera apresentada ao aluno"
+        exemplo: "Qual e a funcao do mitocondria na celula?"
+        dica: "Seja claro e objetivo. Evite ambiguidades."
+
+      passo_2:
+        titulo: "Escolher o Tipo de Questao"
+        campo: "questionType"
+        tipo: "Selecao (dropdown)"
+        obrigatorio: true
+        padrao: "multipla_escolha"
+        opcoes:
+          - "Multipla Escolha"
+          - "Verdadeiro/Falso"
+          - "Dissertativa"
+          - "Oral"
+          - "Associacao"
+          - "Ordenacao"
+          - "Mista"
+        dica: "Escolha o tipo ANTES de preencher alternativas"
+
+      passo_3:
+        titulo: "Definir Dificuldade"
+        campo: "difficulty"
+        tipo: "Selecao"
+        obrigatorio: false
+        padrao: "medium"
+        opcoes:
+          - valor: "easy"
+            nome: "Facil"
+          - valor: "medium"
+            nome: "Medio"
+          - valor: "hard"
+            nome: "Dificil"
+        dica: "Ajuda a balancear avaliacoes automaticas"
+
+      passo_4:
+        titulo: "Definir Pontuacao"
+        campo: "points"
+        tipo: "Numero"
+        obrigatorio: true
+        padrao: 1
+        validacao: "Deve ser maior que zero"
+        o_que_e: "Quantos pontos vale a questao"
+        exemplo: "10 (para uma questao que vale 10 pontos)"
+        dica: "Considere o peso da questao no total da prova"
+
+      passo_5:
+        titulo: "Adicionar Tags"
+        campo: "tags"
+        tipo: "Entrada de tags (multiplas)"
+        obrigatorio: false
+        o_que_e: "Palavras-chave para organizar e buscar a questao"
+        como_funciona: "Digite e pressione Enter. Pode adicionar quantas quiser."
+        exemplo: "matematica, algebra, funcoes, 2-grau"
+        dica: "Use tags consistentes para facilitar filtros depois"
+
+      passo_6:
+        titulo: "Criar Alternativas (se aplicavel)"
+        campo: "alternatives"
+        tipo: "Lista dinamica"
+        obrigatorio: "Sim para Multipla Escolha e Verdadeiro/Falso"
+        quando_aplicavel: "Apenas para questoes objetivas (multipla escolha, V/F)"
+
+        como_adicionar_alternativa:
+          passo_1: "Clique no botao 'Adicionar Alternativa'"
+          passo_2: "Digite o texto da alternativa"
+          passo_3: "Marque a checkbox 'Correta' se for a resposta certa"
+          passo_4: "Opcional: Ajuste o peso (pontuacao) da alternativa"
+
+        requisitos:
+          minimo: "2 alternativas"
+          obrigatorio: "Pelo menos 1 deve ser marcada como correta"
+          peso_padrao: "Alternativa correta = pontos da questao; Errada = 0"
+
+        exemplo:
+          questao: "Qual e a raiz quadrada de 16?"
+          alternativas:
+            - texto: "4"
+              correta: true
+              peso: 5
+            - texto: "8"
+              correta: false
+              peso: 0
+            - texto: "2"
+              correta: false
+              peso: 0
+            - texto: "16"
+              correta: false
+              peso: 0
+
+      passo_7:
+        titulo: "Adicionar Anexos (opcional)"
+        campo: "attachments"
+        tipo: "Upload de imagens"
+        obrigatorio: false
+        o_que_e: "Imagens que acompanham a questao"
+        formatos_aceitos: "JPG, PNG, GIF"
+        quando_usar: "Para graficos, diagramas, mapas, ilustracoes"
+        exemplo: "Imagem de um triangulo para questao de geometria"
+
+      passo_8:
+        titulo: "Adicionar Justificativa (opcional)"
+        campo: "justification"
+        tipo: "Texto longo"
+        obrigatorio: false
+        o_que_e: "Explicacao da resposta correta ou criterios de avaliacao"
+        quando_usar: "Para professores entenderem a correcao ou alunos verem feedback"
+        exemplo: "A mitocondria e responsavel pela producao de ATP (energia celular)"
+
+      passo_9:
+        titulo: "Codigos de Referencia (opcional)"
+        campos:
+          bncc:
+            o_que_e: "Codigo da Base Nacional Comum Curricular"
+            exemplo: "EF67LP28"
+            quando_usar: "Para alinhamento curricular brasileiro"
+          mufa:
+            o_que_e: "Codigo de referencia interna do sistema"
+            exemplo: "MAT-ALG-001"
+            quando_usar: "Para organizacao interna da instituicao"
+
+      passo_10:
+        titulo: "Salvar a Questao"
+        botao: "Salvar"
+        efeito: "Questao e adicionada ao Banco de Questoes"
+        depois: "A questao fica disponivel para ser usada em avaliacoes"
+
+    erros_comuns:
+      erro_1:
+        mensagem: "Enunciado vazio"
+        causa: "Campo 'questionText' nao foi preenchido"
+        solucao: "Digite o texto da questao"
+
+      erro_2:
+        mensagem: "Pontuacao invalida"
+        causa: "Campo 'points' e zero ou negativo"
+        solucao: "Digite um numero maior que zero"
+
+      erro_3:
+        mensagem: "Alternativas insuficientes"
+        causa: "Multipla escolha com menos de 2 alternativas"
+        solucao: "Adicione pelo menos 2 alternativas"
+
+      erro_4:
+        mensagem: "Nenhuma alternativa correta"
+        causa: "Nenhuma alternativa foi marcada como correta"
+        solucao: "Marque pelo menos uma alternativa como correta"
+
+  metodo_ia:
+    titulo: "Gerando Questoes com Inteligencia Artificial"
+
+    o_que_e: >
+      O sistema possui um gerador automatico que cria questoes de multipla escolha
+      usando IA. Voce fornece um contexto/tema e o sistema gera questoes prontas.
+
+    onde_acessar:
+      local: "Banco de Questoes > Botao 'IA'"
+      resultado: "Abre modal de geracao com IA"
+
+    passo_a_passo:
+      passo_1:
+        titulo: "Fornecer Contexto"
+        campo: "context"
+        tipo: "Texto longo"
+        obrigatorio: true
+        o_que_fazer: >
+          Escreva o conteudo ou tema sobre o qual deseja gerar questoes.
+          Pode ser um texto de aula, paragrafo de livro, topico especifico.
+        exemplo: >
+          "A fotossintese e o processo pelo qual plantas convertem luz solar,
+          agua e dioxido de carbono em glicose e oxigenio. Acontece nos cloroplastos."
+        dica: "Quanto mais detalhado o contexto, melhores as questoes geradas"
+
+      passo_2:
+        titulo: "Escolher Dificuldade"
+        campo: "difficulty"
+        tipo: "Selecao"
+        obrigatorio: true
+        padrao: "medium"
+        opcoes:
+          - "Facil"
+          - "Medio"
+          - "Dificil"
+
+      passo_3:
+        titulo: "Definir Quantidade"
+        campo: "quantity"
+        tipo: "Numero"
+        obrigatorio: true
+        padrao: 1
+        o_que_e: "Quantas questoes voce quer que a IA gere"
+        exemplo: "5 (vai gerar 5 questoes diferentes)"
+        dica: "Gere varias e escolha as melhores"
+
+      passo_4:
+        titulo: "Adicionar Tags (opcional)"
+        campo: "tags"
+        tipo: "Entrada de tags"
+        obrigatorio: false
+        o_que_e: "Tags que serao aplicadas a todas as questoes geradas"
+        exemplo: "biologia, fotossintese, plantas"
+
+      passo_5:
+        titulo: "Modo de Contexto Grande (opcional)"
+        campo: "useLargeContext"
+        tipo: "Interruptor (switch)"
+        obrigatorio: false
+        o_que_e: "Permite processar textos muito longos"
+        quando_usar: "Se o contexto tem mais de 1000 palavras"
+
+      passo_6:
+        titulo: "Gerar Questoes"
+        botao: "Gerar"
+        efeito: "IA processa o contexto e cria questoes"
+        tempo: "Pode levar alguns segundos"
+
+      passo_7:
+        titulo: "Revisar Questoes Geradas"
+        o_que_acontece: >
+          Cada questao gerada aparece para revisao. Voce ve:
+          - Enunciado
+          - Alternativas (com a correta marcada)
+          - Pontuacao
+          - Tags
+        o_que_fazer: >
+          Para cada questao, voce decide:
+          - "Manter" = Salva no banco de questoes
+          - "Descartar" = Remove da lista
+
+      passo_8:
+        titulo: "Salvar Questoes Aprovadas"
+        botao: "Manter Questao"
+        efeito: "Questao e salva no banco marcada como 'Gerada por IA'"
+        depois: "Questao fica disponivel para uso em avaliacoes"
+
+    vantagens:
+      - "Cria questoes rapidamente"
+      - "Gera multiplas variantes do mesmo tema"
+      - "Util para bancos de questoes grandes"
+      - "Economiza tempo do professor"
+
+    limitacoes:
+      - "Apenas gera questoes de multipla escolha"
+      - "Requer revisao humana (IA pode errar)"
+      - "Depende da qualidade do contexto fornecido"
+      - "Nao substitui a expertise pedagogica do professor"
+
+    dicas:
+      - "Sempre revise questoes geradas antes de usar"
+      - "Forneça contextos precisos e bem escritos"
+      - "Gere mais questoes do que precisa e selecione as melhores"
+      - "Edite questoes geradas se necessario (melhorar enunciado, alternativas)"
+
+# =============================================================================
+# 4. CONSTRUTOR DE AVALIACOES (EXAM BUILDER)
+# =============================================================================
+construtor_de_avaliacoes:
+
+  o_que_e: >
+    O Construtor de Avaliacoes e onde voce cria provas, testes e questionarios
+    completos. Voce pode montar uma avaliacao de duas formas:
+    1. Manual - Escolhendo questoes especificas do banco
+    2. Automatica - Deixando o sistema montar baseado em criterios
+
+  onde_fica:
+    menu: "Menu Educacional > Avaliacoes > Construtor"
+    url: "/educational/exams/builder"
+
+  criando_avaliacao_manual:
+    titulo: "Criando Avaliacao Manual (Selecao de Questoes)"
+
+    quando_usar: >
+      Quando voce quer controle total sobre quais questoes aparecem na prova
+      e em qual ordem.
+
+    passo_a_passo:
+      passo_1:
+        titulo: "Abrir o Construtor"
+        onde: "Construtor de Avaliacoes > Botao 'Nova Avaliacao'"
+        resultado: "Abre modal de criacao"
+
+      passo_2:
+        titulo: "Nomear a Avaliacao"
+        campo: "name"
+        tipo: "Texto"
+        obrigatorio: true
+        exemplo: "Prova Bimestral de Matematica - 2 Ano"
+        dica: "Use nomes descritivos que identifiquem disciplina, periodo, turma"
+
+      passo_3:
+        titulo: "Adicionar Descricao (opcional)"
+        campo: "description"
+        tipo: "Texto longo"
+        obrigatorio: false
+        exemplo: "Avaliacao sobre algebra e geometria basica"
+        quando_usar: "Para instrucoes adicionais ou contexto da prova"
+
+      passo_4:
+        titulo: "Manter Modo Manual"
+        campo: "useQuestionBank"
+        tipo: "Interruptor"
+        o_que_fazer: "Deixe DESLIGADO para modo manual"
+        estado: "OFF = Manual / ON = Automatico"
+
+      passo_5:
+        titulo: "Adicionar Questoes"
+        botao: "Adicionar Questoes"
+        efeito: "Abre modal seletor de questoes"
+
+        no_seletor_de_questoes:
+          o_que_aparece: >
+            Lista com todas as questoes do banco. Voce pode filtrar e buscar.
+
+          filtros_disponiveis:
+            - "Busca por texto"
+            - "Dificuldade (Facil/Medio/Dificil)"
+            - "Tipo de questao"
+            - "Tags"
+            - "Criador (quem fez a questao)"
+            - "Geradas por IA ou Manuais"
+
+          como_selecionar:
+            passo_1: "Use filtros para encontrar as questoes desejadas"
+            passo_2: "Marque checkbox ao lado de cada questao"
+            passo_3: "Clique 'Confirmar Selecao'"
+            passo_4: "Questoes selecionadas aparecem na sua avaliacao"
+
+      passo_6:
+        titulo: "Ordenar Questoes (opcional)"
+        como: "Arraste e solte questoes para reorganizar"
+        dica: "Comece com questoes faceis e va aumentando dificuldade"
+
+      passo_7:
+        titulo: "Configurar Rubrica (opcional)"
+        campo: "rubricCorrection"
+        tipo: "Interruptor"
+        o_que_e: "Ativa correcao baseada em rubrica para questoes dissertativas"
+        quando_usar: "Se a prova tem questoes dissertativas"
+
+        se_ativado:
+          campo: "selectedRubricId"
+          tipo: "Selecao"
+          o_que_fazer: "Escolha uma rubrica pre-criada"
+          dica: "Veja secao 'Rubricas' para criar rubricas"
+
+      passo_8:
+        titulo: "Salvar Avaliacao"
+        botao: "Criar Avaliacao"
+        efeito: "Avaliacao e criada e fica disponivel no sistema"
+        depois: "Voce pode editar, duplicar ou aplicar a avaliacao"
+
+  criando_avaliacao_automatica:
+    titulo: "Criando Avaliacao Automatica (Banco de Questoes)"
+
+    quando_usar: >
+      Quando voce quer que o sistema monte a prova automaticamente baseado
+      em criterios. Util para gerar multiplas versoes diferentes da mesma prova
+      ou criar avaliacoes randomizadas.
+
+    passo_a_passo:
+      passo_1:
+        titulo: "Abrir o Construtor"
+        onde: "Construtor de Avaliacoes > Botao 'Nova Avaliacao'"
+
+      passo_2:
+        titulo: "Nomear a Avaliacao"
+        campo: "name"
+        obrigatorio: true
+        exemplo: "Prova Automatica de Historia - Tema Revolucoes"
+
+      passo_3:
+        titulo: "Ativar Modo Automatico"
+        campo: "useQuestionBank"
+        tipo: "Interruptor"
+        o_que_fazer: "LIGUE o interruptor"
+        estado: "ON = Automatico / OFF = Manual"
+        efeito: "Aparecem campos de configuracao automatica"
+
+      passo_4:
+        titulo: "Selecionar Tags"
+        campo: "selectedTags"
+        tipo: "Seletor de tags"
+        obrigatorio: true
+        o_que_e: >
+          Tags que definem de quais assuntos o sistema vai pegar questoes.
+          O sistema vai buscar APENAS questoes que tenham essas tags.
+        exemplo: "historia, revolucoes, sec-XIX"
+        dica: "Quanto mais tags, mais especifica a selecao"
+        minimo: "Pelo menos 1 tag"
+
+        como_funciona: >
+          Um popover mostra todas as tags disponiveis. Clique para adicionar.
+          O sistema conta quantas questoes existem com aquelas tags.
+
+      passo_5:
+        titulo: "Definir Quantidade de Questoes"
+        campo: "questionCount"
+        tipo: "Numero"
+        obrigatorio: true
+        padrao: 10
+        validacao: "Minimo 1, Maximo 100"
+        o_que_e: "Quantas questoes a prova tera no total"
+        exemplo: "20 (prova com 20 questoes)"
+
+      passo_6:
+        titulo: "Configurar Distribuicao de Dificuldade"
+        campo: "difficultyLevel"
+        tipo: "Slider (0-100)"
+        obrigatorio: false
+
+        como_funciona: >
+          Um controle deslizante que define a proporcao de questoes faceis,
+          medias e dificeis.
+
+          - 0 = 100% Faceis
+          - 50 = Balanceado (34% Faceis, 33% Medias, 33% Dificeis)
+          - 100 = 100% Dificeis
+
+        exemplo:
+          valor_25: "50% Faceis, 25% Medias, 25% Dificeis"
+          valor_50: "33% Faceis, 34% Medias, 33% Dificeis (balanceado)"
+          valor_75: "25% Faceis, 25% Medias, 50% Dificeis"
+
+        dica: "Use nivel 50 para provas equilibradas"
+
+      passo_7:
+        titulo: "Configurar Distribuicao de Tipos"
+        campo: "questionTypeLevel"
+        tipo: "Slider (0-100)"
+        obrigatorio: false
+
+        como_funciona: >
+          Define a proporcao entre questoes objetivas (multipla escolha) e
+          dissertativas.
+
+          - 0 = 100% Multipla Escolha
+          - 100 = 100% Dissertativas
+
+        exemplo:
+          valor_0: "Apenas multipla escolha"
+          valor_50: "Metade objetiva, metade dissertativa"
+          valor_100: "Apenas dissertativas"
+
+        dica: "Considere o tempo de correcao (dissertativas levam mais tempo)"
+
+      passo_8:
+        titulo: "Verificar Disponibilidade"
+        botao: "Verificar Questoes"
+        o_que_faz: >
+          Verifica se existem questoes suficientes no banco que atendam
+          todos os criterios (tags, dificuldade, tipo).
+
+        resultado_positivo: "Sistema confirma que pode gerar a prova"
+        resultado_negativo: "Sistema avisa que faltam questoes e sugere ajustes"
+
+      passo_9:
+        titulo: "Ativar TRI (opcional)"
+        campo: "useTRI"
+        tipo: "Botao toggle"
+        obrigatorio: false
+        o_que_e: >
+          Teoria de Resposta ao Item - sistema avancado de pontuacao que
+          considera nao so acertos/erros mas a dificuldade das questoes.
+        quando_usar: "Para avaliacoes de alta precisao (vestibulares, certificacoes)"
+        impacto: "Alunos que acertam questoes dificeis pontuam mais"
+
+      passo_10:
+        titulo: "Configurar Rubrica (opcional)"
+        campo: "rubricCorrection"
+        quando: "Se tiver questoes dissertativas"
+        o_que_fazer: "Selecione uma rubrica para padronizar a correcao"
+
+      passo_11:
+        titulo: "Criar Avaliacao"
+        botao: "Criar Avaliacao"
+        efeito: >
+          Sistema randomiza questoes do banco seguindo os criterios.
+          Cada vez que um aluno fizer a prova, pode receber questoes diferentes.
+        vantagem: "Dificulta cola e permite multiplas versoes"
+
+  editando_avaliacao:
+    titulo: "Editando Avaliacao Existente"
+
+    onde: "Construtor > Icone de Edicao na avaliacao"
+
+    o_que_pode_editar:
+      - "Nome da avaliacao"
+      - "Descricao"
+      - "Adicionar novas questoes"
+      - "Remover questoes existentes"
+      - "Reordenar questoes (arrastar e soltar)"
+
+    interface_de_edicao:
+      gerenciar_questoes:
+        botao: "Gerenciar Questoes"
+        efeito: "Abre seletor de questoes"
+        como_funciona: "Igual ao modo de criacao"
+
+      lista_de_questoes:
+        tipo: "Lista arrastavel (drag-and-drop)"
+        como_reordenar: "Clique e arraste cada questao para a posicao desejada"
+        remover_individual: "Clique no X ao lado da questao"
+        limpar_todas: "Botao 'Limpar Todas as Questoes'"
+
+    salvando_mudancas:
+      botao: "Salvar Alteracoes"
+      efeito: >
+        Atualiza nome, descricao e ordem das questoes.
+        Se avaliacao ja foi aplicada, nao afeta tentativas em andamento.
+
+  visualizando_avaliacao:
+    titulo: "Visualizando Detalhes da Avaliacao"
+
+    onde: "Construtor > Clicar no card da avaliacao"
+    resultado: "Abre modal somente leitura com todos os detalhes"
+
+    o_que_e_mostrado:
+      - "Nome e descricao"
+      - "Modo (Manual ou Automatico)"
+      - "Se automatico: tags, distribuicao de dificuldade e tipos"
+      - "Lista completa de questoes com enunciados e alternativas"
+      - "Justificativas de cada questao"
+      - "Matriz de rubrica (se configurada)"
+      - "Pontuacao total da prova"
+
+  deletando_avaliacao:
+    onde: "Construtor > Icone de Lixeira"
+    confirmacao: "Sistema pede confirmacao antes de deletar"
+    alerta: "Avaliacao deletada nao pode ser recuperada"
+    impacto: >
+      Se avaliacao ja foi aplicada a alunos, os registros de tentativa
+      permanecem, mas a avaliacao nao pode ser reaplicada.
+
+# =============================================================================
+# 5. RUBRICAS DE CORRECAO
+# =============================================================================
+rubricas:
+
+  o_que_e: >
+    Rubrica e uma matriz de criterios de avaliacao que padroniza a correcao
+    de questoes dissertativas, trabalhos ou atividades complexas. Funciona como
+    uma tabela onde as linhas sao criterios (aspectos avaliados) e as colunas
+    sao niveis de desempenho (Insuficiente, Regular, Bom, Excelente).
+
+  para_que_serve:
+    - "Padronizar a correcao entre diferentes professores"
+    - "Dar transparencia aos alunos sobre como serao avaliados"
+    - "Facilitar feedback detalhado"
+    - "Reduzir subjetividade na avaliacao"
+    - "Agilizar correcao de questoes abertas"
+
+  onde_fica:
+    menu: "Menu Educacional > Avaliacoes > Rubricas"
+    url: "/educational/exams/rubrics"
+
+  criando_rubrica:
+    passo_a_passo:
+      passo_1:
+        titulo: "Abrir Criador de Rubricas"
+        onde: "Lista de Rubricas > Botao 'Nova Rubrica'"
+        resultado: "Abre tela cheia com o construtor"
+
+      passo_2:
+        titulo: "Nomear a Rubrica"
+        campo: "rubricName"
+        tipo: "Texto"
+        obrigatorio: true
+        exemplo: "Rubrica para Redacao - Ensino Medio"
+        dica: "Nome deve indicar para que tipo de atividade serve"
+
+      passo_3:
+        titulo: "Adicionar Descricao (opcional)"
+        campo: "rubricDescription"
+        tipo: "Texto longo"
+        exemplo: "Criterios de avaliacao para redacoes dissertativas"
+
+      passo_4:
+        titulo: "Criar Criterios de Avaliacao"
+        campo: "criteria"
+        tipo: "Lista dinamica"
+        obrigatorio: true
+        minimo: "Pelo menos 1 criterio"
+
+        para_cada_criterio:
+          nome:
+            campo: "criterionName"
+            obrigatorio: true
+            exemplo: "Coerencia Argumentativa"
+            o_que_e: "Aspecto especifico que sera avaliado"
+
+          descricao:
+            campo: "criterionDescription"
+            obrigatorio: false
+            exemplo: "Avalia se os argumentos sao logicos e bem encadeados"
+
+          niveis_de_pontuacao:
+            campo: "scoreLevels"
+            tipo: "Lista dinamica"
+            obrigatorio: true
+            minimo: "Pelo menos 1 nivel por criterio"
+
+            para_cada_nivel:
+              rotulo:
+                campo: "label"
+                exemplo: "Excelente", "Bom", "Regular", "Insuficiente"
+                o_que_e: "Nome do nivel de desempenho"
+
+              descricao:
+                campo: "description"
+                exemplo: >
+                  Excelente: Argumentos perfeitamente encadeados com uso
+                  apropriado de conectivos e logica impecavel.
+                o_que_e: "Descricao detalhada do que caracteriza este nivel"
+
+              pontos:
+                campo: "points"
+                tipo: "Numero"
+                exemplo: "10 (Excelente), 7 (Bom), 4 (Regular), 0 (Insuficiente)"
+                o_que_e: "Pontuacao atribuida a este nivel"
+
+              ordem:
+                campo: "sequence_order"
+                tipo: "Numero"
+                o_que_e: "Ordem de exibicao (crescente ou decrescente)"
+
+      passo_5:
+        titulo: "Adicionar Mais Criterios"
+        botao: "Adicionar Criterio"
+        como: "Repita o processo para cada aspecto a ser avaliado"
+
+        exemplo_completo:
+          criterio_1:
+            nome: "Coerencia Argumentativa"
+            niveis:
+              - label: "Excelente"
+                points: 10
+                description: "Argumentos perfeitamente encadeados"
+              - label: "Bom"
+                points: 7
+                description: "Argumentos bem estruturados com pequenas falhas"
+              - label: "Regular"
+                points: 4
+                description: "Argumentos presentes mas com falhas de logica"
+              - label: "Insuficiente"
+                points: 0
+                description: "Sem coerencia argumentativa"
+
+          criterio_2:
+            nome: "Dominio da Norma Culta"
+            niveis:
+              - label: "Excelente"
+                points: 10
+                description: "Sem erros gramaticais ou ortograficos"
+              - label: "Bom"
+                points: 7
+                description: "Ate 3 erros leves"
+              - label: "Regular"
+                points: 4
+                description: "Entre 4 e 10 erros"
+              - label: "Insuficiente"
+                points: 0
+                description: "Mais de 10 erros graves"
+
+          criterio_3:
+            nome: "Riqueza Vocabular"
+            niveis:
+              - label: "Excelente"
+                points: 5
+                description: "Vocabulario rico e variado"
+              - label: "Bom"
+                points: 3
+                description: "Vocabulario adequado"
+              - label: "Regular"
+                points: 1
+                description: "Vocabulario limitado"
+              - label: "Insuficiente"
+                points: 0
+                description: "Vocabulario muito pobre"
+
+      passo_6:
+        titulo: "Reordenar Criterios (opcional)"
+        como: "Arraste criterios para reorganizar ordem de exibicao"
+
+      passo_7:
+        titulo: "Visualizar Matriz (Preview)"
+        componente: "RubricGradingMatrix"
+        o_que_mostra: >
+          Tabela visual com criterios nas linhas e niveis nas colunas.
+          Cada celula mostra a descricao e pontuacao daquele nivel.
+        para_que: "Verificar se a rubrica esta clara antes de salvar"
+
+      passo_8:
+        titulo: "Salvar Rubrica"
+        botao: "Salvar Rubrica"
+        efeito: "Rubrica fica disponivel para uso em avaliacoes"
+
+  editando_rubrica:
+    onde: "Lista de Rubricas > Clicar na rubrica OU icone de Edicao"
+    url: "/educational/exams/rubrics/{rubricId}/edit"
+
+    importante:
+      bloqueio:
+        campo: "isLocked"
+        o_que_e: >
+          Rubricas em uso por avaliacoes publicadas ficam bloqueadas
+          (nao podem ser editadas).
+        motivo: "Preservar consistencia nas avaliacoes em andamento"
+        indicador: "Aparece aviso 'Rubrica Bloqueada' na interface"
+        o_que_fazer: "Crie nova versao da rubrica ao inves de editar"
+
+    se_nao_bloqueada:
+      pode_editar:
+        - "Nome e descricao"
+        - "Adicionar/remover criterios"
+        - "Adicionar/remover niveis"
+        - "Editar descricoes e pontuacoes"
+        - "Reordenar criterios"
+
+      salvar: "Botao 'Salvar Rubrica' atualiza a rubrica"
+
+  deletando_rubrica:
+    onde: "Lista de Rubricas > Icone de Lixeira"
+    confirmacao: "AlertDialog pede confirmacao"
+    restricao: "Nao e possivel deletar rubricas em uso por avaliacoes ativas"
+
+  usando_rubrica_em_avaliacao:
+    ao_criar_avaliacao:
+      passo_1: "No Construtor de Avaliacoes, ative 'Correcao por Rubrica'"
+      passo_2: "Selecione a rubrica desejada no dropdown"
+      passo_3: "Rubrica sera aplicada a TODAS questoes dissertativas da prova"
+
+    ao_corrigir:
+      interface: >
+        Professor ve a matriz da rubrica ao lado da resposta do aluno.
+        Para cada criterio, professor clica no nivel de desempenho.
+        Sistema calcula nota automaticamente somando pontos de cada criterio.
+
+      beneficio: "Correcao rapida, consistente e com feedback estruturado"
+
+  exemplo_pratico:
+    nome_rubrica: "Avaliacao de Apresentacao Oral"
+    criterios:
+      - nome: "Clareza de Comunicacao"
+        peso_max: 25
+        niveis:
+          - "Excelente (25pts): Fala clara, ritmo adequado, sem murmuracao"
+          - "Bom (20pts): Fala clara na maior parte, ritmo bom"
+          - "Regular (15pts): Fala compreensivel mas com falhas"
+          - "Insuficiente (0pts): Fala incompreensivel ou inaudivel"
+
+      - nome: "Dominio do Conteudo"
+        peso_max: 40
+        niveis:
+          - "Excelente (40pts): Dominio completo, responde qualquer pergunta"
+          - "Bom (30pts): Bom dominio, responde maioria das perguntas"
+          - "Regular (20pts): Dominio parcial, dificuldade em perguntas"
+          - "Insuficiente (0pts): Nao domina o conteudo apresentado"
+
+      - nome: "Uso de Recursos Visuais"
+        peso_max: 20
+        niveis:
+          - "Excelente (20pts): Slides excelentes, imagens relevantes"
+          - "Bom (15pts): Slides adequados"
+          - "Regular (10pts): Slides confusos ou poluidos"
+          - "Insuficiente (0pts): Sem slides ou slides inadequados"
+
+      - nome: "Postura e Gestao do Tempo"
+        peso_max: 15
+        niveis:
+          - "Excelente (15pts): Postura profissional, tempo perfeito"
+          - "Bom (10pts): Postura adequada, pequeno desvio de tempo"
+          - "Regular (5pts): Postura ou tempo inadequados"
+          - "Insuficiente (0pts): Postura ruim e tempo muito fora"
+
+    nota_maxima: 100
+    como_funciona: >
+      Professor seleciona um nivel em cada criterio. Sistema soma os pontos.
+      Exemplo: Excelente em Clareza (25) + Bom em Conteudo (30) +
+      Regular em Recursos (10) + Bom em Postura (10) = 75 pontos (nota B+)
+
+# =============================================================================
+# 6. CORRIGINDO AVALIACOES (GRADING)
+# =============================================================================
+correcao_de_avaliacoes:
+
+  o_que_e: >
+    Correcao e o processo onde professores/tutores atribuem notas e feedback
+    as tentativas de avaliacao dos alunos. Questoes objetivas sao corrigidas
+    automaticamente; dissertativas, orais e atividades precisam de correcao manual.
+
+  onde_fica:
+    menu: "Menu Educacional > Avaliacoes > Suas Avaliacoes"
+    url: "/educational/exams/your-evaluations"
+
+  lista_de_avaliacoes:
+    o_que_aparece: >
+      Lista todas as tentativas de avaliacao dos seus alunos que precisam
+      de correcao ou que voce ja corrigiu.
+
+    filtros_disponiveis:
+      busca:
+        campo: "search"
+        o_que_busca: "Nome do aluno ou titulo da avaliacao"
+        exemplo: "Digite 'Maria' para ver tentativas da aluna Maria"
+
+      status:
+        campo: "statusFilter"
+        opcoes:
+          - valor: "all"
+            nome: "Todos"
+          - valor: "submitted"
+            nome: "Aguardando Correcao"
+            quando: "Aluno terminou mas professor ainda nao corrigiu"
+          - valor: "graded"
+            nome: "Corrigido"
+            quando: "Ja tem nota atribuida"
+          - valor: "in_progress"
+            nome: "Em Progresso"
+            quando: "Aluno comecou mas nao terminou"
+          - valor: "cancelled"
+            nome: "Cancelado"
+            quando: "Tentativa foi cancelada"
+
+      instituicao:
+        campo: "companyId"
+        o_que_e: "Filtra por empresa/instituicao"
+        quando_usar: "Se voce da aula em multiplas escolas"
+
+      colecao:
+        campo: "collectionId"
+        o_que_e: "Filtra por colecao (grupo de cursos)"
+
+      serie:
+        campo: "seriesId"
+        o_que_e: "Filtra por serie/turma especifica"
+
+      incluir_nao_finalizadas:
+        campo: "showUnfinished"
+        tipo: "Checkbox"
+        o_que_faz: "Mostra tambem tentativas em progresso e canceladas"
+
+      comprovantes_de_presenca:
+        campo: "attendanceProofFilter"
+        opcoes:
+          - "Todos"
+          - "Apenas Comprovantes de Presenca"
+          - "Apenas Avaliacoes"
+        o_que_e: "Diferencia avaliacoes normais de comprovantes de presenca"
+
+  corrigindo_uma_tentativa:
+    como_acessar: "Lista > Clicar na tentativa desejada"
+    resultado: "Abre interface de correcao (AssessmentGradingView)"
+
+    informacoes_exibidas:
+      sobre_aluno:
+        - "Nome do aluno"
+        - "Email do aluno"
+        - "Foto (se disponivel)"
+
+      sobre_avaliacao:
+        - "Titulo da avaliacao"
+        - "Data/hora de submissao"
+        - "Status (submetido, corrigido, em progresso)"
+        - "Numero da tentativa (se permitidas multiplas)"
+
+      sobre_questoes:
+        - "Enunciado de cada questao"
+        - "Resposta dada pelo aluno"
+        - "Alternativas (para objetivas)"
+        - "Tipo de questao"
+        - "Pontuacao maxima da questao"
+
+    processo_de_correcao:
+      questoes_objetivas:
+        tipo: "Multipla escolha, Verdadeiro/Falso"
+        correcao: "AUTOMATICA"
+        o_que_acontece: >
+          Sistema ja marcou como certa/errada e atribuiu pontos automaticamente.
+          Professor apenas visualiza mas nao precisa fazer nada.
+        pontuacao: >
+          Alternativa correta = pontos cheios da questao
+          Alternativa errada = 0 pontos
+
+      questoes_dissertativas:
+        tipo: "Texto livre escrito pelo aluno"
+        correcao: "MANUAL"
+
+        passo_a_passo:
+          passo_1:
+            titulo: "Ler a Resposta do Aluno"
+            onde: "Area de texto mostra o que o aluno escreveu"
+
+          passo_2:
+            titulo: "Avaliar com ou sem Rubrica"
+
+            com_rubrica:
+              quando: "Se a avaliacao foi configurada com rubrica"
+              interface: >
+                Matriz da rubrica aparece ao lado. Para cada criterio,
+                professor clica no nivel de desempenho adequado.
+              calculo: "Sistema soma pontos automaticamente"
+              vantagem: "Correcao rapida e padronizada"
+
+            sem_rubrica:
+              quando: "Se nao tem rubrica configurada"
+              interface: "Professor digita nota manualmente"
+              campo: "score"
+              validacao: "De 0 ate a pontuacao maxima da questao"
+
+          passo_3:
+            titulo: "Adicionar Feedback (opcional)"
+            campo: "feedback"
+            tipo: "Texto longo"
+            o_que_e: "Comentario do professor sobre a resposta"
+            exemplo: >
+              "Boa argumentacao, mas faltou mencionar o Tratado de Versalhes.
+              Reveja a aula sobre causas da guerra."
+            importancia: "Ajuda o aluno a entender erros e acertos"
+
+          passo_4:
+            titulo: "Passar para Proxima Questao"
+            como: "Rolar a pagina ou clicar na proxima"
+
+      questoes_orais:
+        tipo: "Resposta em audio/video"
+        correcao: "MANUAL"
+        interface: "Player de midia para assistir/ouvir gravacao"
+        processo: >
+          Mesmo que dissertativa: assistir, atribuir nota, dar feedback.
+
+      feedback_geral:
+        campo: "overallFeedback"
+        tipo: "Texto longo"
+        obrigatorio: false
+        o_que_e: "Comentario sobre a prova inteira (nao apenas uma questao)"
+        exemplo: >
+          "Parabens, Maria! Voce mostrou excelente dominio da materia.
+          Continue assim!"
+        quando_usar: >
+          Para observacoes gerais, elogios, orientacoes de estudo,
+          incentivo ao aluno.
+
+      nota_total:
+        campo: "totalScore"
+        tipo: "Numero (somente leitura)"
+        o_que_e: "Soma de todos os pontos de todas as questoes"
+        calculo: "Automatico pelo sistema"
+        exibicao: "Aparece em destaque no topo ou rodape da tela"
+
+    salvando_correcao:
+      salvar_rascunho:
+        botao: "Salvar Rascunho"
+        efeito: "Salva progresso sem finalizar"
+        quando_usar: >
+          Se voce precisa parar no meio da correcao e continuar depois.
+          Aluno ainda nao ve a nota.
+        reversivel: true
+
+      finalizar_correcao:
+        botao: "Submeter Notas" ou "Finalizar Correcao"
+        confirmacao: "Sistema pede confirmacao"
+        efeito: >
+          Status da tentativa muda para 'graded' (corrigido).
+          Aluno passa a ver a nota e feedback.
+        irreversivel: >
+          Uma vez finalizado, correcao fica registrada. Para alterar,
+          professor precisa editar manualmente.
+        alerta: "Revise tudo antes de finalizar!"
+
+    voltando:
+      botao: "Voltar" ou icone de seta
+      efeito: "Retorna a lista de avaliacoes"
+      se_nao_salvou: "Sistema pode perder alteracoes (verificar se tem confirmacao)"
+
+  dicas_de_correcao:
+    - "Corrija em blocos (todas as tentativas de uma prova de uma vez) para manter consistencia"
+    - "Use rubricas para agilizar e padronizar correcao de dissertativas"
+    - "De feedback construtivo, nao apenas nota"
+    - "Revise questoes objetivas se muitos alunos erraram a mesma - pode ser questao mal formulada"
+    - "Salve rascunhos periodicamente para nao perder trabalho"
+
+  erros_comuns:
+    erro_1:
+      problema: "Nao consigo atribuir nota maior que X"
+      causa: "Tentando dar mais pontos que o maximo da questao"
+      solucao: "Verifique a pontuacao maxima definida na questao"
+
+    erro_2:
+      problema: "Botao 'Finalizar' esta desabilitado"
+      causa: "Nem todas as questoes foram corrigidas"
+      solucao: "Certifique-se de atribuir nota a TODAS as questoes"
+
+    erro_3:
+      problema: "Aluno nao ve a nota mesmo apos eu corrigir"
+      causa: "Salvou como rascunho ao inves de finalizar"
+      solucao: "Clique em 'Submeter Notas' ou 'Finalizar Correcao'"
+
+# =============================================================================
+# 7. BLOCKLY GAMES (PROGRAMACAO VISUAL)
+# =============================================================================
+blockly_games:
+
+  o_que_e: >
+    Blockly Games sao atividades de programacao visual por blocos (tipo Scratch)
+    onde alunos montam algoritmos arrastando e conectando blocos de comandos.
+    E uma forma ludica de ensinar logica de programacao e pensamento computacional.
+
+  onde_fica:
+    menu: "Menu Educacional > Avaliacoes > Blockly Games"
+    url: "/educational/exams/blockly-games"
+
+  quando_usar:
+    - "Ensino de programacao para iniciantes"
+    - "Desenvolvimento de pensamento computacional"
+    - "Atividades de logica e algoritmos"
+    - "Avaliacoes praticas de conhecimento de programacao"
+
+  lista_de_jogos:
+    filtros:
+      busca:
+        campo: "searchTerm"
+        o_que_busca: "Titulo ou descricao do jogo"
+
+      dificuldade:
+        campo: "difficultyFilter"
+        opcoes:
+          - "Todas as dificuldades"
+          - "Facil"
+          - "Medio"
+          - "Dificil"
+
+  criando_jogo:
+    onde: "Lista de Blockly Games > Botao 'Novo Jogo'"
+    url: "/educational/exams/blockly-games/new"
+
+    passo_a_passo:
+      passo_1:
+        titulo: "Nomear o Jogo"
+        campo: "title"
+        tipo: "Texto"
+        obrigatorio: true
+        exemplo: "Labirinto Basico - Introducao a Loops"
+
+      passo_2:
+        titulo: "Adicionar Descricao/Instrucoes"
+        campo: "description"
+        tipo: "Texto longo"
+        obrigatorio: false
+        exemplo: >
+          "Use blocos de repeticao para mover o personagem ate a saida.
+          Voce tem blocos de mover para frente, virar esquerda, virar direita."
+        dica: "Instrucoes claras ajudam o aluno a entender o desafio"
+
+      passo_3:
+        titulo: "Definir Dificuldade"
+        campo: "difficulty"
+        opcoes: ["Facil", "Medio", "Dificil"]
+        obrigatorio: true
+
+      passo_4:
+        titulo: "Configurar Tentativas Maximas (opcional)"
+        campo: "maxAttempts"
+        tipo: "Numero"
+        obrigatorio: false
+        o_que_e: "Quantas vezes o aluno pode tentar resolver"
+        exemplo: "3 (aluno tem 3 tentativas)"
+        padrao: "Ilimitado (se deixar vazio)"
+
+      passo_5:
+        titulo: "Definir Tempo Limite (opcional)"
+        campo: "timeLimit"
+        tipo: "Numero (minutos)"
+        obrigatorio: false
+        o_que_e: "Tempo maximo para completar o jogo"
+        exemplo: "15 (aluno tem 15 minutos)"
+        padrao: "0 = Sem limite de tempo"
+
+      passo_6:
+        titulo: "Configurar Workspace Blockly"
+        campo: "blocklyWorkspace"
+        tipo: "Editor Blockly (visual)"
+        obrigatorio: true
+        o_que_e: >
+          Area visual onde voce monta o cenario inicial do jogo.
+          Define o tabuleiro, posicao do personagem, obstaculos, etc.
+        como_funciona: >
+          Interface drag-and-drop onde voce:
+          - Define tamanho do grid/labirinto
+          - Coloca personagem inicial
+          - Adiciona objetivos/metas
+          - Define obstaculos
+
+      passo_7:
+        titulo: "Definir Blocos Disponiveis"
+        campo: "availableBlocks"
+        tipo: "Selecao multipla"
+        obrigatorio: true
+        o_que_e: >
+          Quais blocos de comando o aluno tera acesso para montar a solucao.
+        categorias_comuns:
+          - "Movimento (mover frente, virar)"
+          - "Loops (repetir X vezes, repetir ate)"
+          - "Condicionais (se...entao)"
+          - "Logica (e, ou, nao)"
+          - "Variaveis"
+          - "Funcoes"
+        exemplo: >
+          Para jogo de introducao, disponibilize apenas: mover_frente, virar_esquerda,
+          virar_direita, repetir_X_vezes.
+        dica: "Quanto menos blocos, mais facil (foca em conceito especifico)"
+
+      passo_8:
+        titulo: "Definir Solucao Esperada (opcional)"
+        campo: "expectedSolution"
+        tipo: "Editor Blockly"
+        obrigatorio: false
+        o_que_e: >
+          Voce monta a solucao correta usando blocos. Sistema usa para
+          correcao automatica.
+        quando_usar: >
+          Se voce quer que o sistema compare a solucao do aluno com a sua
+          e de nota automatica.
+        limitacao: >
+          Nem sempre ha uma unica solucao. Se aceitar solucoes alternativas,
+          deixe vazio e corrija manualmente.
+
+      passo_9:
+        titulo: "Configuracoes Adicionais do Jogo (opcional)"
+        campo: "gameConfig"
+        tipo: "JSON (configuracao avancada)"
+        obrigatorio: false
+        exemplos:
+          tamanho_grid:
+            config: '{"gridSize": {"width": 8, "height": 8}}'
+            o_que_faz: "Define grid 8x8"
+          personagem:
+            config: '{"character": {"sprite": "robot", "color": "blue"}}'
+            o_que_faz: "Personagem e um robo azul"
+          objetivo:
+            config: '{"goal": {"type": "reach_position", "x": 7, "y": 7}}'
+            o_que_faz: "Objetivo e chegar na posicao (7,7)"
+          tema_visual:
+            config: '{"theme": "space"}'
+            o_que_faz: "Tema espacial"
+
+      passo_10:
+        titulo: "Testar no Preview"
+        botao: "Preview"
+        efeito: "Abre o jogo em modo aluno (visualizacao de como aluno vera)"
+        o_que_fazer: >
+          Tente resolver o desafio para verificar se esta funcionando.
+          Ajuste dificuldade se necessario.
+
+      passo_11:
+        titulo: "Salvar Jogo"
+        botao: "Salvar Jogo"
+        efeito: "Jogo fica disponivel para ser aplicado aos alunos"
+
+  editando_jogo:
+    onde: "Lista de Blockly Games > Clicar no jogo"
+    url: "/educational/exams/blockly-games/{gameId}/edit"
+    o_que_pode_editar: "Todos os campos igual a criacao"
+    salvando: "Botao 'Salvar Alteracoes'"
+
+  aplicando_jogo_aos_alunos:
+    como: >
+      (Depende do modulo de aplicacao de atividades - provavelmente via
+      modulo de Turmas/Series, similar a aplicar uma avaliacao)
+
+  corrigindo_jogos:
+    automatica:
+      quando: "Se voce definiu 'expectedSolution'"
+      como_funciona: >
+        Sistema compara solucao do aluno com a esperada.
+        Se igual = acerto. Se diferente = erro.
+      limitacao: "Nao reconhece solucoes alternativas igualmente validas"
+
+    manual:
+      quando: "Se nao definiu solucao esperada"
+      processo: >
+        Professor visualiza a solucao em blocos montada pelo aluno
+        e atribui nota manualmente baseado em criterios (funcionalidade,
+        eficiencia, uso correto de estruturas).
+
+# =============================================================================
+# 8. CONFIGURACOES AVANCADAS DE AVALIACOES
+# =============================================================================
+configuracoes_avancadas:
+
+  tri_teoria_resposta_ao_item:
+    o_que_e: >
+      TRI (Teoria de Resposta ao Item) e um modelo estatistico avancado de
+      avaliacao usado em exames de larga escala como ENEM. Em vez de contar
+      simplesmente quantas questoes o aluno acertou, o TRI considera a
+      DIFICULDADE de cada questao.
+
+    como_funciona: >
+      Acertar uma questao dificil vale mais do que acertar uma facil.
+      Duas pessoas com mesmo numero de acertos podem ter notas diferentes
+      se acertaram questoes de dificuldades diferentes.
+
+    quando_usar:
+      - "Avaliacoes de certificacao ou vestibular"
+      - "Quando voce quer maior precisao na medicao de conhecimento"
+      - "Provas adaptativas (proxima questao depende do desempenho)"
+
+    como_ativar:
+      onde: "Construtor de Avaliacoes > Modo Automatico"
+      campo: "useTRI"
+      tipo: "Botao toggle"
+      efeito: >
+        Sistema passa a calcular notas usando TRI em vez de soma simples.
+        Requer que questoes tenham dificuldade definida.
+
+    requisitos:
+      - "Questoes precisam ter nivel de dificuldade atribuido (facil/medio/dificil)"
+      - "Banco de questoes deve ter quantidade suficiente em cada nivel"
+      - "Funciona melhor com provas grandes (20+ questoes)"
+
+    impacto_no_aluno:
+      exemplo: >
+        Aluno A acerta 10 questoes faceis = nota 60
+        Aluno B acerta 10 questoes dificeis = nota 85
+        Mesmo numero de acertos, notas diferentes.
+
+  randomizacao_de_questoes:
+    o_que_e: >
+      Em avaliacoes automaticas (modo Banco de Questoes), o sistema pode
+      randomizar quais questoes cada aluno recebe, criando versoes diferentes
+      da mesma prova.
+
+    vantagem:
+      - "Dificulta cola (alunos vizinhos tem provas diferentes)"
+      - "Permite reutilizar avaliacao sem alunos memorizarem questoes"
+      - "Cria banco de versoes alternativas automaticamente"
+
+    como_funciona:
+      - "Sistema escolhe aleatoriamente do banco respeitando criterios (tags, dificuldade, tipo)"
+      - "Cada tentativa pode ter conjunto diferente de questoes"
+      - "Todas as versoes tem mesma dificuldade media e cobertura de temas"
+
+    ativacao: "Automatico ao usar Modo Banco de Questoes"
+
+  multiplas_tentativas:
+    o_que_e: >
+      Voce pode configurar se o aluno pode fazer a mesma avaliacao mais de uma vez.
+
+    onde_configurar: "(Provavelmente em configuracoes de aplicacao da avaliacao, nao no builder)"
+
+    opcoes_comuns:
+      tentativa_unica:
+        quando: "Provas formais, avaliacoes somativas"
+        exemplo: "Prova bimestral - apenas 1 tentativa"
+
+      tentativas_limitadas:
+        quando: "Atividades de pratica com segunda chance"
+        exemplo: "Quiz - ate 2 tentativas"
+
+      tentativas_ilimitadas:
+        quando: "Atividades de treino, auto-estudo"
+        exemplo: "Exercicios de revisao - quantas tentativas quiser"
+
+    calculo_de_nota:
+      opcoes:
+        media: "Nota final = media de todas as tentativas"
+        maior: "Nota final = maior nota entre as tentativas"
+        ultima: "Nota final = nota da ultima tentativa"
+        primeira: "Nota final = nota da primeira tentativa"
+
+  tempo_limite:
+    o_que_e: "Tempo maximo que o aluno tem para completar a avaliacao"
+
+    onde_configurar: "(Configuracoes de aplicacao da avaliacao)"
+
+    exemplos:
+      - "60 minutos para prova de matematica"
+      - "Sem limite para trabalho de pesquisa"
+
+    o_que_acontece_quando_acaba:
+      - "Sistema submete automaticamente o que foi respondido ate aquele momento"
+      - "Questoes nao respondidas ficam em branco (pontuacao 0)"
+      - "Aluno e notificado quando faltam 5 minutos"
+
+  nota_minima:
+    o_que_e: "Pontuacao minima para ser considerado aprovado/passou"
+
+    onde_configurar: "(Configuracoes de aplicacao)"
+
+    exemplo: "Nota minima 70 (de 100) para aprovacao"
+
+    efeito:
+      - "Sistema marca automaticamente se aluno passou ou nao"
+      - "Pode ser usado para liberar conteudo subsequente (gamificacao)"
+      - "Pode determinar se aluno precisa refazer"
+
+  ordem_de_questoes:
+    opcoes:
+      fixa:
+        o_que_e: "Questoes aparecem sempre na mesma ordem"
+        quando: "Quando sequencia importa (uma questao depende da anterior)"
+
+      randomizada:
+        o_que_e: "Ordem e embaralhada para cada aluno"
+        quando: "Para dificultar cola"
+        onde_configurar: "(Configuracao da avaliacao)"
+
+  feedback_imediato_vs_posterior:
+    feedback_imediato:
+      o_que_e: "Aluno ve se acertou logo apos responder cada questao"
+      quando_usar: "Atividades de treino, quizzes formativos"
+      vantagem: "Aprendizado imediato com os erros"
+
+    feedback_posterior:
+      o_que_e: "Aluno so ve resultado no final, apos submeter tudo"
+      quando_usar: "Provas formais, avaliacoes somativas"
+      vantagem: "Evita que aluno mude estrategia no meio da prova"
+
+    sem_feedback:
+      o_que_e: "Aluno nao ve gabarito, apenas a nota final"
+      quando_usar: "Provas que serao reusadas"
+
+# =============================================================================
+# 9. PROCTORING (SUPERVISAO DE PROVAS)
+# =============================================================================
+proctoring:
+
+  status_atual:
+    implementacao: "Coming Soon (Em desenvolvimento)"
+    url: "/educational/exams/proctoring"
+    o_que_aparece: "Pagina placeholder"
+
+  o_que_sera:
+    descricao: >
+      Sistema de supervisao/monitoramento de provas online para prevenir cola
+      e garantir integridade da avaliacao.
+
+    funcionalidades_previstas:
+      - "Monitoramento por webcam (reconhecimento facial)"
+      - "Deteccao de multiplas pessoas na sala"
+      - "Bloqueio de troca de abas/janelas"
+      - "Gravacao de tela do aluno durante a prova"
+      - "Deteccao de comportamento suspeito (olhar para fora da tela)"
+      - "Bloqueio de copy-paste"
+      - "Restricao de acesso a outros sites/aplicativos"
+      - "Relatorio de incidentes para o professor revisar"
+
+    quando_estiver_disponivel:
+      ativacao: "Professor ativa proctoring ao configurar a avaliacao"
+      requisitos_do_aluno:
+        - "Webcam funcional"
+        - "Permissao para acesso a camera"
+        - "Navegador compativel"
+        - "Ambiente adequado (iluminado, silencioso)"
+
+      durante_a_prova:
+        - "Sistema monitora continuamente"
+        - "Alertas sao gerados se detectar irregularidades"
+        - "Gravacoes sao armazenadas para auditoria"
+
+      apos_a_prova:
+        - "Professor recebe relatorio com timestamps de eventos suspeitos"
+        - "Pode revisar gravacoes de alunos sinalizados"
+        - "Decide se aceita ou invalida a tentativa"
+
+# =============================================================================
+# 10. BROKER (FUNCIONALIDADE FUTURA)
+# =============================================================================
+broker:
+
+  status_atual:
+    implementacao: "Coming Soon (Em desenvolvimento)"
+    url: "/educational/exams/broker"
+    o_que_aparece: "Pagina placeholder"
+
+  o_que_pode_ser:
+    especulacao: >
+      "Broker" pode se referir a um intermediador/marketplace de avaliacoes,
+      onde professores compartilham ou vendem bancos de questoes/avaliacoes.
+      Ou pode ser um sistema de gestao de aplicacao de provas (agendar, distribuir).
+
+    aguardar_implementacao: true
+
+# =============================================================================
+# 11. PERGUNTAS FREQUENTES (FAQ)
+# =============================================================================
+faq:
+
+  pergunta_1:
+    pergunta: "Como faco para criar uma prova rapida com 10 questoes?"
+    resposta: >
+      Ir em Construtor de Avaliacoes > Nova Avaliacao > Digite nome >
+      Clique 'Adicionar Questoes' > Filtre por assunto/tags > Marque 10 questoes >
+      Confirmar Selecao > Salvar Avaliacao. Pronto!
+
+  pergunta_2:
+    pergunta: "Posso editar uma questao depois que ja usei em uma prova?"
+    resposta: >
+      Sim, mas a mudanca afeta apenas usos futuros. Provas ja aplicadas
+      mantem a versao original da questao. Se precisar corrigir erro em prova
+      ativa, e melhor criar nova versao da questao e substituir.
+
+  pergunta_3:
+    pergunta: "Como corrijo uma prova com 50 alunos rapidamente?"
+    resposta: >
+      Use avaliacoes com o maximo de questoes objetivas possivel (correcao automatica).
+      Para questoes dissertativas, configure rubricas - elas aceleram muito a correcao.
+      Corrija todas as respostas da mesma questao de uma vez (bloco) para manter
+      consistencia de criterio.
+
+  pergunta_4:
+    pergunta: "Posso gerar multiplas versoes de uma prova para evitar cola?"
+    resposta: >
+      Sim! Use o Modo Automatico (Banco de Questoes) ao criar a avaliacao.
+      Configure tags, dificuldade e quantidade de questoes. O sistema vai
+      randomizar para cada aluno, criando versoes diferentes mas equivalentes.
+
+  pergunta_5:
+    pergunta: "Como faco para importar questoes de um arquivo Word ou PDF?"
+    resposta: >
+      Atualmente nao ha importacao automatica. Voce precisa copiar e colar
+      cada questao manualmente no formulario de criacao. Dica: use a geracao
+      por IA se tiver o conteudo em formato texto - copie paragrafos do material
+      e deixe a IA gerar as questoes.
+
+  pergunta_6:
+    pergunta: "Posso usar imagens nas questoes?"
+    resposta: >
+      Sim! No formulario de criacao de questao, ha um campo para upload de
+      imagens (attachments). Formatos aceitos: JPG, PNG, GIF. Util para
+      graficos, mapas, diagramas, ilustracoes.
+
+  pergunta_7:
+    pergunta: "Como funciona a correcao automatica de questoes dissertativas?"
+    resposta: >
+      Nao ha correcao automatica de questoes abertas. Elas sempre precisam
+      de avaliacao manual do professor. Voce pode usar rubricas para acelerar
+      e padronizar essa correcao, mas a decisao final e humana.
+
+  pergunta_8:
+    pergunta: "Posso reutilizar questoes de uma prova em outra?"
+    resposta: >
+      Sim! Todas as questoes ficam no Banco de Questoes e podem ser reutilizadas
+      quantas vezes quiser. Ao criar nova avaliacao, basta selecionar questoes
+      que ja existem no banco.
+
+  pergunta_9:
+    pergunta: "O que e TRI e devo usar?"
+    resposta: >
+      TRI (Teoria de Resposta ao Item) e um sistema de pontuacao avancado que
+      considera a dificuldade das questoes. Use apenas se voce tem um banco
+      grande de questoes com dificuldades bem calibradas e quer avaliacoes de
+      alta precisao (tipo vestibular). Para provas normais, nao e necessario.
+
+  pergunta_10:
+    pergunta: "Como vejo o historico de tentativas de um aluno?"
+    resposta: >
+      Va em 'Suas Avaliacoes', filtre pelo nome do aluno. Vao aparecer todas
+      as tentativas dele. Cada linha e uma tentativa (se a avaliacao permitir
+      multiplas tentativas, varias linhas da mesma prova aparecem).
+
+  pergunta_11:
+    pergunta: "Posso permitir que o aluno veja a prova corrigida?"
+    resposta: >
+      Sim, depende das configuracoes de feedback da avaliacao. Voce pode escolher
+      se o aluno ve apenas a nota, ou se ve tambem quais questoes errou e o
+      gabarito. (Configuracao exata depende do modulo de aplicacao da avaliacao).
+
+  pergunta_12:
+    pergunta: "Como deleto uma questao do banco?"
+    resposta: >
+      Banco de Questoes > Localize a questao > Icone de Lixeira > Confirmar.
+      ATENCAO: Se a questao ja foi usada em avaliacoes, verifique se isso nao
+      vai quebrar provas aplicadas. Sistema deve avisar se ha uso ativo.
+
+  pergunta_13:
+    pergunta: "Posso criar questoes em grupo/colaborativamente?"
+    resposta: >
+      Sim, qualquer professor com acesso pode criar questoes no banco. Use TAGS
+      consistentes para que todos do grupo encontrem as questoes. Tambem pode
+      filtrar por criador (campo 'creatorEmail') para ver quem criou o que.
+
+  pergunta_14:
+    pergunta: "Qual a diferenca entre 'Suas Avaliacoes' e 'Construtor'?"
+    resposta: >
+      CONSTRUTOR: Onde voce CRIA/EDITA avaliacoes (monta as provas).
+      SUAS AVALIACOES: Onde voce CORRIGE tentativas dos alunos (atribui notas).
+      Sao etapas diferentes: primeiro voce constroi a prova, depois aplica aos
+      alunos, depois corrige as respostas.
+
+  pergunta_15:
+    pergunta: "Como organizo questoes por materia/assunto?"
+    resposta: >
+      Use TAGS! Ao criar cada questao, adicione tags como 'matematica', 'algebra',
+      'funcoes', 'ensino-medio'. Depois voce filtra pelo tag no banco ou no
+      seletor de questoes. Quanto mais consistente o uso de tags, melhor a organizacao.
+
+# =============================================================================
+# 12. ERROS COMUNS E SOLUCOES
+# =============================================================================
+erros_comuns:
+
+  erro_1:
+    sintoma: "Nao consigo salvar a questao - botao fica desabilitado"
+    causas_possiveis:
+      - "Enunciado vazio"
+      - "Tipo de questao nao selecionado"
+      - "Pontuacao zero ou negativa"
+      - "Questao de multipla escolha sem alternativas"
+      - "Nenhuma alternativa marcada como correta"
+    solucao: >
+      Revise todos os campos obrigatorios. Verifique se:
+      1) Campo questionText tem texto
+      2) Campo questionType tem opcao selecionada
+      3) Campo points e maior que zero
+      4) Se multipla escolha: tem pelo menos 2 alternativas E pelo menos 1 correta
+
+  erro_2:
+    sintoma: "Questoes geradas por IA nao fazem sentido ou estao erradas"
+    causas_possiveis:
+      - "Contexto fornecido e muito vago ou curto"
+      - "Contexto tem informacoes erradas"
+      - "IA interpretou mal o tema"
+    solucao: >
+      1) Forneca contextos mais detalhados e precisos
+      2) Sempre REVISE questoes geradas antes de usar
+      3) Edite questoes para corrigir problemas
+      4) Se necessario, gere novamente com contexto melhorado
+      5) Lembre-se: IA e ferramenta auxiliar, nao substitui revisao humana
+
+  erro_3:
+    sintoma: "Avaliacao automatica nao gera - erro 'questoes insuficientes'"
+    causas_possiveis:
+      - "Nao ha questoes suficientes no banco com as tags selecionadas"
+      - "Distribuicao de dificuldade nao pode ser atendida (ex: pediu 50% dificeis mas so tem 10% dificeis)"
+    solucao: >
+      1) Clique em 'Verificar Questoes' antes de criar para ver disponibilidade
+      2) Ajuste criterios (menos questoes, tags mais amplas)
+      3) Crie mais questoes no banco com as tags e dificuldades necessarias
+      4) Use distribuicao balanceada (nivel 50) ao inves de extremos
+
+  erro_4:
+    sintoma: "Nao consigo reordenar questoes na avaliacao"
+    causas_possiveis:
+      - "Tentando arrastar fora da area de drop"
+      - "Navegador nao suporta drag-and-drop"
+    solucao: >
+      1) Certifique-se de soltar a questao dentro da lista (area delimitada)
+      2) Use navegador moderno (Chrome, Firefox, Edge atualizados)
+      3) Se nao funcionar, delete e adicione novamente na ordem desejada
+
+  erro_5:
+    sintoma: "Rubrica esta bloqueada e nao consigo editar"
+    causas_possiveis:
+      - "Rubrica esta sendo usada em avaliacoes publicadas/ativas"
+    solucao: >
+      Sistema bloqueia rubricas em uso para manter consistencia. Opcoes:
+      1) Crie uma NOVA versao da rubrica com as mudancas
+      2) Aguarde todas avaliacoes que usam essa rubrica serem finalizadas
+      3) Use a rubrica como esta (se mudancas nao sao criticas)
+
+  erro_6:
+    sintoma: "Aluno nao consegue ver a nota mesmo apos eu corrigir"
+    causas_possiveis:
+      - "Salvou como rascunho ao inves de finalizar correcao"
+      - "Status da tentativa ainda esta 'submitted' e nao 'graded'"
+      - "Configuracao da avaliacao esconde feedback do aluno"
+    solucao: >
+      1) Volte na correcao e clique em 'Submeter Notas' ou 'Finalizar Correcao'
+      2) Verifique status da tentativa - deve mudar para 'graded'
+      3) Verifique configuracoes de feedback da avaliacao
+
+  erro_7:
+    sintoma: "Upload de imagem falha na questao"
+    causas_possiveis:
+      - "Arquivo muito grande"
+      - "Formato nao suportado"
+      - "Conexao de internet instavel"
+    solucao: >
+      1) Reduza tamanho da imagem (comprima, redimensione)
+      2) Use formatos JPG, PNG ou GIF
+      3) Verifique conexao de internet
+      4) Tente novamente
+
+  erro_8:
+    sintoma: "Tag nao aparece na lista de sugestoes"
+    causas_possiveis:
+      - "Tag nunca foi usada antes (ainda nao existe no sistema)"
+      - "Tag foi digitada com variacao (maiuscula/minuscula, plural)"
+    solucao: >
+      Sistema sugere apenas tags ja existentes. Se a tag e nova, simplesmente
+      digite e pressione Enter - ela sera criada. Dica: padronize tags desde
+      o inicio (sempre minuscula, sempre singular) para evitar duplicatas.
+
+  erro_9:
+    sintoma: "Nota total da prova nao bate com a soma das questoes"
+    causas_possiveis:
+      - "Alguma questao tem peso/pontuacao personalizado"
+      - "TRI esta ativado (altera pontuacao baseado em dificuldade)"
+      - "Professor ajustou nota manualmente"
+    solucao: >
+      Verifique:
+      1) Pontos de cada questao individualmente
+      2) Se TRI esta ativo (desativa para soma simples)
+      3) Se houve ajuste manual de nota
+      Nota: se tudo estiver correto, pode ser calculo do sistema funcionando
+      como esperado (especialmente com TRI ativo)
+
+  erro_10:
+    sintoma: "Deletei questao mas ela ainda aparece em avaliacoes antigas"
+    causas_possiveis:
+      - "Sistema preserva questoes em avaliacoes ja aplicadas"
+    solucao: >
+      Isso e comportamento esperado, nao e erro. Avaliacoes aplicadas mantem
+      snapshot das questoes como estavam no momento da aplicacao. Delete apenas
+      remove a questao do banco para usos futuros. Avaliacoes passadas nao
+      sao afetadas (para manter historico consistente).
+
+# =============================================================================
+# 13. GLOSSARIO DE CAMPOS TECNICOS (REFERENCIA)
+# =============================================================================
+glossario_de_campos:
+
+  questionText:
+    nome_amigavel: "Enunciado da Questao"
+    tipo: "Texto longo"
+    obrigatorio: true
+    descricao: "O texto da pergunta ou afirmacao que sera apresentada ao aluno"
+
+  questionType:
+    nome_amigavel: "Tipo de Questao"
+    tipo: "Selecao"
+    obrigatorio: true
+    opcoes: ["multipla_escolha", "verdadeiro_falso", "dissertativa", "oral", "associacao", "ordenacao", "mista"]
+    descricao: "Formato da questao"
+
+  difficulty:
+    nome_amigavel: "Dificuldade"
+    tipo: "Selecao"
+    obrigatorio: false
+    opcoes: ["easy", "medium", "hard"]
+    padrao: "medium"
+    descricao: "Nivel de dificuldade da questao"
+
+  points:
+    nome_amigavel: "Pontuacao"
+    tipo: "Numero"
+    obrigatorio: true
+    padrao: 1
+    validacao: "Deve ser maior que zero"
+    descricao: "Quantos pontos vale a questao"
+
+  tags:
+    nome_amigavel: "Tags/Marcadores"
+    tipo: "Lista de textos"
+    obrigatorio: false
+    descricao: "Palavras-chave para categorizar e buscar a questao"
+
+  alternatives:
+    nome_amigavel: "Alternativas"
+    tipo: "Lista de objetos"
+    obrigatorio: "Condicional (sim para multipla_escolha e verdadeiro_falso)"
+    estrutura:
+      - "text: texto da alternativa"
+      - "isCorrect: booleano (true = correta)"
+      - "weight: pontos (padrao = points da questao se correta, 0 se errada)"
+    descricao: "Opcoes de resposta para questoes objetivas"
+
+  attachments:
+    nome_amigavel: "Anexos/Imagens"
+    tipo: "Upload de arquivos"
+    obrigatorio: false
+    formatos: ["JPG", "PNG", "GIF"]
+    descricao: "Imagens que acompanham a questao"
+
+  justification:
+    nome_amigavel: "Justificativa"
+    tipo: "Texto longo"
+    obrigatorio: false
+    descricao: "Explicacao da resposta correta ou criterios de avaliacao"
+
+  bncc:
+    nome_amigavel: "Codigo BNCC"
+    tipo: "Texto"
+    obrigatorio: false
+    descricao: "Codigo de referencia da Base Nacional Comum Curricular"
+
+  mufa:
+    nome_amigavel: "Codigo MUFA"
+    tipo: "Texto"
+    obrigatorio: false
+    descricao: "Codigo de referencia interna do sistema"
+
+  useQuestionBank:
+    nome_amigavel: "Usar Banco de Questoes (Modo Automatico)"
+    tipo: "Interruptor (switch)"
+    padrao: false
+    descricao: "Liga/desliga modo automatico de montagem de avaliacao"
+
+  selectedTags:
+    nome_amigavel: "Tags Selecionadas"
+    tipo: "Seletor multiplo de tags"
+    obrigatorio: "Sim quando useQuestionBank=true"
+    descricao: "Tags para filtrar questoes do banco na avaliacao automatica"
+
+  questionCount:
+    nome_amigavel: "Quantidade de Questoes"
+    tipo: "Numero"
+    obrigatorio: "Sim quando useQuestionBank=true"
+    padrao: 10
+    validacao: "Min 1, Max 100"
+    descricao: "Total de questoes na avaliacao automatica"
+
+  difficultyLevel:
+    nome_amigavel: "Nivel de Dificuldade"
+    tipo: "Slider (0-100)"
+    descricao: "Controla distribuicao de questoes faceis/medias/dificeis (0=100% facil, 50=balanceado, 100=100% dificil)"
+
+  questionTypeLevel:
+    nome_amigavel: "Distribuicao de Tipos"
+    tipo: "Slider (0-100)"
+    descricao: "Controla distribuicao multipla escolha vs dissertativas (0=100% MC, 100=100% dissertativa)"
+
+  useTRI:
+    nome_amigavel: "Usar TRI"
+    tipo: "Toggle"
+    descricao: "Ativa Teoria de Resposta ao Item (pontuacao baseada em dificuldade)"
+
+  rubricCorrection:
+    nome_amigavel: "Correcao por Rubrica"
+    tipo: "Toggle"
+    descricao: "Ativa uso de rubrica para corrigir questoes dissertativas"
+
+  selectedRubricId:
+    nome_amigavel: "Rubrica Selecionada"
+    tipo: "Selecao"
+    obrigatorio: "Sim quando rubricCorrection=true"
+    descricao: "ID da rubrica a ser usada"
+
+  rubricName:
+    nome_amigavel: "Nome da Rubrica"
+    tipo: "Texto"
+    obrigatorio: true
+    descricao: "Nome identificador da rubrica"
+
+  criteria:
+    nome_amigavel: "Criterios de Avaliacao"
+    tipo: "Lista de objetos"
+    obrigatorio: true
+    estrutura:
+      - "name: nome do criterio"
+      - "description: descricao do criterio"
+      - "sequence_order: ordem de exibicao"
+      - "levels: array de niveis de pontuacao"
+    descricao: "Aspectos avaliados na rubrica"
+
+  scoreLevels:
+    nome_amigavel: "Niveis de Pontuacao"
+    tipo: "Lista de objetos"
+    obrigatorio: true
+    estrutura:
+      - "label: nome do nivel (ex: Excelente)"
+      - "description: o que caracteriza este nivel"
+      - "points: pontos atribuidos"
+      - "sequence_order: ordem"
+    descricao: "Escalas de desempenho para cada criterio"
+
+  isLocked:
+    nome_amigavel: "Bloqueada"
+    tipo: "Booleano"
+    descricao: "Indica se rubrica esta em uso e nao pode ser editada"
+
+# =============================================================================
+# FIM DO GUIA
+# =============================================================================
+# Este guia cobre todas as funcionalidades do modulo de Avaliacoes do Cogedu.
+# Para duvidas adicionais, consulte a documentacao tecnica ou suporte.

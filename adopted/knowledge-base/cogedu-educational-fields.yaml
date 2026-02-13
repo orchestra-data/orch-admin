@@ -1,0 +1,777 @@
+# =============================================================================
+# GUIA COMPLETO: CONTEUDO EDUCACIONAL DO COGEDU
+# Base de conhecimento para o assistente Orch Admin
+#
+# Este arquivo explica TODOS os conceitos do modulo educacional do Cogedu,
+# como criar cada tipo de conteudo, e o que cada campo significa.
+#
+# Versao: 2.0.0
+# Atualizado: 2026-02-12
+# =============================================================================
+
+# =============================================================================
+# GLOSSARIO DE TERMOS
+# =============================================================================
+# Estes sao os termos usados no sistema Cogedu e seus equivalentes em
+# portugues. O sistema usa termos em ingles internamente, mas a interface
+# mostra os termos em portugues.
+
+glossario:
+  Collection: "Curso - E o nivel mais alto da hierarquia de conteudo. Um Curso agrupa Trilhas de aprendizagem."
+  Pathway: "Trilha - Um caminho de aprendizagem dentro de um Curso. A Trilha organiza Disciplinas em sequencia."
+  Series: "Disciplina - Uma materia ou tema especifico dentro de uma Trilha. A Disciplina contem Modulos."
+  Unit: "Modulo - Uma unidade de ensino dentro de uma Disciplina. O Modulo contem Componentes (aulas, videos, etc)."
+  Component: "Componente - O conteudo real que o aluno consome: video, texto, quiz, atividade, etc."
+  ClassInstance: "Turma - Uma oferta real de um Curso ou Disciplina com alunos matriculados, datas e professores."
+  Enrollment: "Matricula - O vinculo de um aluno a uma Turma."
+  SKU: "Codigo unico de identificacao. Deve ser em letras maiusculas, numeros e hifen. Exemplo: PYTHON-BASICO, MATH-101."
+  Status:
+    draft: "Rascunho - Conteudo em preparacao. Nao visivel para alunos."
+    published: "Publicado - Conteudo disponivel. Alunos podem acessar."
+    archived: "Arquivado - Conteudo desativado. Nao aparece mais para novos alunos."
+
+# =============================================================================
+# HIERARQUIA DE CONTEUDO
+# =============================================================================
+# Esta e a estrutura organizacional do conteudo educacional no Cogedu.
+# Cada nivel contem o proximo, formando uma arvore.
+
+hierarquia:
+  descricao: |
+    O conteudo educacional do Cogedu e organizado em 5 niveis hierarquicos:
+
+    CURSO (Collection)
+      └── TRILHA (Pathway)
+            └── DISCIPLINA (Series)
+                  └── MODULO (Unit)
+                        └── COMPONENTE (Component)
+
+    Exemplo real:
+      Curso: "Formacao Python Full Stack"
+        └── Trilha: "Python Basico"
+              ├── Disciplina: "Fundamentos de Python"
+              │     ├── Modulo: "Variaveis e Tipos"
+              │     │     ├── Componente: Video - Introducao a Variaveis
+              │     │     ├── Componente: Texto - Guia de Tipos de Dados
+              │     │     └── Componente: Quiz - Teste seus Conhecimentos
+              │     └── Modulo: "Estruturas de Controle"
+              │           ├── Componente: Video - If, Else e Loops
+              │           └── Componente: Atividade - Exercicios Praticos
+              └── Disciplina: "Python Orientado a Objetos"
+                    └── Modulo: "Classes e Objetos"
+                          └── Componente: Video - OOP em Python
+
+  regras_importantes:
+    - "Um Curso pode ter varias Trilhas"
+    - "Uma Trilha pode pertencer a mais de um Curso"
+    - "Uma Disciplina pode pertencer a mais de uma Trilha"
+    - "Um Modulo pertence a uma unica Disciplina"
+    - "Componentes pertencem a um unico Modulo"
+    - "Para criar uma Turma, voce precisa de um Curso OU uma Disciplina"
+
+# =============================================================================
+# CURSO (COLLECTION) - NIVEL 1
+# =============================================================================
+# Um Curso e o nivel mais alto da hierarquia educacional. E o que os
+# alunos veem no catalogo e onde se matriculam.
+
+curso_collection:
+  o_que_e: |
+    Um Curso (chamado internamente de "Collection") e o agrupamento principal
+    de conteudo educacional no Cogedu. E como um programa de formacao completo
+    que organiza varias Trilhas de aprendizagem.
+
+    Pense no Curso como uma "pasta" que contem todas as Trilhas, Disciplinas,
+    Modulos e Componentes que o aluno precisa completar.
+
+    Exemplos de Cursos:
+    - "Formacao Python Full Stack"
+    - "MBA em Gestao de Projetos"
+    - "Tecnico em Enfermagem"
+    - "Curso Livre de Fotografia"
+
+  onde_fica_no_sistema: |
+    Menu principal: Conteudos > Colecoes
+    URL: /educational/collections
+
+  como_criar:
+    passo_1:
+      acao: "Acesse o menu Conteudos e clique na aba Colecoes"
+      url: "/educational/collections"
+    passo_2:
+      acao: "Clique no botao 'Nova Colecao' (canto superior direito)"
+      url: "/educational/collections/new"
+    passo_3:
+      acao: "Preencha os campos do formulario (detalhes abaixo)"
+    passo_4:
+      acao: "Clique em 'Salvar' para criar o Curso"
+      resultado: "O Curso sera criado e voce sera redirecionado para a pagina de detalhes"
+
+  campos_do_formulario:
+    empresa:
+      nome_no_sistema: "companyId"
+      o_que_e: "A instituicao dona deste Curso. Selecione a empresa na lista."
+      obrigatorio: true
+      dica: "Se voce so tem acesso a uma empresa, o campo ja vem preenchido automaticamente."
+
+    titulo:
+      nome_no_sistema: "title"
+      o_que_e: "O nome do Curso que os alunos e administradores verao."
+      obrigatorio: true
+      exemplo: "Formacao Python Full Stack"
+      dica: "Use um nome claro e descritivo. Evite abreviacoes."
+
+    descricao:
+      nome_no_sistema: "description"
+      o_que_e: "Uma descricao livre sobre o Curso. Pode explicar objetivos, publico-alvo, etc."
+      obrigatorio: false
+      exemplo: "Curso completo de Python para quem quer se tornar desenvolvedor full stack. Cobre fundamentos, web, APIs e deploy."
+      dica: "Opcional, mas recomendado. Ajuda alunos e gestores a entenderem o proposito."
+
+    codigo_sku:
+      nome_no_sistema: "sku"
+      o_que_e: "Codigo unico de identificacao do Curso. Usado para referencia rapida em relatorios e integracoes."
+      obrigatorio: true
+      regras:
+        - "Apenas letras MAIUSCULAS, numeros e hifen (-)"
+        - "Minimo 3 caracteres"
+        - "Deve ser unico (nao pode repetir)"
+      exemplos_validos: ["PYTHON-FULLSTACK", "MBA-GP-2026", "ENF-TEC-01", "FOTO-LIVRE"]
+      exemplos_invalidos: ["python (minusculo)", "PY (muito curto)", "PYTHON FULL (espaco nao permitido)"]
+      dica: "O sistema converte automaticamente para maiuscula. Crie um padrao: AREA-NOME ou SIGLA-NUMERO."
+
+    status:
+      nome_no_sistema: "status"
+      o_que_e: "Define a visibilidade e disponibilidade do Curso."
+      obrigatorio: false
+      padrao: "Rascunho (draft)"
+      opcoes:
+        rascunho: "O Curso esta em preparacao. Nao aparece para alunos. Use enquanto monta o conteudo."
+        publicado: "O Curso esta ativo e disponivel. Alunos podem ser matriculados."
+        arquivado: "O Curso foi desativado. Nao aparece mais, mas os dados sao preservados."
+      dica: "Comece sempre com Rascunho. Publique so quando o conteudo estiver completo."
+
+    disponivel_no_marketplace:
+      nome_no_sistema: "isOfferable"
+      o_que_e: "Define se o Curso aparece no catalogo publico (marketplace) da instituicao."
+      obrigatorio: false
+      padrao: "Sim (marcado)"
+      explicacao: "Se marcado, o Curso pode ser encontrado e adquirido pelo marketplace. Se desmarcado, o Curso so pode ser acessado por matricula direta."
+      dica: "Para cursos internos (treinamentos corporativos), desmarque esta opcao."
+
+    imagem_miniatura:
+      nome_no_sistema: "thumbnailUrl"
+      o_que_e: "Imagem pequena do Curso exibida em cards e listagens."
+      obrigatorio: false
+      formato: "JPG ou PNG, maximo 5MB"
+      dica: "Recomendado para uma apresentacao visual atraente."
+
+    imagem_banner:
+      nome_no_sistema: "bannerUrl"
+      o_que_e: "Imagem grande do Curso exibida na pagina de detalhes."
+      obrigatorio: false
+      formato: "JPG ou PNG, maximo 5MB"
+      dica: "Use uma imagem de alta qualidade que represente o conteudo do Curso."
+
+  depois_de_criar: |
+    Apos criar o Curso, voce sera redirecionado para a pagina de detalhes.
+    Nesta pagina voce pode:
+    - Editar as informacoes do Curso (botao Editar)
+    - Adicionar Trilhas ao Curso (botao Adicionar Trilha)
+    - Reordenar Trilhas arrastando e soltando
+    - Excluir o Curso (botao Excluir - CUIDADO: irreversivel!)
+
+  erros_comuns:
+    - erro: "SKU ja existe"
+      solucao: "Escolha um codigo diferente. Verifique na lista de Cursos se o SKU ja esta em uso."
+    - erro: "Titulo obrigatorio"
+      solucao: "O campo titulo nao pode ficar vazio. Digite o nome do Curso."
+    - erro: "Selecione uma empresa"
+      solucao: "Voce precisa escolher a instituicao dona do Curso no seletor de empresa."
+
+  pagina_de_listagem:
+    url: "/educational/collections"
+    descricao: "Lista todos os Cursos com opcoes de busca e filtro."
+    filtros:
+      busca: "Filtra por titulo, descricao ou SKU. Digite e os resultados aparecem automaticamente."
+      status: "Filtra por status: Todos, Rascunho, Publicado ou Arquivado."
+      marketplace: "Filtra entre todos os Cursos, apenas os do marketplace ou apenas privados."
+
+  pagina_de_edicao:
+    url: "/educational/collections/{id}/edit"
+    descricao: "Mesmo formulario da criacao, mas com os campos ja preenchidos com os dados do Curso."
+    dica: "As alteracoes so sao salvas quando voce clica em Salvar."
+
+  pagina_de_detalhes:
+    url: "/educational/collections/{id}"
+    descricao: "Visualizacao completa do Curso com todas as informacoes e Trilhas vinculadas."
+    acoes:
+      editar: "Clique em Editar para alterar informacoes do Curso"
+      excluir: "Clique em Excluir para remover o Curso (pede confirmacao)"
+      adicionar_trilha: "Clique em Adicionar Trilha para vincular uma Trilha existente"
+      reordenar: "Arraste e solte as Trilhas para alterar a ordem"
+
+# =============================================================================
+# TRILHA (PATHWAY) - NIVEL 2
+# =============================================================================
+# Uma Trilha e um caminho de aprendizagem dentro de um Curso.
+
+trilha_pathway:
+  o_que_e: |
+    Uma Trilha (chamada internamente de "Pathway") e um caminho de aprendizagem
+    dentro de um Curso. Ela organiza as Disciplinas em uma sequencia logica.
+
+    Pense na Trilha como um "modulo grande" ou "eixo tematico" do Curso.
+    Um Curso pode ter varias Trilhas, e uma Trilha pode pertencer a mais de um Curso.
+
+    Exemplos de Trilhas:
+    - No Curso "Formacao Python": Trilha "Python Basico", Trilha "Python Web", Trilha "Python Data Science"
+    - No Curso "MBA Gestao": Trilha "Fundamentos", Trilha "Lideranca", Trilha "Estrategia"
+
+  onde_fica_no_sistema: |
+    Menu principal: Conteudos > Trilhas
+    URL: /educational/pathways
+
+  como_criar:
+    passo_1:
+      acao: "Acesse o menu Conteudos e clique na aba Trilhas"
+      url: "/educational/pathways"
+    passo_2:
+      acao: "Clique no botao 'Nova Trilha'"
+      url: "/educational/pathways/new"
+    passo_3:
+      acao: "Selecione a qual(is) Curso(s) esta Trilha pertence"
+      dica: "Uma Trilha pode pertencer a mais de um Curso (multi-selecao)"
+    passo_4:
+      acao: "Preencha os campos (detalhes abaixo)"
+    passo_5:
+      acao: "Clique em Salvar"
+
+  campos_do_formulario:
+    cursos_vinculados:
+      nome_no_sistema: "collectionIds"
+      o_que_e: "Selecione os Cursos aos quais esta Trilha pertence. Pode selecionar mais de um."
+      obrigatorio: true
+      dica: "Apenas Cursos com status Publicado aparecem na lista."
+
+    titulo:
+      nome_no_sistema: "title"
+      o_que_e: "O nome da Trilha."
+      obrigatorio: true
+      exemplo: "Python Basico"
+
+    objetivo:
+      nome_no_sistema: "objective"
+      o_que_e: "Descricao dos objetivos de aprendizagem desta Trilha."
+      obrigatorio: false
+      exemplo: "Ao final desta trilha, o aluno dominara os fundamentos da linguagem Python."
+
+    codigo_sku:
+      nome_no_sistema: "sku"
+      o_que_e: "Codigo unico da Trilha. Mesmas regras do SKU do Curso."
+      obrigatorio: true
+      exemplos_validos: ["PY-BASICO", "MBA-FUND", "ENF-CLINICA"]
+
+    regra_de_progressao:
+      nome_no_sistema: "progressionRule"
+      o_que_e: "Define como o aluno avanca pelas Disciplinas da Trilha."
+      obrigatorio: false
+      padrao: "Flexivel"
+      opcoes:
+        flexivel: "O aluno pode acessar qualquer Disciplina em qualquer ordem."
+        linear: "O aluno deve completar as Disciplinas na ordem definida, uma por vez."
+      dica: "Use Linear para cursos que precisam de pre-requisitos sequenciais."
+
+    limite_matricula_tardia:
+      nome_no_sistema: "maxProgressPercentageForLateEnrollment"
+      o_que_e: "Percentual maximo de progresso que a turma pode ter para aceitar matriculas tardias."
+      obrigatorio: false
+      exemplo: "Se definir 30, alunos nao podem entrar quando a turma ja passou de 30% do conteudo."
+
+    percentual_alerta:
+      nome_no_sistema: "alertPercentage"
+      o_que_e: "Percentual de progresso que dispara alerta de checkpoint para gestores."
+      obrigatorio: false
+      exemplo: "Se definir 50, quando a turma atingir 50% de progresso, o sistema verifica criterios."
+
+    criterios_de_checkpoint:
+      descricao: "Quando o alerta de checkpoint e disparado, o sistema verifica estes criterios:"
+      verificar_pagamento:
+        nome_no_sistema: "paymentCheck"
+        o_que_e: "Verifica se o aluno esta com pagamento em dia."
+      verificar_presenca:
+        nome_no_sistema: "attendanceCheck"
+        o_que_e: "Verifica se o aluno atingiu frequencia minima."
+      verificar_notas:
+        nome_no_sistema: "gradeCheck"
+        o_que_e: "Verifica se o aluno atingiu nota minima."
+
+    status:
+      nome_no_sistema: "status"
+      o_que_e: "Visibilidade da Trilha. Mesmas opcoes do Curso: Rascunho, Publicado, Arquivado."
+      padrao: "Publicado"
+
+  depois_de_criar: |
+    Na pagina de detalhes da Trilha voce pode:
+    - Editar informacoes (botao Editar)
+    - Adicionar Disciplinas (botao Adicionar Disciplina)
+    - Reordenar Disciplinas arrastando e soltando
+    - Excluir a Trilha
+
+# =============================================================================
+# DISCIPLINA (SERIES) - NIVEL 3
+# =============================================================================
+# Uma Disciplina e uma materia especifica dentro de uma Trilha.
+
+disciplina_series:
+  o_que_e: |
+    Uma Disciplina (chamada internamente de "Series") e uma materia ou tema
+    especifico dentro de uma Trilha. Ela contem os Modulos de ensino.
+
+    Uma Disciplina pode pertencer a mais de uma Trilha, e tambem pode existir
+    de forma independente (sem Trilha).
+
+    Exemplos:
+    - "Fundamentos de Python"
+    - "Calculo I"
+    - "Anatomia Humana"
+    - "Marketing Digital"
+
+  onde_fica_no_sistema: |
+    Menu principal: Conteudos > Disciplinas
+    URL: /educational/series
+
+  como_criar:
+    passo_1:
+      acao: "Acesse Conteudos > Disciplinas"
+      url: "/educational/series"
+    passo_2:
+      acao: "Clique em 'Nova Disciplina'"
+      url: "/educational/series/new"
+    passo_3:
+      acao: "Preencha os campos obrigatorios"
+    passo_4:
+      acao: "Clique em Salvar"
+
+  campos_do_formulario:
+    trilhas_vinculadas:
+      nome_no_sistema: "pathwayIds"
+      o_que_e: "Selecione as Trilhas a que esta Disciplina pertence. Pode selecionar varias ou nenhuma."
+      obrigatorio: false
+      dica: "Se nao vincular a nenhuma Trilha, a Disciplina fica independente."
+
+    titulo:
+      nome_no_sistema: "title"
+      o_que_e: "O nome da Disciplina."
+      obrigatorio: true
+      exemplo: "Fundamentos de Python"
+
+    descricao:
+      nome_no_sistema: "description"
+      o_que_e: "Descricao do conteudo e objetivos da Disciplina."
+      obrigatorio: false
+
+    codigo_sku:
+      nome_no_sistema: "sku"
+      o_que_e: "Codigo unico da Disciplina."
+      obrigatorio: true
+      exemplos_validos: ["PY-FUND", "CALC-1", "ANAT-HUM"]
+
+    carga_horaria:
+      nome_no_sistema: "workload"
+      o_que_e: "Carga horaria total da Disciplina em horas."
+      obrigatorio: false
+      exemplo: "40 (para 40 horas)"
+      dica: "Valor numerico. Usado para calculos de certificados e relatorios."
+
+    modalidade:
+      nome_no_sistema: "deliveryMode"
+      o_que_e: "Como a Disciplina sera ministrada."
+      opcoes:
+        presencial: "Aulas presenciais na instituicao"
+        online: "Aulas 100% online pelo AVA"
+        hibrido: "Combinacao de presencial e online"
+
+    status:
+      nome_no_sistema: "status"
+      opcoes_iguais_ao_curso: true
+
+  pagina_de_detalhes:
+    acoes:
+      - "Editar informacoes da Disciplina"
+      - "Adicionar Modulos"
+      - "Reordenar Modulos"
+      - "Ver Turmas vinculadas"
+      - "Configurar condicoes de liberacao"
+
+  condicoes_de_liberacao:
+    descricao: "Voce pode definir quando cada parte do conteudo fica disponivel para o aluno."
+    opcoes:
+      sempre_disponivel: "O conteudo esta disponivel desde o inicio."
+      agendado: "O conteudo fica disponivel a partir de uma data especifica."
+      relativo: "O conteudo fica disponivel X dias apos a matricula do aluno."
+    dica: "Util para cursos com cronograma fixo ou para liberar conteudo gradualmente."
+
+# =============================================================================
+# MODULO (UNIT) - NIVEL 4
+# =============================================================================
+# Um Modulo e uma unidade de ensino dentro de uma Disciplina.
+
+modulo_unit:
+  o_que_e: |
+    Um Modulo (chamado internamente de "Unit") e uma unidade de ensino dentro
+    de uma Disciplina. E no Modulo que voce adiciona os Componentes: videos,
+    textos, quizzes e atividades.
+
+    Pense no Modulo como um "capitulo" de um livro.
+
+    Exemplos:
+    - "Modulo 1: Variaveis e Tipos de Dados"
+    - "Modulo 2: Estruturas de Controle"
+    - "Modulo 3: Funcoes"
+
+  onde_fica_no_sistema: |
+    Menu principal: Conteudos > Modulos
+    URL: /educational/units
+    Tambem acessivel pela pagina de detalhes de uma Disciplina.
+
+  como_criar:
+    passo_1:
+      acao: "Acesse Conteudos > Modulos"
+      url: "/educational/units"
+    passo_2:
+      acao: "Clique em 'Novo Modulo'"
+      url: "/educational/units/new"
+    passo_3:
+      acao: "Preencha nome e descricao"
+    passo_4:
+      acao: "Clique em Salvar"
+    passo_5:
+      acao: "Na pagina de detalhes, acesse o Builder para adicionar Componentes"
+      url: "/educational/units/{id}/builder"
+
+  campos_do_formulario:
+    titulo:
+      nome_no_sistema: "title"
+      o_que_e: "Nome do Modulo."
+      obrigatorio: true
+      exemplo: "Variaveis e Tipos de Dados"
+
+    descricao:
+      nome_no_sistema: "description"
+      o_que_e: "Descricao do conteudo do Modulo."
+      obrigatorio: false
+
+  builder_de_componentes:
+    url: "/educational/units/{id}/builder"
+    descricao: |
+      O Builder e a ferramenta visual para montar o conteudo do Modulo.
+      Funciona com drag-and-drop (arrastar e soltar):
+
+      1. Na barra lateral esquerda, veja os tipos de Componentes disponiveis
+      2. Arraste o tipo desejado para a area central
+      3. Configure o Componente no painel da direita
+      4. Reordene os Componentes arrastando para cima ou para baixo
+
+    tipos_de_componentes:
+      video:
+        descricao: "Video de aula. Suporta YouTube, Vimeo, Wistia, Panda Video, ou upload direto."
+        campos: ["titulo", "url_do_video", "provedor", "descricao"]
+      texto:
+        descricao: "Conteudo em texto formatado (rich text). Ideal para explicacoes, leituras, referencias."
+        campos: ["titulo", "conteudo_html"]
+      quiz:
+        descricao: "Questionario com questoes de multipla escolha, verdadeiro/falso, etc."
+        campos: ["titulo", "questoes", "nota_minima", "tentativas"]
+      atividade:
+        descricao: "Tarefa para o aluno entregar. Pode ser texto, arquivo, ou link."
+        campos: ["titulo", "instrucoes", "data_entrega", "nota_maxima"]
+      arquivo:
+        descricao: "Material para download (PDF, slides, planilhas, etc)."
+        campos: ["titulo", "arquivo", "descricao"]
+      link_externo:
+        descricao: "Link para recurso externo (artigo, ferramenta, simulador, etc)."
+        campos: ["titulo", "url", "descricao"]
+
+# =============================================================================
+# TURMA (CLASS INSTANCE) - OFERTA DE CONTEUDO
+# =============================================================================
+# Uma Turma e uma oferta real de um Curso ou Disciplina.
+
+turma_class_instance:
+  o_que_e: |
+    Uma Turma (chamada internamente de "Class Instance") e a oferta real de um
+    Curso ou Disciplina, com alunos matriculados, datas definidas e professores.
+
+    E como "instanciar" o conteudo para um grupo especifico de alunos.
+    O conteudo existe uma vez; a Turma e criada a cada nova oferta.
+
+    Exemplos:
+    - "Python Basico - Turma 2026.1" (oferta do 1o semestre de 2026)
+    - "MBA Gestao - Noturno" (oferta noturna)
+    - "Enfermagem Clinica - Campus SP" (oferta no campus SP)
+
+  onde_fica_no_sistema: |
+    Menu principal: Turmas
+    URL: /educational/class-instances
+
+  como_criar:
+    passo_1:
+      acao: "Acesse o menu Turmas"
+      url: "/educational/class-instances"
+    passo_2:
+      acao: "Clique em 'Nova Turma'"
+      url: "/educational/class-instances/new"
+    passo_3:
+      acao: "Escolha o tipo de conteudo: Curso (Collection) ou Disciplina (Series)"
+    passo_4:
+      acao: "Selecione o Curso ou Disciplina especifico(a)"
+    passo_5:
+      acao: "Preencha os campos: nome, datas, limite de alunos, etc."
+    passo_6:
+      acao: "Clique em Salvar"
+
+  campos_do_formulario:
+    tipo_de_conteudo:
+      nome_no_sistema: "contentType"
+      o_que_e: "Define se a Turma e de um Curso completo ou de uma Disciplina individual."
+      opcoes:
+        collection: "Curso - A turma cobre todo o conteudo do Curso"
+        series: "Disciplina - A turma cobre uma Disciplina especifica"
+
+    nome_da_turma:
+      nome_no_sistema: "name"
+      o_que_e: "Nome identificador da Turma."
+      obrigatorio: true
+      exemplo: "Python Basico - Turma 2026.1"
+
+    descricao:
+      nome_no_sistema: "description"
+      o_que_e: "Descricao adicional da Turma."
+      obrigatorio: false
+
+    periodo:
+      nome_no_sistema: "startDate / endDate"
+      o_que_e: "Datas de inicio e fim da Turma."
+      dica: "Define o periodo em que os alunos podem acessar o conteudo."
+
+    limite_de_alunos:
+      nome_no_sistema: "enrollmentLimit"
+      o_que_e: "Numero maximo de alunos que podem se matricular."
+      obrigatorio: false
+      dica: "Deixe vazio para ilimitado."
+
+  como_matricular_alunos:
+    passo_1:
+      acao: "Acesse a pagina de detalhes da Turma"
+      url: "/educational/class-instances/{id}"
+    passo_2:
+      acao: "Acesse a secao Matriculas"
+      url: "/educational/class-instances/{id}/enrollments"
+    passo_3:
+      acao: "Clique em 'Nova Matricula'"
+    passo_4:
+      acao: "Busque e selecione o aluno"
+    passo_5:
+      acao: "Confirme a matricula"
+
+# =============================================================================
+# AVALIACOES (EXAMS) - PROVAS E ATIVIDADES
+# =============================================================================
+
+avaliacoes_exams:
+  o_que_e: |
+    O modulo de Avaliacoes permite criar provas, quizzes e atividades
+    para medir o aprendizado dos alunos.
+
+  onde_fica_no_sistema: |
+    Menu principal: Conteudos > Avaliacoes
+    URL: /educational/exams
+
+  sub_abas:
+    suas_avaliacoes:
+      nome: "Suas Avaliacoes"
+      url: "/educational/exams/your-evaluations"
+      descricao: "Lista as avaliacoes criadas por voce."
+
+    atividades:
+      nome: "Atividades"
+      url: "/educational/exams/your-activities"
+      descricao: "Lista atividades para corrigir e dar feedback."
+
+    banco_de_questoes:
+      nome: "Banco de Questoes"
+      url: "/educational/exams/bank"
+      descricao: "Repositorio de questoes reutilizaveis. Crie questoes aqui e use em varias provas."
+
+    builder:
+      nome: "Builder"
+      url: "/educational/exams/builder"
+      descricao: "Ferramenta visual para montar provas arrastando questoes."
+
+    rubricas:
+      nome: "Rubricas"
+      url: "/educational/exams/rubrics"
+      descricao: "Criterios de avaliacao detalhados. Defina niveis de desempenho para cada criterio."
+
+    blockly:
+      nome: "Blockly"
+      url: "/educational/exams/blockly-games"
+      descricao: "Jogos de programacao visual com blocos. Para avaliacoes de logica e codigo."
+
+  tipos_de_questao:
+    multipla_escolha: "Questao com varias opcoes, uma correta."
+    multipla_resposta: "Questao com varias opcoes, mais de uma correta."
+    verdadeiro_falso: "Questao com duas opcoes: Verdadeiro ou Falso."
+    dissertativa: "Questao aberta que o aluno responde com texto."
+    correspondencia: "Questao onde o aluno liga itens de duas colunas."
+    ordenacao: "Questao onde o aluno coloca itens na ordem correta."
+
+  como_criar_prova:
+    passo_1:
+      acao: "Acesse Conteudos > Avaliacoes > Builder"
+      url: "/educational/exams/builder"
+    passo_2:
+      acao: "Clique em 'Nova Avaliacao'"
+    passo_3:
+      acao: "Defina titulo, descricao e configuracoes (tempo, tentativas, nota minima)"
+    passo_4:
+      acao: "Adicione questoes: crie novas ou importe do Banco de Questoes"
+    passo_5:
+      acao: "Configure pontuacao por questao"
+    passo_6:
+      acao: "Publique a avaliacao para que fique disponivel nas Turmas"
+
+  geracao_com_ia:
+    descricao: |
+      O Cogedu tem integracao com IA para gerar questoes automaticamente.
+      A partir de uma transcricao de video ou texto, a IA sugere questoes
+      de diferentes tipos e niveis de dificuldade.
+    servico: "QuestionGenerationService"
+    como_usar: "Na pagina de criacao de questoes, clique em 'Gerar com IA'."
+
+# =============================================================================
+# CERTIFICADOS
+# =============================================================================
+
+certificados:
+  o_que_e: |
+    O modulo de Certificados permite criar templates de certificados,
+    emitir certificados para alunos e validar certificados emitidos.
+
+  onde_fica_no_sistema: |
+    Menu principal: Conteudos > Certificados
+    URL: /educational/certificates
+
+  sub_abas:
+    templates:
+      nome: "Templates"
+      url: "/educational/certificates/templates"
+      descricao: "Modelos de certificado reutilizaveis com layout, campos variaveis e design."
+
+    emitidos:
+      nome: "Emitidos"
+      url: "/educational/certificates/issued"
+      descricao: "Lista de certificados ja emitidos para alunos."
+
+    documentos:
+      nome: "Documentos"
+      url: "/educational/certificates/documents"
+      descricao: "Documentos academicos (historicos, declaracoes, etc)."
+
+  como_emitir_certificado:
+    passo_1: "Crie um Template de certificado em Templates"
+    passo_2: "Vincule o Template a um Curso ou Disciplina"
+    passo_3: "Quando o aluno completar os requisitos, o certificado pode ser emitido"
+    passo_4: "Acesse Emitidos para ver e gerenciar certificados"
+
+  validacao_publica:
+    url: "/validate/{codigo}"
+    descricao: "Qualquer pessoa pode validar um certificado informando o codigo. Nao precisa estar logado."
+
+# =============================================================================
+# FLUXO COMPLETO: COMO MONTAR UM CURSO DO ZERO
+# =============================================================================
+
+fluxo_completo:
+  descricao: |
+    Este e o passo a passo completo para criar um Curso funcional no Cogedu,
+    desde o inicio ate ter alunos matriculados.
+
+  passos:
+    1_criar_curso:
+      acao: "Crie o Curso (Collection)"
+      onde: "Conteudos > Colecoes > Nova Colecao"
+      campos_minimos: "Titulo, SKU, Status: Rascunho"
+
+    2_criar_trilhas:
+      acao: "Crie as Trilhas (Pathways) do Curso"
+      onde: "Conteudos > Trilhas > Nova Trilha"
+      campos_minimos: "Titulo, SKU, vincular ao Curso criado"
+
+    3_criar_disciplinas:
+      acao: "Crie as Disciplinas (Series) de cada Trilha"
+      onde: "Conteudos > Disciplinas > Nova Disciplina"
+      campos_minimos: "Titulo, SKU, vincular a Trilha"
+
+    4_criar_modulos:
+      acao: "Crie os Modulos (Units) de cada Disciplina"
+      onde: "Conteudos > Modulos > Novo Modulo"
+      campos_minimos: "Titulo"
+
+    5_adicionar_componentes:
+      acao: "Adicione Componentes a cada Modulo usando o Builder"
+      onde: "Pagina do Modulo > Builder"
+      tipos: "Videos, textos, quizzes, atividades, arquivos"
+
+    6_publicar:
+      acao: "Publique o Curso (mude o status para Publicado)"
+      onde: "Pagina do Curso > Editar > Status: Publicado"
+
+    7_criar_turma:
+      acao: "Crie uma Turma para o Curso"
+      onde: "Turmas > Nova Turma"
+      campos_minimos: "Tipo: Curso, selecionar o Curso, nome da Turma, datas"
+
+    8_matricular:
+      acao: "Matricule os alunos na Turma"
+      onde: "Pagina da Turma > Matriculas > Nova Matricula"
+
+  dica_final: |
+    Voce nao precisa criar tudo de uma vez. Pode criar o Curso como Rascunho,
+    ir adicionando conteudo aos poucos, e publicar quando estiver pronto.
+
+# =============================================================================
+# PERGUNTAS FREQUENTES (FAQ)
+# =============================================================================
+
+faq:
+  - pergunta: "O que e uma Collection no Cogedu?"
+    resposta: "Collection e o termo interno para Curso. E o agrupamento principal de conteudo educacional. Na interface voce encontra como 'Colecao' na aba de Conteudos."
+
+  - pergunta: "Qual a diferenca entre Curso e Turma?"
+    resposta: "O Curso (Collection) e o CONTEUDO - as trilhas, disciplinas, modulos e materiais. A Turma (Class Instance) e a OFERTA desse conteudo para um grupo de alunos com datas especificas. Voce cria o Curso uma vez e pode criar varias Turmas dele."
+
+  - pergunta: "Posso criar uma Turma sem ter um Curso?"
+    resposta: "Sim, voce pode criar uma Turma a partir de uma Disciplina (Series) individual, sem precisar de um Curso completo."
+
+  - pergunta: "O que e o SKU?"
+    resposta: "SKU e um codigo unico de identificacao. Deve ter apenas letras maiusculas, numeros e hifen. Minimo 3 caracteres. Exemplo: PYTHON-BASICO, MBA-GP-2026."
+
+  - pergunta: "Como adiciono videos a um Modulo?"
+    resposta: "Acesse a pagina do Modulo e clique em Builder. No Builder, arraste o componente Video da barra lateral para a area central. Configure a URL do video (YouTube, Vimeo, etc) no painel da direita."
+
+  - pergunta: "Como crio uma prova?"
+    resposta: "Acesse Conteudos > Avaliacoes > Builder > Nova Avaliacao. Defina titulo e configuracoes, depois adicione questoes (criando novas ou importando do Banco de Questoes)."
+
+  - pergunta: "O que significa cada status?"
+    resposta: "Rascunho: em preparacao, invisivel para alunos. Publicado: ativo e disponivel. Arquivado: desativado, dados preservados."
+
+  - pergunta: "Como matriculo alunos em uma Turma?"
+    resposta: "Va ate a pagina da Turma, acesse a secao Matriculas e clique em Nova Matricula. Busque o aluno pelo nome ou email e confirme."
+
+  - pergunta: "Posso gerar questoes com IA?"
+    resposta: "Sim! Na criacao de questoes, use o botao 'Gerar com IA'. O sistema analisa o conteudo (transcricao de video ou texto) e sugere questoes automaticamente."
+
+  - pergunta: "Como emito um certificado?"
+    resposta: "Primeiro crie um Template em Certificados > Templates. Vincule ao Curso/Disciplina. Quando o aluno completar os requisitos, o certificado pode ser emitido em Certificados > Emitidos."

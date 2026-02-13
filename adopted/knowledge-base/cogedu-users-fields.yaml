@@ -1,0 +1,1304 @@
+# ============================================================================
+# GUIA COMPLETO: USUARIOS E EMPRESAS DO COGEDU
+# Versao: 1.0
+# Ultima atualizacao: 2026-02-12
+# ============================================================================
+
+glossario:
+  Usuario: "Qualquer pessoa cadastrada no sistema Cogedu. Pode ser um Aluno ou um Funcionario da instituicao."
+
+  Aluno: "Usuario com perfil de estudante matriculado em cursos da instituicao. Tem acesso ao AVA (Ambiente Virtual de Aprendizagem) para consumir conteudo, fazer avaliacoes e acompanhar seu progresso academico."
+
+  Funcionario: "Colaborador da instituicao de ensino. Pode ter diferentes funcoes como Professor, Coordenador, Secretario, etc. Geralmente possui permissoes administrativas no sistema."
+
+  Instituicao: "A organizacao de ensino que contrata o Cogedu (universidade, faculdade, escola, curso livre). Uma instituicao pode ter varios cursos e unidades."
+
+  Status_do_Aluno:
+    ingresso: "Aluno NOVO que acabou de se matricular e iniciou os estudos. Status inicial de todo aluno que entra na instituicao."
+    egresso: "Aluno que CONCLUIU o curso com sucesso e se formou. Ja possui diploma ou certificado."
+    evadido: "Aluno que DESISTIU ou ABANDONOU o curso antes de concluir. Nao pretende retornar."
+    trancado: "Aluno com matricula SUSPENSA TEMPORARIAMENTE. Pode retornar aos estudos posteriormente sem precisar fazer nova matricula."
+
+  Status_do_Funcionario:
+    atual: "Funcionario ATIVO que trabalha atualmente na instituicao."
+    ex-colaborador: "Funcionario DESLIGADO que nao trabalha mais na instituicao."
+
+  CPF: "Cadastro de Pessoa Fisica. Documento de identificacao obrigatorio para brasileiros. Formato: 000.000.000-00 (11 digitos numericos)."
+
+  CEP: "Codigo de Enderecamento Postal. Identifica logradouros no Brasil. Formato: 00000-000 (8 digitos numericos). O sistema preenche automaticamente o endereco ao digitar o CEP."
+
+  ViaCEP: "Servico automatico que busca dados de endereco (rua, bairro, cidade, estado) a partir do CEP digitado."
+
+  Responsavel: "Adulto legalmente responsavel por aluno MENOR DE IDADE (menos de 18 anos). Geralmente pai, mae ou tutor legal. Deve ser cadastrado para contatos importantes."
+
+  Campos_Personalizados: "Informacoes extras que cada instituicao pode criar conforme suas necessidades especificas (ex: numero de matricula interna, grupo sanguineo, necessidades especiais, etc)."
+
+# ============================================================================
+# MODULO: LISTAGEM DE USUARIOS
+# ============================================================================
+
+listagem_de_usuarios:
+  o_que_e: >
+    Tela que mostra todos os usuarios cadastrados no sistema (alunos e funcionarios).
+    Permite buscar, filtrar e gerenciar usuarios de forma organizada.
+
+  onde_fica_no_sistema:
+    menu: "Menu lateral > Usuarios"
+    url: "/users"
+
+  como_usar:
+    - "1. Acesse o menu lateral e clique em 'Usuarios'"
+    - "2. Escolha o tipo de usuario que deseja ver (Funcionarios ou Alunos)"
+    - "3. Use a caixa de busca para encontrar usuarios especificos"
+    - "4. Role a pagina para carregar mais usuarios (carregamento infinito)"
+    - "5. Clique em um usuario para ver seus detalhes completos"
+
+  filtros_disponiveis:
+    tipo_de_usuario:
+      o_que_e: "Botoes no topo da tela para alternar entre Funcionarios e Alunos"
+      opcoes:
+        - "Funcionarios (employee) - mostra apenas colaboradores"
+        - "Alunos (student) - mostra apenas estudantes"
+      padrao: "Funcionarios"
+
+    busca_por_texto:
+      o_que_e: "Campo de busca que filtra usuarios por nome completo ou email"
+      como_funciona: "Digite qualquer parte do nome ou email e a lista sera filtrada automaticamente"
+      exemplo: "Digite 'maria' para encontrar Maria Silva, Maria Santos, etc."
+      dica: "A busca nao diferencia maiusculas de minusculas"
+
+  acoes_disponiveis:
+    criar_novo_funcionario:
+      quando_aparece: "Quando o filtro 'Funcionarios' esta ativado"
+      botao: "Novo Funcionario"
+      o_que_faz: "Abre o formulario para cadastrar um novo colaborador"
+
+    criar_novo_aluno:
+      quando_aparece: "Quando o filtro 'Alunos' esta ativado"
+      botao: "Novo Aluno"
+      o_que_faz: "Abre o formulario para cadastrar um novo estudante"
+
+    importacao_em_lote:
+      quando_aparece: "Quando o filtro 'Alunos' esta ativado"
+      botao: "Importacao em Lote"
+      icone: "Icone de arquivo com seta para cima"
+      o_que_faz: "Permite importar varios alunos de uma vez usando planilha CSV ou Excel"
+      quando_usar: "Ideal para inicio de semestre quando precisa cadastrar uma turma inteira"
+
+    ver_detalhes:
+      como: "Clique no card do usuario"
+      o_que_faz: "Abre a pagina com todos os detalhes e informacoes completas do usuario"
+
+    excluir_usuario:
+      icone: "Icone de lixeira no card do usuario"
+      confirmacao: "SIM - o sistema pede confirmacao antes de excluir"
+      cuidado: "Esta acao NAO pode ser desfeita. Use com cuidado."
+      dica: "Prefira mudar o status para 'evadido' (alunos) ou 'ex-colaborador' (funcionarios) em vez de excluir"
+
+  erros_comuns:
+    - erro: "Lista vazia ou nao carrega usuarios"
+      solucao: "Verifique sua conexao com internet e recarregue a pagina"
+
+    - erro: "Nao encontro um usuario especifico"
+      solucao: "Confirme se esta no filtro correto (Aluno ou Funcionario) e tente buscar por email em vez de nome"
+
+    - erro: "Botao 'Carregar mais' nao aparece"
+      solucao: "Isso e normal - significa que todos os usuarios ja foram carregados"
+
+# ============================================================================
+# MODULO: CADASTRO DE ALUNO
+# ============================================================================
+
+cadastro_de_aluno:
+  o_que_e: >
+    Formulario completo para cadastrar um novo estudante no sistema.
+    Dividido em 3 abas para organizar as informacoes: Identidade, Enderecos e +Informacoes.
+
+  onde_fica_no_sistema:
+    menu: "Menu Usuarios > Botao 'Novo Aluno' (quando filtro Alunos esta ativado)"
+    url: "/users/newStudent"
+
+  como_criar_passo_a_passo:
+    - "1. Na listagem de usuarios, clique no filtro 'Alunos'"
+    - "2. Clique no botao 'Novo Aluno'"
+    - "3. Preencha a ABA 1 (Identidade) com dados pessoais obrigatorios"
+    - "4. Clique em 'Continuar' para ir para ABA 2 (Enderecos)"
+    - "5. Adicione pelo menos um endereco do aluno"
+    - "6. Clique em 'Continuar' para ir para ABA 3 (+Informacoes)"
+    - "7. Preencha campos personalizados se necessario"
+    - "8. Clique em 'Finalizar' para criar o aluno"
+
+  abas_do_formulario:
+    aba_1_identidade:
+      titulo: "Identidade"
+      o_que_contem: "Dados pessoais, documentos, foto, redes sociais, vinculo academico e responsavel (se menor de idade)"
+
+    aba_2_enderecos:
+      titulo: "Enderecos"
+      o_que_contem: "Enderecos residencial, comercial ou outros do aluno"
+
+    aba_3_mais_informacoes:
+      titulo: "+Informacoes"
+      o_que_contem: "Campos personalizados criados pela instituicao (variam conforme configuracao)"
+
+  campos_da_aba_identidade:
+    foto_do_aluno:
+      o_que_e: "Foto de perfil do aluno que aparecera no sistema"
+      obrigatorio: "NAO"
+      formatos_aceitos: "PNG, JPG, WebP"
+      tamanho_maximo: "5 MB (megabytes)"
+      como_adicionar:
+        - "Clique na area da foto (icone de camera)"
+        - "Selecione a imagem do computador"
+        - "A foto sera enviada automaticamente"
+      como_remover: "Clique no 'X' na foto para remove-la"
+      dica: "Fotos claras e com fundo neutro funcionam melhor"
+
+    nome_completo:
+      o_que_e: "Nome civil completo do aluno conforme documento de identidade"
+      obrigatorio: "SIM"
+      exemplo: "Maria da Silva Santos"
+      validacao: "Nao pode ficar em branco"
+      dica: "Digite exatamente como esta no documento oficial (RG ou CPF)"
+
+    nome_social:
+      o_que_e: "Nome pelo qual o aluno prefere ser chamado (diferente do nome civil)"
+      obrigatorio: "NAO"
+      exemplo: "Joao Silva (quando o nome civil e Joana Silva)"
+      quando_usar: "Para pessoas trans, travestis ou quem usa nome diferente do registro civil"
+      dica: "Este nome aparecera em certificados e comunicacoes quando preenchido"
+
+    email:
+      o_que_e: "Email principal do aluno para login e comunicacao"
+      obrigatorio: "SIM"
+      formato: "usuario@dominio.com"
+      exemplo: "maria.santos@gmail.com"
+      validacao: "Deve ter formato valido de email (com @ e dominio)"
+      cuidado: "Cada email so pode ser usado por UM usuario no sistema"
+      dica: "Confirme que o email esta correto - e por ele que o aluno recebera acesso ao AVA"
+
+    telefone:
+      o_que_e: "Numero de telefone ou celular do aluno para contato"
+      obrigatorio: "SIM"
+      formato_brasil: "(00) 00000-0000 ou (00) 0000-0000"
+      exemplo: "(11) 98765-4321"
+      formatacao_automatica: "SIM - quando pais e Brasil (BR), o sistema formata automaticamente"
+      dica: "Prefira cadastrar um celular com WhatsApp para contato rapido"
+
+    codigo_do_pais:
+      o_que_e: "Sigla de 2 letras do pais do aluno"
+      obrigatorio: "NAO"
+      padrao: "BR (Brasil)"
+      exemplo: "PT (Portugal), US (Estados Unidos), AR (Argentina)"
+      quando_mudar: "Apenas se o aluno for estrangeiro ou morar fora do Brasil"
+
+    data_de_nascimento:
+      o_que_e: "Data em que o aluno nasceu"
+      obrigatorio: "NAO (mas recomendado)"
+      formato: "DD/MM/AAAA"
+      exemplo: "15/08/2000"
+      para_que_serve: "Calcular idade, identificar menores de idade e gerar relatorios"
+      dica: "Obrigatorio se aluno for menor de 18 anos (precisa de responsavel)"
+
+    genero:
+      o_que_e: "Identidade de genero do aluno"
+      obrigatorio: "NAO"
+      opcoes:
+        - "Masculino"
+        - "Feminino"
+        - "Nao Binario"
+        - "Prefere nao informar"
+        - "Outro"
+      padrao: "Outro"
+      dica: "Respeite a auto-identificacao do aluno"
+
+    status:
+      o_que_e: "Situacao atual do aluno em relacao ao curso"
+      obrigatorio: "NAO"
+      opcoes:
+        - "Ingresso - Aluno novo que acabou de se matricular"
+        - "Egresso - Aluno que concluiu o curso e se formou"
+        - "Evadido - Aluno que desistiu ou abandonou o curso"
+      padrao: "Ingresso"
+      quando_mudar:
+        - "Para 'egresso': quando aluno completar todas as disciplinas e se formar"
+        - "Para 'evadido': quando aluno desistir e nao pretender voltar"
+      dica: "Novo aluno sempre comeca como 'Ingresso'"
+
+    tipo_de_documento_principal:
+      o_que_e: "Tipo do documento de identificacao principal do aluno"
+      obrigatorio: "SIM"
+      opcoes:
+        - "CPF - Cadastro de Pessoa Fisica (padrao Brasil)"
+        - "CNPJ - Cadastro Nacional de Pessoa Juridica"
+        - "RG - Registro Geral"
+        - "PASSAPORTE - Para estrangeiros"
+      padrao: "CPF (para brasileiros)"
+      quando_aparece: "Apenas se pais for diferente de Brasil"
+      dica: "Para brasileiros, sempre use CPF"
+
+    numero_do_documento:
+      o_que_e: "Numero do documento de identificacao do aluno"
+      obrigatorio: "SIM"
+      formato_cpf: "000.000.000-00 (11 digitos numericos)"
+      formato_cnpj: "00.000.000/0000-00 (14 digitos numericos)"
+      exemplo_cpf: "123.456.789-00"
+      formatacao_automatica: "SIM - o sistema adiciona pontos e tracos automaticamente"
+      validacao_cpf: "Deve ter exatamente 11 digitos numericos"
+      validacao_cnpj: "Deve ter exatamente 14 digitos numericos"
+      cuidado: "CPF/CNPJ deve ser valido - o sistema nao aceita documentos invalidos"
+      dica: "Digite apenas os numeros - o sistema formata automaticamente"
+
+    secao_redes_sociais:
+      o_que_e: "Links para perfis do aluno em redes sociais"
+      obrigatorio: "NAO"
+
+      linkedin:
+        o_que_e: "Link do perfil profissional no LinkedIn"
+        exemplo: "https://linkedin.com/in/maria-santos"
+        para_que_serve: "Networking profissional e curriculo"
+
+      instagram:
+        o_que_e: "Link do perfil no Instagram"
+        exemplo: "https://instagram.com/maria.santos"
+        para_que_serve: "Contato informal e divulgacao"
+
+      facebook:
+        o_que_e: "Link do perfil no Facebook"
+        exemplo: "https://facebook.com/maria.santos"
+        para_que_serve: "Comunicacao e networking"
+
+      dica: "Cole a URL completa do perfil (comecando com https://)"
+
+    secao_vinculo_academico:
+      o_que_e: "Informacoes sobre a matricula do aluno na instituicao"
+
+      instituicao:
+        o_que_e: "A instituicao de ensino onde o aluno esta matriculado"
+        obrigatorio: "SIM"
+        tipo: "Selecao de lista"
+        como_funciona: "Selecione da lista de instituicoes cadastradas no sistema"
+        se_nao_aparecer: "A instituicao precisa ser cadastrada primeiro em 'Empresas'"
+        dica: "Se houver varias unidades, escolha a unidade especifica do aluno"
+
+      nome_do_curso:
+        o_que_e: "Nome do curso em que o aluno esta matriculado"
+        obrigatorio: "SIM"
+        exemplo: "Administracao de Empresas, Engenharia Civil, Tecnico em Enfermagem"
+        tipo: "Texto livre"
+        dica: "Digite o nome completo e oficial do curso"
+
+    secao_responsavel:
+      o_que_e: "Dados do adulto responsavel legal pelo aluno (obrigatorio para menores de 18 anos)"
+      quando_preencher: "Sempre que o aluno for menor de idade"
+
+      nome_completo_responsavel:
+        o_que_e: "Nome completo do pai, mae ou tutor legal"
+        obrigatorio: "NAO (mas obrigatorio se aluno for menor)"
+        exemplo: "Ana Paula Santos"
+
+      parentesco:
+        o_que_e: "Relacao do responsavel com o aluno"
+        obrigatorio: "NAO"
+        exemplo: "Mae, Pai, Avo, Tio, Tutor Legal"
+        dica: "Especifique claramente o grau de parentesco"
+
+      telefone_responsavel:
+        o_que_e: "Telefone de contato do responsavel"
+        obrigatorio: "NAO (mas recomendado para menores)"
+        formato: "(00) 00000-0000"
+        exemplo: "(11) 98765-4321"
+        para_que_serve: "Contato em casos de emergencia ou comunicados importantes"
+
+      email_responsavel:
+        o_que_e: "Email do responsavel para comunicacao oficial"
+        obrigatorio: "NAO (mas recomendado para menores)"
+        exemplo: "ana.santos@gmail.com"
+        para_que_serve: "Envio de boletins, avisos e autorizacoes"
+
+      dica: "Para alunos menores, sempre preencha pelo menos nome e telefone do responsavel"
+
+  campos_da_aba_enderecos:
+    o_que_e: "Lista de enderecos do aluno (residencial, comercial, etc)"
+    pode_ter_multiplos: "SIM - pode cadastrar varios enderecos"
+
+    como_adicionar_endereco:
+      - "1. Clique no botao '+ Adicionar Endereco'"
+      - "2. Digite o CEP (8 digitos sem traco)"
+      - "3. Aguarde o sistema preencher automaticamente rua, bairro, cidade e estado"
+      - "4. Preencha o numero e complemento"
+      - "5. Clique em 'Salvar' ou 'Continuar'"
+
+    como_remover_endereco:
+      - "Clique no icone de lixeira ao lado do endereco que deseja remover"
+
+    cep:
+      o_que_e: "Codigo de Enderecamento Postal do Brasil"
+      obrigatorio: "NAO (mas necessario para auto-preencher endereco)"
+      formato: "00000-000 (8 digitos numericos)"
+      exemplo: "01310-100"
+      formatacao_automatica: "SIM - adiciona o traco automaticamente"
+      funcao_especial: "Ao digitar 8 digitos, o sistema busca o endereco automaticamente no ViaCEP"
+      o_que_preenche_sozinho: "Rua, Bairro, Cidade, Estado e as vezes Complemento"
+      dica: "Digite primeiro o CEP e economize tempo - o resto preenche sozinho!"
+
+    rua:
+      o_que_e: "Nome da rua, avenida, travessa, etc"
+      obrigatorio: "NAO"
+      exemplo: "Avenida Paulista, Rua das Flores, Travessa do Comercio"
+      preenchimento_automatico: "SIM - se digitar o CEP"
+      pode_editar: "SIM - mesmo apos preenchimento automatico"
+
+    numero:
+      o_que_e: "Numero do imovel na rua"
+      obrigatorio: "NAO"
+      exemplo: "123, 45-A, S/N"
+      dica: "Se nao houver numero, digite 'S/N' (sem numero)"
+
+    bairro:
+      o_que_e: "Bairro ou distrito do endereco"
+      obrigatorio: "NAO"
+      exemplo: "Centro, Jardim Paulista, Vila Mariana"
+      preenchimento_automatico: "SIM - se digitar o CEP"
+
+    estado:
+      o_que_e: "Sigla do estado (UF)"
+      obrigatorio: "NAO"
+      formato: "2 letras maiusculas"
+      exemplo: "SP, RJ, MG, RS, BA"
+      preenchimento_automatico: "SIM - se digitar o CEP"
+      validacao: "Apenas 2 caracteres"
+
+    cidade:
+      o_que_e: "Nome da cidade ou municipio"
+      obrigatorio: "NAO"
+      exemplo: "Sao Paulo, Rio de Janeiro, Belo Horizonte"
+      preenchimento_automatico: "SIM - se digitar o CEP"
+
+    complemento:
+      o_que_e: "Informacoes adicionais do endereco"
+      obrigatorio: "NAO"
+      exemplo: "Apto 101, Bloco B, Casa 3, Fundos, Ao lado da padaria"
+      dica: "Use para facilitar localizacao (numero do apartamento, ponto de referencia, etc)"
+
+    erros_comuns:
+      - erro: "CEP nao encontra o endereco"
+        solucao: "Verifique se digitou os 8 digitos corretamente. Se CEP estiver certo mas nao funcionar, preencha manualmente."
+
+      - erro: "Endereco preenchido automaticamente esta errado"
+        solucao: "Voce pode editar qualquer campo apos o preenchimento automatico. Corrija os dados manualmente."
+
+      - erro: "Nao consigo adicionar mais de um endereco"
+        solucao: "Clique em '+ Adicionar Endereco' novamente. Nao ha limite de enderecos."
+
+  campos_da_aba_mais_informacoes:
+    o_que_e: "Secao de campos personalizados que variam conforme configuracao da instituicao"
+    obrigatorio: "NAO (depende da configuracao da instituicao)"
+
+    como_funciona:
+      - "Cada instituicao pode criar seus proprios campos extras"
+      - "Exemplos: numero de matricula, grupo sanguineo, necessidades especiais, etc"
+      - "Voce pode aplicar 'Conjuntos de Campos' pre-configurados ou criar campos individuais"
+
+    como_adicionar_campos:
+      - "1. Clique em um dos botoes de 'Conjunto de Campos' se disponiveis"
+      - "2. OU clique em '+ Nova Secao' para criar campos do zero"
+      - "3. Preencha os valores conforme solicitado"
+
+    como_usar_gerenciador_de_campos:
+      - "1. Clique no botao '+ Nova Secao'"
+      - "2. Abre uma janela (modal) para criar e gerenciar campos personalizados"
+      - "3. Voce pode criar campos de varios tipos: texto, numero, data, lista de opcoes, sim/nao"
+      - "4. Apos criar, os campos aparecem no formulario"
+
+    dica: "Campos personalizados sao opcionais mas podem ser muito uteis para necessidades especificas da instituicao"
+
+  funcoes_especiais:
+    salvar_rascunho_automatico:
+      o_que_e: "O sistema salva automaticamente o que voce esta digitando"
+      como_funciona: "As informacoes ficam salvas no navegador mesmo se fechar a aba"
+      quando_e_apagado: "Ao clicar em 'Finalizar' (criando o aluno) ou ao clicar em 'Voltar'"
+      dica: "Pode fechar e voltar depois que os dados estarao la"
+
+    validacao_de_abas:
+      o_que_e: "O sistema valida os campos obrigatorios antes de avancar para proxima aba"
+      como_funciona: "Se faltar preencher algo obrigatorio, o botao 'Continuar' nao funcionara"
+      dica: "Campos obrigatorios aparecem com asterisco (*) vermelho"
+
+    navegacao_entre_abas:
+      como_avancar: "Clique no botao 'Continuar' no final da aba"
+      como_voltar: "Clique no botao 'Voltar' ou clique diretamente no titulo da aba anterior"
+      pode_pular: "NAO - precisa passar pelas abas em ordem na primeira vez"
+
+  erros_comuns:
+    - erro: "Botao 'Continuar' nao funciona"
+      solucao: "Verifique se todos os campos obrigatorios (marcados com *) foram preenchidos corretamente"
+
+    - erro: "Email ja cadastrado"
+      solucao: "Este email ja esta sendo usado por outro usuario. Use um email diferente ou verifique se o usuario ja existe no sistema"
+
+    - erro: "CPF invalido"
+      solucao: "Verifique se digitou todos os 11 digitos corretamente. O sistema valida se o CPF e matematicamente valido"
+
+    - erro: "Foto nao sobe"
+      solucao: "Verifique se a foto tem menos de 5MB e esta em formato PNG, JPG ou WebP. Reduza o tamanho se necessario"
+
+    - erro: "CEP nao preenche endereco automaticamente"
+      solucao: "Aguarde alguns segundos apos digitar. Se nao funcionar, preencha manualmente os campos de endereco"
+
+    - erro: "Perdi tudo que digitei"
+      solucao: "Improvavel - o sistema salva rascunho automaticamente. Verifique se nao mudou de navegador ou limpou cache"
+
+  dicas_importantes:
+    - "Tenha em maos os documentos do aluno antes de comecar (CPF, RG, comprovante de endereco)"
+    - "Para alunos menores de 18 anos, tenha tambem os dados do responsavel"
+    - "Confira o email duas vezes - e por ele que o aluno recebera acesso"
+    - "Use a busca de CEP para economizar tempo no cadastro"
+    - "A foto e opcional mas ajuda na identificacao visual do aluno"
+    - "Campos personalizados variam por instituicao - nao se preocupe se nao aparecerem"
+
+# ============================================================================
+# MODULO: CADASTRO DE FUNCIONARIO
+# ============================================================================
+
+cadastro_de_funcionario:
+  o_que_e: >
+    Formulario completo para cadastrar um novo colaborador da instituicao.
+    Dividido em 4 abas: Identidade, Enderecos, +Informacoes e Permissoes.
+
+  onde_fica_no_sistema:
+    menu: "Menu Usuarios > Botao 'Novo Funcionario' (quando filtro Funcionarios esta ativado)"
+    url: "/users/newEmployee"
+
+  como_criar_passo_a_passo:
+    - "1. Na listagem de usuarios, clique no filtro 'Funcionarios'"
+    - "2. Clique no botao 'Novo Funcionario'"
+    - "3. Preencha a ABA 1 (Identidade) com dados pessoais e vinculo profissional"
+    - "4. Clique em 'Continuar' para ABA 2 (Enderecos)"
+    - "5. Adicione pelo menos um endereco"
+    - "6. Clique em 'Continuar' para ABA 3 (+Informacoes)"
+    - "7. Preencha campos personalizados se necessario"
+    - "8. Clique em 'Continuar' para ABA 4 (Permissoes)"
+    - "9. Configure as permissoes de acesso do funcionario no sistema"
+    - "10. Clique em 'Finalizar' para criar o funcionario"
+
+  abas_do_formulario:
+    aba_1_identidade:
+      titulo: "Identidade"
+      o_que_contem: "Dados pessoais, documentos, foto, redes sociais e vinculo profissional (empresa, cargo)"
+
+    aba_2_enderecos:
+      titulo: "Enderecos"
+      o_que_contem: "Enderecos residencial, comercial ou outros do funcionario"
+
+    aba_3_mais_informacoes:
+      titulo: "+Informacoes"
+      o_que_contem: "Campos personalizados criados pela instituicao"
+
+    aba_4_permissoes:
+      titulo: "Permissoes"
+      o_que_contem: "Configuracao de niveis de acesso e permissoes do funcionario no sistema"
+
+  campos_da_aba_identidade:
+    foto_do_funcionario:
+      o_que_e: "Foto de perfil do funcionario"
+      obrigatorio: "NAO"
+      formatos_aceitos: "PNG, JPG, WebP"
+      tamanho_maximo: "5 MB"
+      dica: "Foto profissional ajuda na identificacao em reunioes e comunicados"
+
+    nome_completo:
+      o_que_e: "Nome civil completo do funcionario"
+      obrigatorio: "SIM"
+      exemplo: "Carlos Eduardo Oliveira"
+      dica: "Nome conforme documento oficial"
+
+    nome_social:
+      o_que_e: "Nome social de preferencia (se diferente do nome civil)"
+      obrigatorio: "NAO"
+      quando_usar: "Para pessoas trans ou quem usa nome diferente do registro"
+
+    email:
+      o_que_e: "Email corporativo ou pessoal para login e comunicacao"
+      obrigatorio: "SIM"
+      formato: "usuario@dominio.com"
+      exemplo: "carlos.oliveira@instituicao.edu.br"
+      cuidado: "Email deve ser unico no sistema"
+      dica: "Prefira email corporativo para funcionarios"
+
+    telefone:
+      o_que_e: "Telefone de contato do funcionario"
+      obrigatorio: "SIM"
+      formato: "(00) 00000-0000"
+      exemplo: "(11) 97777-8888"
+      dica: "Celular facilita contato rapido"
+
+    codigo_do_pais:
+      o_que_e: "Codigo do pais (2 letras)"
+      obrigatorio: "NAO"
+      padrao: "BR (Brasil)"
+
+    data_de_nascimento:
+      o_que_e: "Data de nascimento do funcionario"
+      obrigatorio: "NAO (mas recomendado)"
+      formato: "DD/MM/AAAA"
+      exemplo: "22/03/1985"
+
+    genero:
+      o_que_e: "Identidade de genero"
+      obrigatorio: "NAO"
+      opcoes:
+        - "Feminino"
+        - "Masculino"
+        - "Nao Binario"
+        - "Prefere nao informar"
+        - "Outro"
+      padrao: "Prefere nao informar"
+
+    status:
+      o_que_e: "Situacao profissional atual do funcionario"
+      obrigatorio: "NAO"
+      opcoes:
+        - "Atual - Funcionario ativo que trabalha atualmente"
+        - "Ex-colaborador - Funcionario desligado"
+      padrao: "Atual"
+      quando_mudar: "Mude para 'Ex-colaborador' quando pessoa for desligada da instituicao"
+      dica: "Novo funcionario sempre comeca como 'Atual'"
+
+    tipo_de_documento_principal:
+      o_que_e: "Tipo do documento principal"
+      obrigatorio: "SIM"
+      opcoes:
+        - "CPF"
+        - "CNPJ"
+        - "RG"
+        - "PASSAPORTE"
+      padrao: "CPF (para brasileiros)"
+
+    numero_do_documento:
+      o_que_e: "Numero do CPF, CNPJ ou outro documento"
+      obrigatorio: "SIM"
+      formato_cpf: "000.000.000-00"
+      exemplo: "123.456.789-00"
+      formatacao_automatica: "SIM"
+
+    secao_redes_sociais:
+      linkedin:
+        o_que_e: "Perfil profissional no LinkedIn"
+        obrigatorio: "NAO"
+        exemplo: "https://linkedin.com/in/carlos-oliveira"
+
+      instagram:
+        o_que_e: "Perfil no Instagram"
+        obrigatorio: "NAO"
+        exemplo: "https://instagram.com/carlos.prof"
+
+      facebook:
+        o_que_e: "Perfil no Facebook"
+        obrigatorio: "NAO"
+        exemplo: "https://facebook.com/carlos.oliveira"
+
+    secao_vinculo_profissional:
+      o_que_e: "Dados da contratacao e cargo do funcionario"
+
+      empresa:
+        o_que_e: "A instituicao onde o funcionario trabalha"
+        obrigatorio: "SIM"
+        tipo: "Selecao de lista"
+        como_funciona: "Selecione da lista de empresas cadastradas"
+        se_nao_aparecer: "A empresa precisa ser cadastrada primeiro no modulo 'Empresas'"
+        dica: "Se a instituicao tem varias unidades, escolha a unidade especifica"
+
+      cargo:
+        o_que_e: "Cargo ou funcao do funcionario"
+        obrigatorio: "SIM"
+        exemplo: "Professor, Coordenador Pedagogico, Secretario Academico, Diretor"
+        dica: "Use o titulo oficial do cargo na instituicao"
+
+      descricao_do_cargo:
+        o_que_e: "Descricao detalhada das responsabilidades do cargo"
+        obrigatorio: "NAO"
+        exemplo: "Responsavel por ministrar aulas de Matematica para turmas do ensino medio"
+        dica: "Opcional mas ajuda a entender as atribuicoes"
+
+  campos_da_aba_enderecos:
+    o_que_e: "Mesma estrutura da aba de enderecos de Alunos"
+    campos: "CEP, Rua, Numero, Bairro, Estado, Cidade, Complemento"
+    funcao_viacep: "SIM - auto-preenchimento ao digitar CEP"
+    pode_ter_multiplos: "SIM"
+    dica: "Veja secao 'campos_da_aba_enderecos' em Cadastro de Aluno para detalhes"
+
+  campos_da_aba_mais_informacoes:
+    o_que_e: "Campos personalizados conforme configuracao da instituicao"
+    exemplos_possiveis:
+      - "Numero de registro profissional (CREA, CRM, OAB, etc)"
+      - "Data de admissao"
+      - "Departamento"
+      - "Matricula interna"
+    dica: "Veja secao 'campos_da_aba_mais_informacoes' em Cadastro de Aluno para detalhes de como funciona"
+
+  campos_da_aba_permissoes:
+    o_que_e: "Interface para definir o que o funcionario pode ou nao fazer no sistema"
+
+    como_funciona:
+      - "O sistema mostra uma arvore de permissoes organizadas por modulos"
+      - "Voce pode dar permissoes globais (para toda instituicao) ou por unidade"
+      - "Permissoes controlam se o funcionario pode ver, criar, editar ou excluir informacoes"
+
+    tipos_de_permissao:
+      visualizar: "Pode VER informacoes (leitura)"
+      criar: "Pode CADASTRAR novas informacoes"
+      editar: "Pode MODIFICAR informacoes existentes"
+      excluir: "Pode DELETAR informacoes"
+
+    niveis_de_permissao:
+      global: "Permissao vale para TODAS as unidades da instituicao"
+      por_unidade: "Permissao vale apenas para unidades especificas"
+
+    exemplos_praticos:
+      professor:
+        - "Visualizar: turmas, alunos, materiais didaticos"
+        - "Criar: aulas, atividades, avaliacoes"
+        - "Editar: notas, presencas"
+        - "Excluir: (geralmente nao tem)"
+
+      secretario:
+        - "Visualizar: alunos, cursos, turmas"
+        - "Criar: matriculas, usuarios"
+        - "Editar: dados cadastrais"
+        - "Excluir: (limitado)"
+
+      coordenador:
+        - "Visualizar: tudo da area pedagogica"
+        - "Criar: turmas, disciplinas"
+        - "Editar: grade curricular, horarios"
+        - "Excluir: (com restricoes)"
+
+      diretor:
+        - "Visualizar: tudo"
+        - "Criar: tudo"
+        - "Editar: tudo"
+        - "Excluir: tudo (com confirmacao)"
+
+    dica: "Siga o principio do 'minimo privilegio' - de apenas as permissoes necessarias para o funcionario fazer seu trabalho"
+    cuidado: "Permissoes de edicao e exclusao devem ser dadas com criterio"
+
+  funcoes_especiais:
+    salvar_rascunho_automatico: "SIM - funciona igual ao cadastro de aluno"
+    validacao_de_abas: "SIM - campos obrigatorios sao verificados antes de avancar"
+    navegacao_entre_abas: "Pode avancar/voltar entre abas"
+
+  erros_comuns:
+    - erro: "Nao consigo finalizar sem configurar permissoes"
+      solucao: "Permissoes sao obrigatorias para funcionarios. Configure pelo menos permissoes basicas de visualizacao"
+
+    - erro: "Empresa nao aparece na lista"
+      solucao: "A empresa precisa ser cadastrada primeiro. Va em menu 'Empresas' e cadastre a instituicao"
+
+    - erro: "Email corporativo ja existe"
+      solucao: "Verifique se o funcionario ja foi cadastrado. Se for recadastro, procure o usuario existente e edite"
+
+  dicas_importantes:
+    - "Funcionarios sempre precisam de permissoes configuradas na Aba 4"
+    - "Email corporativo e preferivel a email pessoal"
+    - "Configure permissoes conservadoras no inicio - pode ampliar depois"
+    - "Cargo e descricao do cargo ajudam outros usuarios a saber quem contatar"
+    - "Sempre revise as permissoes antes de finalizar"
+
+# ============================================================================
+# MODULO: DETALHES DO USUARIO
+# ============================================================================
+
+detalhes_do_usuario:
+  o_que_e: >
+    Pagina completa com todas as informacoes de um usuario (aluno ou funcionario).
+    Permite visualizar e editar informacoes organizadas por blocos.
+
+  onde_fica_no_sistema:
+    menu: "Clique em um usuario na listagem de usuarios"
+    url: "/users/{id}"
+
+  como_usar:
+    - "1. Na listagem de usuarios, clique no card do usuario desejado"
+    - "2. Navegue pelas abas para ver diferentes tipos de informacao"
+    - "3. Clique no icone de lapis em um bloco para editar"
+    - "4. Faca as alteracoes necessarias"
+    - "5. Clique em 'Salvar' (icone de disquete) para confirmar OU 'X' para cancelar"
+
+  abas_disponiveis:
+    aba_identidade:
+      titulo: "Identidade"
+      o_que_mostra: "Dados pessoais, foto, documentos, redes sociais, responsavel (alunos)"
+
+    aba_enderecos:
+      titulo: "Enderecos"
+      o_que_mostra: "Lista de todos os enderecos cadastrados"
+
+    aba_vinculo:
+      titulo: "Vinculo"
+      o_que_mostra_aluno: "Instituicao e curso do aluno"
+      o_que_mostra_funcionario: "Empresa, cargo e descricao do cargo"
+
+    aba_mais_informacoes:
+      titulo: "+Informacoes"
+      o_que_mostra: "Campos personalizados"
+
+    aba_permissoes:
+      titulo: "Permissoes"
+      o_que_mostra: "Configuracao de permissoes (apenas funcionarios)"
+      quando_aparece: "Apenas para usuarios do tipo Funcionario"
+
+  como_funciona_edicao:
+    modo_visualizacao:
+      o_que_e: "Estado inicial - todas informacoes sao mostradas mas nao podem ser editadas"
+      como_identificar: "Campos aparecem em texto simples, icone de lapis visivel"
+
+    modo_edicao:
+      o_que_e: "Estado apos clicar no icone de lapis - campos ficam editaveis"
+      como_identificar: "Campos viram caixas de texto, botoes Salvar e Cancelar aparecem"
+      como_entrar: "Clique no icone de lapis (Editar) no bloco desejado"
+      como_sair: "Clique em 'Salvar' para confirmar OU 'X' para descartar mudancas"
+
+    edicao_por_blocos:
+      o_que_e: "Voce edita um bloco de informacoes por vez, nao a pagina inteira"
+      exemplos_de_blocos:
+        - "Bloco de Identidade (nome, email, telefone, etc)"
+        - "Bloco de Documentos (CPF, RG, etc)"
+        - "Bloco de Enderecos (cada endereco e um bloco)"
+        - "Bloco de Redes Sociais"
+        - "Bloco de Responsavel (alunos)"
+        - "Bloco de Vinculo Academico/Profissional"
+      vantagem: "Pode editar uma secao sem afetar as outras"
+
+  acoes_disponiveis:
+    voltar:
+      icone: "Seta para esquerda no topo"
+      o_que_faz: "Volta para a listagem de usuarios"
+      atalho: "Botao 'Voltar' no navegador tambem funciona"
+
+    editar_bloco:
+      icone: "Lapis"
+      o_que_faz: "Ativa modo de edicao para aquele bloco especifico"
+      onde_aparece: "No canto superior direito de cada bloco editavel"
+
+    salvar_bloco:
+      icone: "Disquete"
+      o_que_faz: "Salva as alteracoes feitas no bloco"
+      quando_aparece: "Apenas em modo de edicao"
+      cuidado: "Apenas as mudancas do bloco atual sao salvas"
+
+    cancelar_edicao:
+      icone: "X"
+      o_que_faz: "Descarta mudancas e volta ao modo visualizacao"
+      quando_aparece: "Apenas em modo de edicao"
+      resultado: "Dados voltam ao estado anterior"
+
+    trocar_foto:
+      onde: "Clique na foto do usuario"
+      o_que_faz: "Permite fazer upload de nova foto"
+      formatos: "PNG, JPG, WebP"
+      tamanho_maximo: "5 MB"
+      efeito: "Foto e atualizada imediatamente apos upload"
+
+    adicionar_endereco:
+      botao: "+ Adicionar Endereco"
+      onde: "Na aba Enderecos"
+      o_que_faz: "Abre formulario para cadastrar novo endereco"
+
+    remover_endereco:
+      icone: "Lixeira"
+      onde: "Ao lado de cada endereco"
+      confirmacao: "SIM"
+      cuidado: "Acao irreversivel"
+
+    buscar_cep:
+      como: "Digite 8 digitos do CEP ao editar endereco"
+      o_que_faz: "Preenche automaticamente rua, bairro, cidade e estado"
+
+  blocos_editaveis:
+    bloco_identidade:
+      campos:
+        - "Nome Completo"
+        - "Nome Social"
+        - "Email"
+        - "Telefone"
+        - "Data de Nascimento"
+        - "Genero"
+        - "Status (Ingresso/Egresso/Evadido OU Atual/Ex-colaborador)"
+      dica: "Email e CPF podem ser editados mas deve haver cuidado pois afetam login"
+
+    bloco_documento:
+      campos:
+        - "Tipo de Documento (CPF, CNPJ, RG, Passaporte)"
+        - "Numero do Documento"
+      cuidado: "Alterar CPF pode afetar integracao com outros sistemas"
+
+    bloco_enderecos:
+      campos:
+        - "CEP (com auto-preenchimento)"
+        - "Rua"
+        - "Numero"
+        - "Bairro"
+        - "Estado"
+        - "Cidade"
+        - "Complemento"
+      pode_ter_multiplos: "SIM"
+      pode_adicionar: "SIM"
+      pode_remover: "SIM"
+
+    bloco_redes_sociais:
+      campos:
+        - "LinkedIn"
+        - "Instagram"
+        - "Facebook"
+      dica: "Cole URLs completas dos perfis"
+
+    bloco_responsavel:
+      quando_aparece: "Apenas para alunos"
+      campos:
+        - "Nome Completo do Responsavel"
+        - "Parentesco"
+        - "Telefone do Responsavel"
+        - "Email do Responsavel"
+      obrigatorio: "Para alunos menores de 18 anos"
+
+    bloco_vinculo_aluno:
+      campos:
+        - "Instituicao"
+        - "Curso"
+      cuidado: "Mudar instituicao ou curso e uma acao importante - confirme antes"
+
+    bloco_vinculo_funcionario:
+      campos:
+        - "Empresa"
+        - "Cargo"
+        - "Descricao do Cargo"
+      cuidado: "Mudar empresa afeta permissoes e acessos"
+
+    bloco_permissoes:
+      quando_aparece: "Apenas para funcionarios"
+      o_que_e: "Interface completa de configuracao de permissoes"
+      como_editar: "Use o configurador de permissoes (arvore hierarquica)"
+      dica: "Mudancas de permissao tem efeito imediato no que o funcionario pode acessar"
+
+  erros_comuns:
+    - erro: "Nao consigo editar nenhum campo"
+      solucao: "Clique no icone de lapis (Editar) no bloco que deseja modificar"
+
+    - erro: "Mudancas nao foram salvas"
+      solucao: "Voce precisa clicar no botao 'Salvar' (icone de disquete) apos fazer as mudancas. Se clicar em 'X' ou sair da pagina sem salvar, mudancas sao perdidas"
+
+    - erro: "Foto nao atualiza"
+      solucao: "Verifique tamanho (max 5MB) e formato (PNG, JPG, WebP). Limpe cache do navegador se foto antiga continuar aparecendo"
+
+    - erro: "CEP nao preenche endereco ao editar"
+      solucao: "Certifique-se de estar em modo de edicao do bloco de Enderecos e digite todos os 8 digitos do CEP"
+
+    - erro: "Email alterado mas usuario nao consegue logar"
+      solucao: "Mudancas de email afetam login. Usuario deve usar o NOVO email para acessar. Pode levar alguns minutos para atualizar"
+
+  dicas_importantes:
+    - "Sempre clique em 'Salvar' apos fazer mudancas - nao ha salvamento automatico na edicao"
+    - "Voce pode estar editando multiplos blocos, mas cada um salva independentemente"
+    - "Mudancas de email, CPF ou permissoes sao sensiveis - faca com cuidado"
+    - "Use 'Cancelar' (X) livremente se mudar de ideia - descarta mudancas sem afetar dados"
+    - "A foto pode ser trocada a qualquer momento sem entrar em modo de edicao"
+
+# ============================================================================
+# MODULO: IMPORTACAO EM LOTE DE ALUNOS
+# ============================================================================
+
+importacao_em_lote:
+  o_que_e: >
+    Funcionalidade para cadastrar varios alunos de uma so vez usando arquivo CSV ou Excel.
+    Ideal para inicio de semestre ou quando precisa cadastrar turmas inteiras.
+
+  onde_fica_no_sistema:
+    menu: "Menu Usuarios > Filtro 'Alunos' > Botao 'Importacao em Lote'"
+    icone: "Icone de arquivo com seta para cima"
+    url: "/users/batch-students"
+
+  quando_usar:
+    - "Cadastro de turma inteira no inicio do semestre"
+    - "Migracao de alunos de outro sistema"
+    - "Atualizacao em massa de dados de alunos"
+    - "Qualquer situacao com mais de 10 alunos para cadastrar"
+
+  quando_NAO_usar:
+    - "Cadastro de 1 ou 2 alunos - mais rapido fazer manual"
+    - "Quando os dados estao desorganizados ou incompletos"
+    - "Primeira vez usando o sistema - treine com cadastro manual primeiro"
+
+  como_funciona_passo_a_passo:
+    - "1. Prepare uma planilha (Excel ou CSV) com os dados dos alunos"
+    - "2. Acesse Menu Usuarios > Alunos > Importacao em Lote"
+    - "3. Baixe o modelo de planilha disponibilizado pelo sistema"
+    - "4. Preencha o modelo com os dados dos alunos (uma linha por aluno)"
+    - "5. Salve a planilha no formato CSV ou Excel"
+    - "6. Faca upload do arquivo no sistema"
+    - "7. Aguarde validacao automatica dos dados"
+    - "8. Corrija erros se houver (o sistema mostra quais linhas tem problemas)"
+    - "9. Confirme a importacao"
+    - "10. Aguarde processamento (pode levar alguns minutos para muitos alunos)"
+    - "11. Verifique relatorio de importacao (quantos foram importados, quantos falharam)"
+
+  preparando_a_planilha:
+    formato_aceito: "CSV (separado por virgula) ou Excel (.xlsx)"
+
+    colunas_obrigatorias:
+      - "fullName - Nome completo do aluno"
+      - "email - Email unico para login"
+      - "phone - Telefone de contato"
+      - "primaryDocument.type - Tipo de documento (CPF, RG, etc)"
+      - "primaryDocument.value - Numero do documento"
+      - "studentProfile.institutionId - ID da instituicao"
+      - "studentProfile.courseName - Nome do curso"
+
+    colunas_opcionais:
+      - "socialName - Nome social"
+      - "countryCode - Codigo do pais (padrao: BR)"
+      - "birthDate - Data de nascimento (formato DD/MM/AAAA)"
+      - "gender - Genero (masc, fem, nao-binario, outro, nao-informado)"
+      - "status - Status (ingresso, egresso, evadido, trancado)"
+      - "social.linkedin - URL do LinkedIn"
+      - "social.instagram - URL do Instagram"
+      - "social.facebook - URL do Facebook"
+      - "guardian.fullName - Nome do responsavel"
+      - "guardian.relationship - Parentesco"
+      - "guardian.phone - Telefone do responsavel"
+      - "guardian.email - Email do responsavel"
+      - "addresses[0].postalCode - CEP"
+      - "addresses[0].street - Rua"
+      - "addresses[0].number - Numero"
+      - "addresses[0].district - Bairro"
+      - "addresses[0].state - Estado (UF)"
+      - "addresses[0].city - Cidade"
+      - "addresses[0].complement - Complemento"
+
+    formato_dos_dados:
+      cpf: "Apenas numeros (11 digitos) OU formatado 000.000.000-00"
+      telefone: "Apenas numeros OU formatado (00) 00000-0000"
+      data: "DD/MM/AAAA (exemplo: 15/08/2000)"
+      cep: "Apenas numeros (8 digitos) OU formatado 00000-000"
+      email: "usuario@dominio.com"
+      urls: "URL completa comecando com https://"
+
+    dicas_de_preparacao:
+      - "Use o modelo fornecido pelo sistema - garante que colunas estao corretas"
+      - "Nao mude os nomes das colunas do modelo"
+      - "Nao deixe linhas vazias entre os dados"
+      - "Primeira linha deve ser o cabecalho (nomes das colunas)"
+      - "Certifique-se que emails sao unicos (nao repetidos)"
+      - "Certifique-se que CPFs sao validos"
+      - "Teste primeiro com 2-3 alunos antes de importar centenas"
+
+  validacao_automatica:
+    o_que_e: "O sistema verifica automaticamente se os dados estao corretos antes de importar"
+
+    o_que_e_validado:
+      - "Formato de email valido"
+      - "CPF matematicamente valido (se Brasil)"
+      - "Campos obrigatorios preenchidos"
+      - "Email nao duplicado no arquivo"
+      - "Email nao ja existente no sistema"
+      - "Instituicao existe no sistema"
+      - "Formato de data valido"
+
+    se_houver_erros:
+      - "Sistema mostra lista de erros com numero da linha"
+      - "Voce pode baixar relatorio de erros"
+      - "Corrija os erros na planilha e faca upload novamente"
+      - "Nao precisa comecar do zero - apenas corrija as linhas com problema"
+
+  apos_importacao:
+    o_que_acontece:
+      - "Sistema processa alunos em segundo plano (assincrono)"
+      - "Cada aluno valido e cadastrado no banco de dados"
+      - "Emails de boas-vindas podem ser enviados (se configurado)"
+      - "Relatorio final mostra: total importado, total com erro, tempo de processamento"
+
+    relatorio_de_importacao:
+      o_que_contem:
+        - "Numero total de linhas processadas"
+        - "Numero de alunos criados com sucesso"
+        - "Numero de alunos com erro"
+        - "Lista de erros (se houver) com numero da linha e motivo"
+      o_que_fazer_com_erros:
+        - "Identifique as linhas com problema no relatorio"
+        - "Corrija apenas essas linhas na planilha original"
+        - "Crie nova planilha so com as linhas corrigidas"
+        - "Importe novamente apenas as que falharam"
+
+  erros_comuns:
+    - erro: "Arquivo nao e aceito"
+      solucao: "Verifique se o arquivo esta em formato CSV ou Excel (.xlsx). Outros formatos nao sao aceitos"
+
+    - erro: "Email duplicado"
+      solucao: "Verifique se ha emails repetidos na planilha OU se o aluno ja existe no sistema. Emails devem ser unicos"
+
+    - erro: "CPF invalido na linha X"
+      solucao: "Verifique se digitou os 11 digitos corretamente. Sistema valida se CPF e matematicamente valido"
+
+    - erro: "Instituicao nao encontrada"
+      solucao: "O ID da instituicao (institutionId) precisa ser de uma instituicao ja cadastrada. Verifique o ID correto no cadastro de Empresas"
+
+    - erro: "Importacao travou ou muito lenta"
+      solucao: "Para arquivos muito grandes (mais de 500 alunos), divida em lotes menores e importe em varias vezes"
+
+    - erro: "Campos personalizados nao importam"
+      solucao: "Campos personalizados tem sintaxe especial. Consulte documentacao tecnica ou suporte para formato correto"
+
+    - erro: "Acentos aparecendo errado"
+      solucao: "Salve o CSV em formato UTF-8. No Excel: Salvar Como > CSV UTF-8 (delimitado por virgula)"
+
+  dicas_importantes:
+    - "SEMPRE baixe e use o modelo fornecido pelo sistema"
+    - "Teste com 2-3 alunos primeiro antes de importar centenas"
+    - "Mantenha backup da planilha original"
+    - "Para arquivos grandes, importe em lotes de 100-200 alunos"
+    - "Verifique o relatorio final e confirme que todos foram importados"
+    - "Corrija erros em lotes pequenos - nao tente reimportar tudo de uma vez"
+    - "Campos de endereco sao opcionais - pode importar sem endereco e adicionar depois"
+    - "Responsavel e opcional - adicione depois manualmente se necessario"
+
+  limites_e_restricoes:
+    tamanho_maximo_arquivo: "10 MB"
+    numero_maximo_linhas: "1000 alunos por arquivo (recomendado)"
+    tempo_processamento: "Varia - pode levar varios minutos para centenas de alunos"
+    formato_data: "Apenas DD/MM/AAAA"
+    formato_telefone: "Aceita varios formatos mas recomenda-se apenas numeros"
+
+# ============================================================================
+# FAQ - PERGUNTAS FREQUENTES
+# ============================================================================
+
+faq:
+  geral:
+    - pergunta: "Qual a diferenca entre Aluno e Funcionario?"
+      resposta: >
+        Aluno e o estudante matriculado que acessa o AVA para estudar.
+        Funcionario e o colaborador da instituicao (professor, coordenador, secretario)
+        que tem acesso administrativo ao sistema.
+
+    - pergunta: "Posso mudar um usuario de Aluno para Funcionario?"
+      resposta: >
+        NAO. Tipo de usuario (Aluno/Funcionario) nao pode ser mudado apos criacao.
+        Se precisar, crie um novo usuario do tipo correto.
+
+    - pergunta: "O que acontece se eu cadastrar email errado?"
+      resposta: >
+        O usuario nao conseguira acessar o sistema. Voce pode editar o email
+        na pagina de detalhes do usuario, mas isso afetara o login dele.
+
+    - pergunta: "Posso usar o mesmo email para Aluno e Funcionario?"
+      resposta: >
+        NAO. Cada email so pode pertencer a UM usuario no sistema, independente do tipo.
+
+  sobre_status:
+    - pergunta: "Quando uso 'Trancado' vs 'Evadido' para alunos?"
+      resposta: >
+        TRANCADO: quando aluno suspende temporariamente mas pretende VOLTAR.
+        EVADIDO: quando aluno DESISTE definitivamente e NAO vai voltar.
+
+    - pergunta: "Aluno 'Egresso' ainda tem acesso ao AVA?"
+      resposta: >
+        Depende da configuracao da instituicao. Geralmente egressos perdem acesso
+        ao AVA mas podem ter acesso a certificados e historico.
+
+    - pergunta: "Devo excluir ou mudar status para 'Ex-colaborador'?"
+      resposta: >
+        PREFIRA mudar status para 'Ex-colaborador'. Excluir remove permanentemente
+        e pode afetar historico e relatorios. Ex-colaboradores ficam inativos mas
+        preservam historico.
+
+  sobre_documentos:
+    - pergunta: "E obrigatorio ter CPF?"
+      resposta: >
+        Para brasileiros, SIM. CPF e o documento principal obrigatorio.
+        Para estrangeiros, pode usar Passaporte.
+
+    - pergunta: "Posso cadastrar aluno sem CPF?"
+      resposta: >
+        Apenas se for estrangeiro. Neste caso, use Passaporte como documento principal
+        e mude o codigo do pais.
+
+    - pergunta: "O que fazer se aluno nao tem CPF ainda?"
+      resposta: >
+        CPF e obrigatorio para cadastro completo. Pode usar CPF de responsavel
+        temporariamente e atualizar depois quando aluno tiver CPF proprio.
+
+  sobre_enderecos:
+    - pergunta: "E obrigatorio cadastrar endereco?"
+      resposta: >
+        NAO. Endereco e opcional mas recomendado para correspondencia e certificados.
+
+    - pergunta: "CEP nao preenche automaticamente. O que fazer?"
+      resposta: >
+        Preencha os campos manualmente. Auto-preenchimento funciona apenas para
+        CEPs brasileiros validos. CEP de areas rurais ou muito novas pode nao funcionar.
+
+    - pergunta: "Posso cadastrar mais de um endereco?"
+      resposta: >
+        SIM. Pode cadastrar residencial, comercial, etc. Nao ha limite.
+
+  sobre_responsavel:
+    - pergunta: "Quando e obrigatorio cadastrar Responsavel?"
+      resposta: >
+        Quando aluno for MENOR DE 18 ANOS. Para maiores, responsavel e opcional.
+
+    - pergunta: "O que preencher em 'Parentesco'?"
+      resposta: >
+        A relacao familiar: Mae, Pai, Avo, Tio, Tutor Legal, etc.
+        Use o termo que descreve melhor a relacao.
+
+    - pergunta: "Responsavel precisa ter email?"
+      resposta: >
+        NAO e obrigatorio, mas e MUITO recomendado. Responsaveis recebem
+        comunicados importantes sobre o aluno por email.
+
+  sobre_importacao:
+    - pergunta: "Quantos alunos posso importar de uma vez?"
+      resposta: >
+        Tecnicamente ate 1000, mas recomendamos lotes de 100-200 para melhor performance.
+
+    - pergunta: "Quanto tempo demora para importar 100 alunos?"
+      resposta: >
+        Geralmente 2-5 minutos, dependendo da velocidade do servidor.
+
+    - pergunta: "Posso importar Funcionarios em lote?"
+      resposta: >
+        Atualmente NAO. Importacao em lote e apenas para Alunos.
+        Funcionarios devem ser cadastrados individualmente.
+
+    - pergunta: "O que fazer se metade importou e metade deu erro?"
+      resposta: >
+        Os que importaram com sucesso ficam no sistema. Corrija apenas as linhas
+        com erro (veja relatorio) e importe novamente so essas.
+
+  sobre_permissoes:
+    - pergunta: "O que sao permissoes?"
+      resposta: >
+        Permissoes controlam o que cada Funcionario pode ou nao fazer no sistema
+        (ver, criar, editar, excluir informacoes). Alunos nao tem permissoes configuradas.
+
+    - pergunta: "Professor precisa de permissoes?"
+      resposta: >
+        SIM. Mesmo professor precisa de permissoes basicas configuradas
+        (visualizar turmas, lancar notas, etc).
+
+    - pergunta: "Como dar permissoes para todas as unidades?"
+      resposta: >
+        Use 'Permissoes Globais' no configurador. Elas valem para toda instituicao.
+
+    - pergunta: "Posso mudar permissoes depois?"
+      resposta: >
+        SIM. Permissoes podem ser editadas a qualquer momento na pagina de
+        detalhes do funcionario, aba Permissoes.
+
+  sobre_edicao:
+    - pergunta: "Por que nao consigo editar usuario?"
+      resposta: >
+        Voce precisa clicar no icone de LAPIS em cada bloco para habilitar edicao.
+        Edicao e por blocos, nao da pagina inteira.
+
+    - pergunta: "Mudancas nao foram salvas. Por que?"
+      resposta: >
+        Voce precisa clicar no botao SALVAR (icone de disquete) apos editar.
+        Se clicar em X ou sair sem salvar, mudancas sao perdidas.
+
+    - pergunta: "Posso editar varios blocos ao mesmo tempo?"
+      resposta: >
+        SIM, mas cada bloco salva independentemente. Nao esqueca de salvar cada um.
+
+    - pergunta: "Como voltar se fiz mudanca errada?"
+      resposta: >
+        Se ainda nao salvou: clique em X (Cancelar) para descartar.
+        Se ja salvou: edite novamente e corrija o valor.
+
+  sobre_exclusao:
+    - pergunta: "Posso desfazer exclusao de usuario?"
+      resposta: >
+        NAO. Exclusao e permanente e irreversivel. Por isso o sistema pede confirmacao.
+
+    - pergunta: "O que e melhor: excluir ou mudar status?"
+      resposta: >
+        SEMPRE prefira mudar status (Evadido/Ex-colaborador). Exclusao deve ser
+        usada apenas para cadastros duplicados ou por engano.
+
+    - pergunta: "Ao excluir aluno, perco historico dele?"
+      resposta: >
+        SIM. Todas informacoes sao perdidas. Por isso recomendamos mudar status
+        em vez de excluir.
+
+# ============================================================================
+# GLOSSARIO DE TERMOS TECNICOS
+# ============================================================================
+
+glossario_tecnico:
+  ViaCEP: >
+    Servico web gratuito que busca informacoes de endereco a partir do CEP brasileiro.
+    O Cogedu usa esse servico para preencher automaticamente rua, bairro, cidade e estado.
+
+  Upload: >
+    Acao de enviar um arquivo do seu computador para o sistema (exemplo: upload de foto).
+
+  CSV: >
+    Formato de arquivo de planilha simples onde valores sao separados por virgula.
+    Pode ser aberto em Excel, Google Sheets, etc.
+
+  UTF-8: >
+    Formato de codificacao de caracteres que suporta acentos e caracteres especiais.
+    Importante para arquivos CSV com nomes brasileiros.
+
+  Validacao: >
+    Verificacao automatica que o sistema faz para garantir que dados estao corretos
+    antes de salvar (exemplo: validar se email tem formato correto).
+
+  Modo_de_Edicao: >
+    Estado da interface onde campos ficam editaveis (viram caixas de texto).
+    Ativado ao clicar no icone de lapis.
+
+  Modo_de_Visualizacao: >
+    Estado padrao da interface onde campos sao apenas exibidos, nao editaveis.
+
+  Rascunho_Automatico: >
+    Funcionalidade que salva automaticamente o que voce esta digitando no navegador,
+    mesmo se fechar a aba. Usado em formularios de cadastro.
+
+  Campos_Personalizados: >
+    Campos extras que cada instituicao pode criar conforme suas necessidades.
+    Nao sao padroes do sistema - variam por instituicao.
+
+  Permissoes: >
+    Configuracao de niveis de acesso que define o que cada Funcionario pode fazer no sistema.
+
+# ============================================================================
+# DICAS DE USO RAPIDO
+# ============================================================================
+
+dicas_rapidas:
+  produtividade:
+    - "Use atalho Ctrl+F (ou Cmd+F no Mac) para buscar na listagem de usuarios"
+    - "Para cadastros rapidos, comece apenas com campos obrigatorios e complete depois"
+    - "Sempre use CEP para economizar tempo - endereco preenche sozinho"
+    - "Antes de importacao em lote, teste com 2-3 alunos primeiro"
+    - "Prefira cadastro em lote para mais de 10 alunos - e muito mais rapido"
+
+  organizacao:
+    - "Use Status de forma consistente - facilita relatorios depois"
+    - "Campos personalizados devem ter padrao - defina antes de comecar a usar"
+    - "Mantenha emails corporativos para funcionarios e pessoais para alunos"
+    - "Preencha dados de Responsavel sempre para menores - evita problemas legais"
+
+  seguranca:
+    - "Nao de permissoes de Exclusao para todos - reserve para cargos de confianca"
+    - "Revise permissoes de novos funcionarios antes de finalizar cadastro"
+    - "Nunca compartilhe email/senha de acesso - cada pessoa deve ter usuario proprio"
+    - "Ao desligar funcionario, mude status imediatamente para Ex-colaborador"
+
+  prevencao_de_erros:
+    - "Sempre confirme email duas vezes ao cadastrar - erro de digitacao e comum"
+    - "Valide CPF antes de cadastrar - sistema rejeita CPFs invalidos"
+    - "Nao use caracteres especiais em nomes - podem causar problemas em certificados"
+    - "Prefira mudar Status a excluir usuarios - exclusao e irreversivel"
+    - "Sempre clique em Salvar apos editar - mudancas nao salvas sao perdidas"

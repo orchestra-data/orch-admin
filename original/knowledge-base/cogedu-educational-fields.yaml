@@ -1,0 +1,3573 @@
+# =============================================================================
+# Cogedu Educational & Class-Instance Modules - Complete Field Extraction
+# Generated from source code analysis
+# =============================================================================
+
+modules:
+  # ===========================================================================
+  # COLLECTIONS MODULE
+  # ===========================================================================
+  collections:
+    CollectionListRoute:
+      source_file: routes/educational/CollectionList/CollectionListRoute.tsx
+      description: Lists all collections with search and filtering capabilities.
+
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          component: SearchBar
+          required: false
+          validation: none
+          purpose: Filter collections by title, description, or SKU
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          validation: none
+          default_value: "all"
+          options:
+            - value: "all"
+              label: status.all
+            - value: "draft"
+              label: status.draft
+            - value: "published"
+              label: status.published
+            - value: "archived"
+              label: status.archived
+
+        - name: marketplaceFilter
+          field_id: marketplaceFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          validation: none
+          default_value: "all"
+          options:
+            - value: "all"
+              label: collections.allCollections
+            - value: "marketplace"
+              label: collections.marketplace
+            - value: "private"
+              label: collections.private
+
+      modals: []
+
+      actions:
+        - name: Create Collection
+          type: navigation
+          effect: Navigates to /educational/collections/new
+          trigger: SearchBar button click
+          reversible: true
+          confirmation_required: false
+
+        - name: View Collection Detail
+          type: navigation
+          effect: Navigates to /educational/collections/{id}
+          trigger: Card click
+          reversible: true
+          confirmation_required: false
+
+    CollectionCreateRoute:
+      source_file: routes/educational/CollectionCreate/CollectionCreateRoute.tsx
+      description: Form to create a new educational collection.
+
+      fields:
+        - name: companyId
+          field_id: companyId
+          type: company_selector
+          component: FormCompanySelector
+          required: true
+          validation:
+            - rule: must_be_selected
+              message: collections.validation.selectCompany
+          default_value: currentCompanyId from tenant store
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: collections.validation.titleRequired
+
+        - name: description
+          field_id: description
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 4
+
+        - name: sku
+          field_id: sku
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: collections.validation.skuRequired
+            - rule: min_length_3
+              message: collections.validation.skuMinLength
+            - rule: regex_pattern
+              pattern: "^[A-Z0-9-]+$"
+              message: collections.validation.skuFormat
+          transform: toUpperCase on input
+          tooltip: collections.fields.skuTooltip
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          validation: none
+          default_value: "draft"
+          options:
+            - value: "draft"
+              label: status.draft
+            - value: "published"
+              label: status.published
+            - value: "archived"
+              label: status.archived
+
+        - name: isOfferable
+          field_id: isOfferable
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          validation: none
+          default_value: true
+          description: collections.fields.isOfferableDescription
+          note: "Marketplace flag - controls whether collection is available in the marketplace"
+
+        - name: thumbnailUrl
+          field_id: thumbnailUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          validation: none
+          config:
+            entityType: collection
+            imageType: thumbnail
+            maxSizeMB: 5
+
+        - name: bannerUrl
+          field_id: bannerUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          validation: none
+          config:
+            entityType: collection
+            imageType: banner
+            maxSizeMB: 5
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/collections
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Save Collection
+          type: form_submit
+          effect: Creates collection via useCreateCollection mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useCreateCollection
+
+        - name: Back
+          type: navigation
+          effect: Navigates back to /educational/collections
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    CollectionEditRoute:
+      source_file: routes/educational/CollectionEdit/CollectionEditRoute.tsx
+      description: Form to edit an existing collection. Same fields as create with data loading.
+
+      data_loading:
+        hook: useCollection(id)
+        source: URL param :id
+
+      fields:
+        - name: companyId
+          field_id: companyId
+          type: company_selector
+          component: FormCompanySelector
+          required: true
+          validation:
+            - rule: must_be_selected
+              message: collections.validation.selectCompany
+          pre_populated: true
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: collections.validation.titleRequired
+          pre_populated: true
+
+        - name: description
+          field_id: description
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 4
+          pre_populated: true
+
+        - name: sku
+          field_id: sku
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: collections.validation.skuRequired
+            - rule: min_length_3
+              message: collections.validation.skuMinLength
+            - rule: regex_pattern
+              pattern: "^[A-Z0-9-]+$"
+              message: collections.validation.skuFormat
+          transform: toUpperCase on input
+          tooltip: collections.fields.skuTooltip
+          pre_populated: true
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          validation: none
+          options:
+            - value: "draft"
+              label: status.draft
+            - value: "published"
+              label: status.published
+            - value: "archived"
+              label: status.archived
+          pre_populated: true
+
+        - name: isOfferable
+          field_id: isOfferable
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          validation: none
+          description: collections.fields.isOfferableDescription
+          pre_populated: true
+
+        - name: thumbnailUrl
+          field_id: thumbnailUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          validation: none
+          config:
+            entityType: collection
+            imageType: thumbnail
+            maxSizeMB: 5
+          pre_populated: true
+
+        - name: bannerUrl
+          field_id: bannerUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          validation: none
+          config:
+            entityType: collection
+            imageType: banner
+            maxSizeMB: 5
+          pre_populated: true
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/collections/{id}
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Update Collection
+          type: form_submit
+          effect: Updates collection via useUpdateCollection mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useUpdateCollection
+
+        - name: Back
+          type: navigation
+          effect: Navigates back to /educational/collections/{id}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    CollectionDetailRoute:
+      source_file: routes/educational/CollectionDetail/CollectionDetailRoute.tsx
+      description: Read-only detail view of a collection showing metadata grid and linked pathways with drag-drop reordering.
+
+      data_loading:
+        hook: useCollection(id)
+        source: URL param :id
+
+      fields: []
+      note: "Read-only detail view. Displays collection metadata in a grid layout."
+
+      display_sections:
+        - name: Metadata Grid
+          fields_displayed:
+            - title
+            - description
+            - sku
+            - status
+            - isOfferable
+            - thumbnailUrl
+            - bannerUrl
+            - createdAt
+            - updatedAt
+
+        - name: Linked Pathways
+          component: DragDropList
+          description: "Lists pathways linked to this collection with drag-drop reordering support."
+          data_source: usePathways(collectionId)
+          features:
+            - drag_drop_reorder: true
+            - add_pathway: true
+            - remove_pathway: true
+
+      modals: []
+
+      actions:
+        - name: Edit Collection
+          type: navigation
+          effect: Navigates to /educational/collections/{id}/edit
+          trigger: Edit button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Delete Collection
+          type: destructive
+          effect: Deletes collection via useDeleteCollection mutation, navigates to list
+          trigger: Delete button click
+          reversible: false
+          confirmation_required: true
+          confirmation_method: window.confirm
+          mutation: useDeleteCollection
+
+        - name: Add Pathway
+          type: action
+          effect: Links an existing pathway to this collection
+          trigger: Add Pathway button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/collections
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+  # ===========================================================================
+  # PATHWAYS MODULE
+  # ===========================================================================
+  pathways:
+    PathwayListRoute:
+      source_file: routes/educational/PathwayList/PathwayListRoute.tsx
+      description: Lists all pathways with search and status filtering.
+
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          component: SearchBar
+          required: false
+          validation: none
+          purpose: Filter pathways by title
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          validation: none
+          default_value: "all"
+          options:
+            - value: "all"
+              label: status.all
+            - value: "draft"
+              label: status.draft
+            - value: "published"
+              label: status.published
+            - value: "archived"
+              label: status.archived
+
+      query_params:
+        - name: collectionId
+          source: URL search params
+          purpose: Pre-filter pathways by collection
+
+      modals: []
+
+      actions:
+        - name: Create Pathway
+          type: navigation
+          effect: Navigates to /educational/pathways/new
+          trigger: SearchBar button click
+          reversible: true
+          confirmation_required: false
+
+        - name: View Pathway Detail
+          type: navigation
+          effect: Navigates to /educational/pathways/{id}
+          trigger: Card click
+          reversible: true
+          confirmation_required: false
+
+    PathwayCreateRoute:
+      source_file: routes/educational/PathwayCreate/PathwayCreateRoute.tsx
+      description: Form to create a new educational pathway with enrollment limits and checkpoint thresholds.
+
+      fields:
+        - name: collectionIds
+          field_id: collectionIds
+          type: multi_select
+          component: MultiSelect
+          required: true
+          validation:
+            - rule: at_least_one
+              message: pathways.validation.collectionRequired
+          data_source: useCollections (published only)
+          note: "Multi-parent support: pathway can belong to multiple collections"
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: pathways.validation.titleRequired
+
+        - name: objective
+          field_id: objective
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 4
+
+        - name: sku
+          field_id: sku
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: pathways.validation.skuRequired
+            - rule: min_length_3
+              message: pathways.validation.skuMinLength
+            - rule: regex_pattern
+              pattern: "^[A-Z0-9-]+$"
+              message: pathways.validation.skuFormat
+          transform: toUpperCase on input
+          tooltip: pathways.fields.skuTooltip
+
+        - name: progressionRule
+          field_id: progressionRule
+          type: select
+          component: select (native)
+          required: false
+          validation: none
+          default_value: "flexible"
+          options:
+            - value: "flexible"
+              label: pathways.fields.progressionRuleFlexible
+            - value: "linear"
+              label: pathways.fields.progressionRuleLinear
+          description: pathways.fields.progressionRuleDescription
+
+        - name: maxProgressPercentageForLateEnrollment
+          field_id: maxProgressPercentageForLateEnrollment
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: range
+              min: 0
+              max: 100
+          metadata_path: enrollment_limits.max_progress_percentage_for_late_enrollment
+          section: Enrollment Limits
+          note: "Maximum progress percentage allowed for late enrollment"
+
+        - name: alertPercentage
+          field_id: alertPercentage
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: range
+              min: 0
+              max: 100
+          metadata_path: checkpoint_thresholds.alert_percentage
+          section: Checkpoint Thresholds
+
+        - name: paymentCheck
+          field_id: paymentCheck
+          type: checkbox
+          component: input[type=checkbox] (native)
+          required: false
+          default_value: false
+          metadata_path: checkpoint_thresholds.criteria.payment_status_check
+          section: Checkpoint Thresholds - Alert Criteria
+
+        - name: attendanceCheck
+          field_id: attendanceCheck
+          type: checkbox
+          component: input[type=checkbox] (native)
+          required: false
+          default_value: false
+          metadata_path: checkpoint_thresholds.criteria.attendance_check
+          section: Checkpoint Thresholds - Alert Criteria
+
+        - name: gradeCheck
+          field_id: gradeCheck
+          type: checkbox
+          component: input[type=checkbox] (native)
+          required: false
+          default_value: false
+          metadata_path: checkpoint_thresholds.criteria.grade_check
+          section: Checkpoint Thresholds - Alert Criteria
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          default_value: "published"
+          options:
+            - value: "published"
+              label: status.published
+            - value: "draft"
+              label: status.draft
+            - value: "archived"
+              label: status.archived
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/pathways
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Save Pathway
+          type: form_submit
+          effect: Creates pathway via useCreatePathway mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useCreatePathway
+
+        - name: Back
+          type: navigation
+          effect: Navigates back to /educational/pathways
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    PathwayEditRoute:
+      source_file: routes/educational/PathwayEdit/PathwayEditRoute.tsx
+      description: Form to edit an existing pathway. Same fields as create with data loading.
+
+      data_loading:
+        hook: usePathway(id)
+        source: URL param :id
+
+      fields:
+        - name: collectionIds
+          field_id: collectionIds
+          type: multi_select
+          component: MultiSelect
+          required: true
+          validation:
+            - rule: at_least_one
+              message: pathways.validation.collectionRequired
+          data_source: useCollections (published only)
+          pre_populated: true
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: pathways.validation.titleRequired
+          pre_populated: true
+
+        - name: objective
+          field_id: objective
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 4
+          pre_populated: true
+
+        - name: sku
+          field_id: sku
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: pathways.validation.skuRequired
+            - rule: min_length_3
+              message: pathways.validation.skuMinLength
+            - rule: regex_pattern
+              pattern: "^[A-Z0-9-]+$"
+              message: pathways.validation.skuFormat
+          transform: toUpperCase on input
+          tooltip: pathways.fields.skuTooltip
+          pre_populated: true
+
+        - name: progressionRule
+          field_id: progressionRule
+          type: select
+          component: select (native)
+          required: false
+          validation: none
+          options:
+            - value: "flexible"
+              label: pathways.fields.progressionRuleFlexible
+            - value: "linear"
+              label: pathways.fields.progressionRuleLinear
+          pre_populated: true
+
+        - name: maxProgressPercentageForLateEnrollment
+          field_id: maxProgressPercentageForLateEnrollment
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: range
+              min: 0
+              max: 100
+          metadata_path: enrollment_limits.max_progress_percentage_for_late_enrollment
+          section: Enrollment Limits
+          pre_populated: true
+
+        - name: alertPercentage
+          field_id: alertPercentage
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: range
+              min: 0
+              max: 100
+          metadata_path: checkpoint_thresholds.alert_percentage
+          section: Checkpoint Thresholds
+          pre_populated: true
+
+        - name: paymentCheck
+          field_id: paymentCheck
+          type: checkbox
+          component: input[type=checkbox] (native)
+          required: false
+          metadata_path: checkpoint_thresholds.criteria.payment_status_check
+          section: Checkpoint Thresholds - Alert Criteria
+          pre_populated: true
+
+        - name: attendanceCheck
+          field_id: attendanceCheck
+          type: checkbox
+          component: input[type=checkbox] (native)
+          required: false
+          metadata_path: checkpoint_thresholds.criteria.attendance_check
+          section: Checkpoint Thresholds - Alert Criteria
+          pre_populated: true
+
+        - name: gradeCheck
+          field_id: gradeCheck
+          type: checkbox
+          component: input[type=checkbox] (native)
+          required: false
+          metadata_path: checkpoint_thresholds.criteria.grade_check
+          section: Checkpoint Thresholds - Alert Criteria
+          pre_populated: true
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          options:
+            - value: "published"
+              label: status.published
+            - value: "draft"
+              label: status.draft
+            - value: "archived"
+              label: status.archived
+          pre_populated: true
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/pathways/{id}
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Update Pathway
+          type: form_submit
+          effect: Updates pathway via useUpdatePathway mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useUpdatePathway
+
+        - name: Back
+          type: navigation
+          effect: Navigates back to /educational/pathways/{id}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    PathwayDetailRoute:
+      source_file: routes/educational/PathwayDetail/PathwayDetailRoute.tsx
+      description: Read-only detail view of a pathway showing metadata and linked series with drag-drop reordering.
+
+      data_loading:
+        hook: usePathway(id)
+        source: URL param :id
+
+      fields: []
+      note: "Read-only detail view. Displays pathway metadata and linked series."
+
+      display_sections:
+        - name: Metadata Grid
+          fields_displayed:
+            - title
+            - objective
+            - sku
+            - progressionRule
+            - status
+            - maxProgressPercentageForLateEnrollment
+            - alertPercentage
+            - paymentCheck
+            - attendanceCheck
+            - gradeCheck
+            - createdAt
+            - updatedAt
+
+        - name: Linked Series
+          component: DragDropList
+          description: "Lists series linked to this pathway with drag-drop reordering support."
+          data_source: useSeries(pathwayId)
+          features:
+            - drag_drop_reorder: true
+            - add_series: true
+            - remove_series: true
+
+      modals: []
+
+      actions:
+        - name: Edit Pathway
+          type: navigation
+          effect: Navigates to /educational/pathways/{id}/edit
+          trigger: Edit button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Delete Pathway
+          type: destructive
+          effect: Deletes pathway via useDeletePathway mutation, navigates to list
+          trigger: Delete button click
+          reversible: false
+          confirmation_required: true
+          confirmation_method: window.confirm
+          mutation: useDeletePathway
+
+        - name: Add Series
+          type: action
+          effect: Links an existing series to this pathway
+          trigger: Add Series button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/pathways
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+  # ===========================================================================
+  # SERIES MODULE
+  # ===========================================================================
+  series:
+    SeriesListRoute:
+      source_file: routes/educational/SeriesList/SeriesListRoute.tsx
+      description: Lists all series with search, status, and requirement type filtering.
+
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          component: SearchBar
+          required: false
+          validation: none
+          purpose: Filter series by title, objective, or SKU
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          default_value: "all"
+          options:
+            - value: "all"
+              label: status.all
+            - value: "draft"
+              label: status.draft
+            - value: "published"
+              label: status.published
+            - value: "archived"
+              label: status.archived
+
+        - name: requirementFilter
+          field_id: requirementFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          default_value: "all"
+          note: "NEW feature - partially implemented (filter logic uses null fallback)"
+          options:
+            - value: "all"
+              label: series.filters.mandatory
+            - value: "private"
+              label: series.filters.optional
+
+      query_params:
+        - name: pathwayId
+          source: URL search params
+          purpose: Pre-filter series by pathway
+
+      modals: []
+
+      actions:
+        - name: Create Series
+          type: navigation
+          effect: Navigates to /educational/series/new
+          trigger: SearchBar button click
+          reversible: true
+          confirmation_required: false
+
+        - name: View Series Detail
+          type: navigation
+          effect: Navigates to /educational/series/{id}
+          trigger: Card click
+          reversible: true
+          confirmation_required: false
+
+    SeriesCreateRoute:
+      source_file: routes/educational/SeriesCreate/SeriesCreateRoute.tsx
+      description: Form to create a new series with grading configuration and images.
+
+      fields:
+        - name: pathwayIds
+          field_id: pathwayIds
+          type: multi_select
+          component: MultiSelect
+          required: false
+          validation: none
+          data_source: usePathways (published only)
+          note: "Multi-parent support: series can belong to multiple pathways. Optional - standalone series allowed."
+          pre_populated_from: pathwayId URL search param
+
+        - name: companyId
+          field_id: companyId
+          type: company_selector
+          component: FormCompanySelector
+          required: conditionally (only when no pathway selected - standalone series)
+          validation:
+            - rule: required_when_standalone
+              message: series.validation.selectCompany
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: series.validation.titleRequired
+            - rule: min_length_3
+              message: series.validation.titleMinLength
+
+        - name: objective
+          field_id: objective
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 4
+
+        - name: sku
+          field_id: sku
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: series.validation.skuRequired
+            - rule: min_length_3
+              message: series.validation.skuMinLength
+            - rule: regex_pattern
+              pattern: "^[A-Z0-9-]+$"
+              message: series.validation.skuFormat
+          transform: toUpperCase on input
+          maxLength: 50
+          tooltip: series.fields.skuTooltip
+
+        - name: workloadHours
+          field_id: workloadHours
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: min
+              value: 0
+          maps_to_api_field: durationHours
+
+        - name: thumbnailUrl
+          field_id: thumbnailUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          config:
+            entityType: series
+            imageType: thumbnail
+            maxSizeMB: 5
+
+        - name: bannerUrl
+          field_id: bannerUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          config:
+            entityType: series
+            imageType: banner
+            maxSizeMB: 5
+
+        - name: minAttendancePercentage
+          field_id: minAttendancePercentage
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: range
+              min: 0
+              max: 100
+          section: Grading Configuration
+          maps_to: grading_config.approval_criteria.min_attendance_percentage
+
+        - name: minFinalGrade
+          field_id: minFinalGrade
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: range
+              min: 0
+              max: 10
+          section: Grading Configuration
+          maps_to: grading_config.approval_criteria.min_final_grade
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          default_value: "published"
+          options:
+            - value: "published"
+              label: status.published
+            - value: "draft"
+              label: status.draft
+            - value: "archived"
+              label: status.archived
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back (history -1)
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Save Series
+          type: form_submit
+          effect: Creates series via useCreateSeries mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useCreateSeries
+
+        - name: Back
+          type: navigation
+          effect: Navigates back (history -1)
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    SeriesEditRoute:
+      source_file: routes/educational/SeriesEdit/SeriesEditRoute.tsx
+      description: Form to edit an existing series. Same fields as create with data loading.
+
+      data_loading:
+        hook: useSeries(id)
+        source: URL param :id
+
+      fields:
+        - name: pathwayIds
+          field_id: pathwayIds
+          type: multi_select
+          component: MultiSelect
+          required: false
+          validation: none
+          data_source: usePathways (published only)
+          pre_populated: true
+
+        - name: companyId
+          field_id: companyId
+          type: company_selector
+          component: FormCompanySelector
+          required: conditionally (only when no pathway selected - standalone series)
+          validation:
+            - rule: required_when_standalone
+              message: series.validation.selectCompany
+          pre_populated: true
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: series.validation.titleRequired
+            - rule: min_length_3
+              message: series.validation.titleMinLength
+          pre_populated: true
+
+        - name: objective
+          field_id: objective
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 4
+          pre_populated: true
+
+        - name: sku
+          field_id: sku
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: series.validation.skuRequired
+            - rule: min_length_3
+              message: series.validation.skuMinLength
+            - rule: regex_pattern
+              pattern: "^[A-Z0-9-]+$"
+              message: series.validation.skuFormat
+          transform: toUpperCase on input
+          maxLength: 50
+          tooltip: series.fields.skuTooltip
+          pre_populated: true
+
+        - name: workloadHours
+          field_id: workloadHours
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: min
+              value: 0
+          maps_to_api_field: durationHours
+          pre_populated: true
+
+        - name: thumbnailUrl
+          field_id: thumbnailUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          config:
+            entityType: series
+            imageType: thumbnail
+            maxSizeMB: 5
+          pre_populated: true
+
+        - name: bannerUrl
+          field_id: bannerUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          config:
+            entityType: series
+            imageType: banner
+            maxSizeMB: 5
+          pre_populated: true
+
+        - name: minAttendancePercentage
+          field_id: minAttendancePercentage
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: range
+              min: 0
+              max: 100
+          section: Grading Configuration
+          maps_to: grading_config.approval_criteria.min_attendance_percentage
+          pre_populated: true
+
+        - name: minFinalGrade
+          field_id: minFinalGrade
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: range
+              min: 0
+              max: 10
+          section: Grading Configuration
+          maps_to: grading_config.approval_criteria.min_final_grade
+          pre_populated: true
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          options:
+            - value: "published"
+              label: status.published
+            - value: "draft"
+              label: status.draft
+            - value: "archived"
+              label: status.archived
+          pre_populated: true
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/series/{id}
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Update Series
+          type: form_submit
+          effect: Updates series via useUpdateSeries mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useUpdateSeries
+
+        - name: Back
+          type: navigation
+          effect: Navigates back to /educational/series/{id}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    SeriesDetailRoute:
+      source_file: routes/educational/SeriesDetail/SeriesDetailRoute.tsx
+      description: Read-only detail view of a series showing metadata and linked units with drag-drop reordering.
+
+      data_loading:
+        hook: useSeries(id)
+        source: URL param :id
+
+      fields: []
+      note: "Read-only detail view. Displays series metadata and linked units."
+
+      display_sections:
+        - name: Metadata Grid
+          fields_displayed:
+            - title
+            - objective
+            - sku
+            - workloadHours
+            - status
+            - minAttendancePercentage
+            - minFinalGrade
+            - thumbnailUrl
+            - bannerUrl
+            - createdAt
+            - updatedAt
+
+        - name: Linked Units
+          component: DragDropList
+          description: "Lists units linked to this series with drag-drop reordering support."
+          data_source: useUnits(seriesId)
+          features:
+            - drag_drop_reorder: true
+            - add_unit: true
+            - remove_unit: true
+
+      modals: []
+
+      actions:
+        - name: Edit Series
+          type: navigation
+          effect: Navigates to /educational/series/{id}/edit
+          trigger: Edit button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Delete Series
+          type: destructive
+          effect: Deletes series via useDeleteSeries mutation, navigates to list
+          trigger: Delete button click
+          reversible: false
+          confirmation_required: true
+          confirmation_method: window.confirm
+          mutation: useDeleteSeries
+
+        - name: Add Unit
+          type: action
+          effect: Links an existing unit to this series
+          trigger: Add Unit button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/series
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+  # ===========================================================================
+  # UNITS MODULE
+  # ===========================================================================
+  units:
+    UnitListRoute:
+      source_file: routes/educational/UnitList/UnitListRoute.tsx
+      description: Lists all units with search and status filtering.
+
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          component: SearchBar
+          required: false
+          validation: none
+          purpose: Filter units by title or description
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          default_value: "all"
+          options:
+            - value: "all"
+              label: status.all
+            - value: "draft"
+              label: status.draft
+            - value: "published"
+              label: status.published
+            - value: "archived"
+              label: status.archived
+
+      query_params:
+        - name: seriesId
+          source: URL search params
+          purpose: Pre-filter units by series
+
+      modals: []
+
+      actions:
+        - name: Create Unit
+          type: navigation
+          effect: Navigates to /educational/units/new
+          trigger: SearchBar button click or empty-state button click
+          reversible: true
+          confirmation_required: false
+
+        - name: View Unit Detail
+          type: navigation
+          effect: Navigates to /educational/units/{id}
+          trigger: Card click
+          reversible: true
+          confirmation_required: false
+
+    UnitCreateRoute:
+      source_file: routes/educational/UnitCreate/UnitCreateRoute.tsx
+      description: Form to create a new unit with release condition configuration.
+
+      fields:
+        - name: seriesIds
+          field_id: seriesIds
+          type: multi_select
+          component: MultiSelect
+          required: true
+          validation:
+            - rule: at_least_one
+              message: units.validation.seriesRequired
+          data_source: useSeries (published only)
+          note: "Multi-parent support: unit can belong to multiple series."
+          pre_populated_from: seriesId URL search param
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: units.validation.titleRequired
+            - rule: min_length_3
+              message: units.validation.titleMinLength
+
+        - name: description
+          field_id: description
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 3
+
+        - name: sequenceOrder
+          field_id: sequenceOrder
+          type: number
+          component: Input (number)
+          required: true
+          default_value: 1
+          validation:
+            - rule: min
+              value: 1
+              message: units.validation.sequenceOrderMin
+
+        - name: releaseType
+          field_id: releaseType
+          type: radio_group
+          component: input[type=radio] (native)
+          required: false
+          default_value: "always_available"
+          section: Release Condition
+          options:
+            - value: "always_available"
+              label: units.releaseCondition.alwaysAvailable
+              description: units.releaseCondition.alwaysAvailableDescription
+            - value: "scheduled"
+              label: units.releaseCondition.scheduledRelease
+              description: units.releaseCondition.scheduledReleaseDescription
+            - value: "relative"
+              label: units.releaseCondition.relativeRelease
+              description: units.releaseCondition.relativeReleaseDescription
+
+        - name: scheduledDatetime
+          field_id: scheduledDatetime
+          type: datetime-local
+          component: Input (datetime-local)
+          required: false
+          validation: none
+          visible_when: releaseType == "scheduled"
+          section: Release Condition
+
+        - name: relativeQuantity
+          field_id: relativeQuantity
+          type: number
+          component: Input (number)
+          required: false
+          default_value: 1
+          validation:
+            - rule: min
+              value: 1
+          visible_when: releaseType == "relative"
+          section: Release Condition
+
+        - name: relativeUnit
+          field_id: relativeUnit
+          type: select
+          component: select (native)
+          required: false
+          default_value: "days"
+          visible_when: releaseType == "relative"
+          section: Release Condition
+          options:
+            - value: "hours"
+              label: units.releaseCondition.hours
+            - value: "days"
+              label: units.releaseCondition.days
+            - value: "weeks"
+              label: units.releaseCondition.weeks
+
+        - name: relativeAnchor
+          field_id: relativeAnchor
+          type: select
+          component: select (native)
+          required: false
+          default_value: "enrollment"
+          visible_when: releaseType == "relative"
+          section: Release Condition
+          options:
+            - value: "enrollment"
+              label: units.releaseCondition.enrollment
+            - value: "series_start"
+              label: units.releaseCondition.seriesStart
+            - value: "previous_unit_completion"
+              label: units.releaseCondition.previousUnit
+            - value: "previous_component_completion"
+              label: units.releaseCondition.previousComponent
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          default_value: "published"
+          options:
+            - value: "published"
+              label: status.published
+            - value: "draft"
+              label: status.draft
+            - value: "archived"
+              label: status.archived
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back (history -1)
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Save Unit
+          type: form_submit
+          effect: Creates unit via useCreateUnit mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useCreateUnit
+
+        - name: Back
+          type: navigation
+          effect: Navigates back (history -1)
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    UnitEditRoute:
+      source_file: routes/educational/UnitEdit/UnitEditRoute.tsx
+      description: Form to edit an existing unit. Same fields as create with data loading.
+
+      data_loading:
+        hook: useUnit(id)
+        source: URL param :id
+
+      fields:
+        - name: seriesIds
+          field_id: seriesIds
+          type: multi_select
+          component: MultiSelect
+          required: true
+          validation:
+            - rule: at_least_one
+              message: units.validation.seriesRequired
+          data_source: useSeries (published only)
+          pre_populated: true
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: units.validation.titleRequired
+            - rule: min_length_3
+              message: units.validation.titleMinLength
+          pre_populated: true
+
+        - name: description
+          field_id: description
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 3
+          pre_populated: true
+
+        - name: sequenceOrder
+          field_id: sequenceOrder
+          type: number
+          component: Input (number)
+          required: true
+          validation:
+            - rule: min
+              value: 1
+              message: units.validation.sequenceOrderMin
+          pre_populated: true
+
+        - name: releaseType
+          field_id: releaseType
+          type: radio_group
+          component: input[type=radio] (native)
+          required: false
+          section: Release Condition
+          options:
+            - value: "always_available"
+              label: units.releaseCondition.alwaysAvailable
+              description: units.releaseCondition.alwaysAvailableDescription
+            - value: "scheduled"
+              label: units.releaseCondition.scheduledRelease
+              description: units.releaseCondition.scheduledReleaseDescription
+            - value: "relative"
+              label: units.releaseCondition.relativeRelease
+              description: units.releaseCondition.relativeReleaseDescription
+          pre_populated: true
+
+        - name: scheduledDatetime
+          field_id: scheduledDatetime
+          type: datetime-local
+          component: Input (datetime-local)
+          required: false
+          validation: none
+          visible_when: releaseType == "scheduled"
+          section: Release Condition
+          pre_populated: true
+
+        - name: relativeQuantity
+          field_id: relativeQuantity
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: min
+              value: 1
+          visible_when: releaseType == "relative"
+          section: Release Condition
+          pre_populated: true
+
+        - name: relativeUnit
+          field_id: relativeUnit
+          type: select
+          component: select (native)
+          required: false
+          visible_when: releaseType == "relative"
+          section: Release Condition
+          options:
+            - value: "hours"
+              label: units.releaseCondition.hours
+            - value: "days"
+              label: units.releaseCondition.days
+            - value: "weeks"
+              label: units.releaseCondition.weeks
+          pre_populated: true
+
+        - name: relativeAnchor
+          field_id: relativeAnchor
+          type: select
+          component: select (native)
+          required: false
+          visible_when: releaseType == "relative"
+          section: Release Condition
+          options:
+            - value: "enrollment"
+              label: units.releaseCondition.enrollment
+            - value: "series_start"
+              label: units.releaseCondition.seriesStart
+            - value: "previous_unit_completion"
+              label: units.releaseCondition.previousUnit
+            - value: "previous_component_completion"
+              label: units.releaseCondition.previousComponent
+          pre_populated: true
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          options:
+            - value: "published"
+              label: status.published
+            - value: "draft"
+              label: status.draft
+            - value: "archived"
+              label: status.archived
+          pre_populated: true
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/units/{id}
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Update Unit
+          type: form_submit
+          effect: Updates unit via useUpdateUnit mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useUpdateUnit
+
+        - name: Back
+          type: navigation
+          effect: Navigates back to /educational/units/{id}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    UnitDetailRoute:
+      source_file: routes/educational/UnitDetail/UnitDetailRoute.tsx
+      description: Read-only detail view of a unit showing metadata, linked components, and Open Builder button.
+
+      data_loading:
+        hook: useUnit(id)
+        source: URL param :id
+
+      fields: []
+      note: "Read-only detail view. Displays unit metadata and linked components."
+
+      display_sections:
+        - name: Metadata Grid
+          fields_displayed:
+            - title
+            - description
+            - sequenceOrder
+            - releaseType
+            - scheduledDatetime
+            - relativeQuantity
+            - relativeUnit
+            - relativeAnchor
+            - status
+            - createdAt
+            - updatedAt
+
+        - name: Linked Components
+          component: ComponentList
+          description: "Lists components linked to this unit with ordering support."
+          data_source: useComponents(unitId)
+          features:
+            - reorder: true
+            - add_component: true
+            - remove_component: true
+
+      modals: []
+
+      actions:
+        - name: Edit Unit
+          type: navigation
+          effect: Navigates to /educational/units/{id}/edit
+          trigger: Edit button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Open Builder
+          type: navigation
+          effect: Navigates to /educational/units/{id}/builder
+          trigger: Open Builder button click
+          reversible: true
+          confirmation_required: false
+          note: "Opens the visual component builder within the unit context"
+
+        - name: Delete Unit
+          type: destructive
+          effect: Deletes unit via useDeleteUnit mutation, navigates to list
+          trigger: Delete button click
+          reversible: false
+          confirmation_required: true
+          confirmation_method: window.confirm
+          mutation: useDeleteUnit
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/units
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+  # ===========================================================================
+  # COMPONENTS MODULE
+  # ===========================================================================
+  components:
+    ComponentListRoute:
+      source_file: routes/educational/ComponentList/ComponentListRoute.tsx
+      description: Lists all components with search and unit filtering.
+
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          component: SearchBar
+          required: false
+          validation: none
+          purpose: Filter components by title
+
+        - name: unitFilter
+          field_id: unitFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          default_value: "all"
+          data_source: useUnits
+          purpose: Filter components by unit
+
+      query_params:
+        - name: unitId
+          source: URL search params
+          purpose: Pre-filter components by unit
+
+      modals: []
+
+      actions:
+        - name: Create Component
+          type: navigation
+          effect: Navigates to /educational/components/new
+          trigger: SearchBar button click
+          reversible: true
+          confirmation_required: false
+
+        - name: View Component Detail
+          type: navigation
+          effect: Navigates to /educational/components/{id}
+          trigger: Card click
+          reversible: true
+          confirmation_required: false
+
+    ComponentCreateRoute:
+      source_file: routes/educational/ComponentCreate/ComponentCreateRoute.tsx
+      description: Form to create a new component with type-specific configurations and feature flags.
+
+      fields:
+        - name: unitId
+          field_id: unitId
+          type: select
+          component: Select (shadcn)
+          required: true
+          validation:
+            - rule: not_empty
+              message: components.validation.unitRequired
+          data_source: useUnits (published only)
+          pre_populated_from: unitId URL search param
+
+        - name: componentType
+          field_id: componentType
+          type: select
+          component: Select (shadcn)
+          required: true
+          validation:
+            - rule: not_empty
+              message: components.validation.typeRequired
+          options:
+            - value: "video"
+              label: components.types.video
+            - value: "text"
+              label: components.types.text
+            - value: "quiz"
+              label: components.types.quiz
+            - value: "formative_assessment"
+              label: components.types.formativeAssessment
+            - value: "summative_assessment"
+              label: components.types.summativeAssessment
+            - value: "assignment"
+              label: components.types.assignment
+            - value: "discussion"
+              label: components.types.discussion
+            - value: "link"
+              label: components.types.link
+            - value: "file"
+              label: components.types.file
+            - value: "interactive"
+              label: components.types.interactive
+            - value: "live_session"
+              label: components.types.liveSession
+          note: "Changing component type resets type-specific config fields"
+
+        - name: subtype
+          field_id: subtype
+          type: text
+          component: Input
+          required: false
+          validation: none
+          note: "Optional subtype for further classification within the component type"
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: components.validation.titleRequired
+
+        - name: description
+          field_id: description
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 4
+
+        - name: thumbnailUrl
+          field_id: thumbnailUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          validation: none
+          config:
+            entityType: component
+            imageType: thumbnail
+            maxSizeMB: 5
+
+        # Feature Flags (8 flags)
+        - name: xapiEnabled
+          field_id: xapiEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          default_value: false
+          section: Feature Flags
+          description: components.features.xapiDescription
+
+        - name: aiEnabled
+          field_id: aiEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          default_value: false
+          section: Feature Flags
+          description: components.features.aiDescription
+
+        - name: annotationsEnabled
+          field_id: annotationsEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          default_value: false
+          section: Feature Flags
+          description: components.features.annotationsDescription
+
+        - name: aiQaEnabled
+          field_id: aiQaEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          default_value: false
+          section: Feature Flags
+          description: components.features.aiQaDescription
+
+        - name: groupWorkEnabled
+          field_id: groupWorkEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          default_value: false
+          section: Feature Flags
+          description: components.features.groupWorkDescription
+
+        - name: discussionEnabled
+          field_id: discussionEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          default_value: false
+          section: Feature Flags
+          description: components.features.discussionDescription
+
+        - name: proctoringEnabled
+          field_id: proctoringEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          default_value: false
+          section: Feature Flags
+          description: components.features.proctoringDescription
+
+        - name: antiPlagiarismEnabled
+          field_id: antiPlagiarismEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          default_value: false
+          section: Feature Flags
+          description: components.features.antiPlagiarismDescription
+
+        # Type-specific configurations (conditionally visible)
+        - name: videoProvider
+          field_id: videoProvider
+          type: select
+          component: Select (shadcn)
+          required: false
+          visible_when: componentType == "video"
+          section: "Type-Specific Config: Video"
+          options:
+            - value: "youtube"
+              label: components.video.youtube
+            - value: "vimeo"
+              label: components.video.vimeo
+            - value: "custom"
+              label: components.video.custom
+
+        - name: videoDuration
+          field_id: videoDuration
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType == "video"
+          section: "Type-Specific Config: Video"
+          note: "Duration in minutes"
+
+        - name: xapiTrackingOptions
+          field_id: xapiTrackingOptions
+          type: multi_select
+          component: MultiSelect
+          required: false
+          visible_when: componentType == "video" AND xapiEnabled == true
+          section: "Type-Specific Config: Video"
+          options:
+            - value: "played"
+              label: components.xapi.played
+            - value: "paused"
+              label: components.xapi.paused
+            - value: "completed"
+              label: components.xapi.completed
+            - value: "seeked"
+              label: components.xapi.seeked
+
+        - name: timeLimit
+          field_id: timeLimit
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType in ["quiz", "formative_assessment", "summative_assessment"]
+          section: "Type-Specific Config: Assessment"
+          note: "Time limit in minutes. 0 or null = no limit."
+
+        - name: maxAttempts
+          field_id: maxAttempts
+          type: number
+          component: Input (number)
+          required: false
+          default_value: 1
+          visible_when: componentType in ["quiz", "formative_assessment", "summative_assessment"]
+          section: "Type-Specific Config: Assessment"
+          validation:
+            - rule: min
+              value: 1
+
+        - name: assessmentWeight
+          field_id: assessmentWeight
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType in ["formative_assessment", "summative_assessment"]
+          section: "Type-Specific Config: Assessment"
+          validation:
+            - rule: range
+              min: 0
+              max: 100
+          note: "Weight as percentage of final grade"
+
+        - name: activityMode
+          field_id: activityMode
+          type: select
+          component: Select (shadcn)
+          required: false
+          visible_when: componentType == "assignment"
+          section: "Type-Specific Config: Assignment"
+          options:
+            - value: "individual"
+              label: components.assignment.individual
+            - value: "group"
+              label: components.assignment.group
+
+        - name: groupMembers
+          field_id: groupMembers
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType == "assignment" AND activityMode == "group"
+          section: "Type-Specific Config: Assignment"
+          default_value: 3
+          validation:
+            - rule: min
+              value: 2
+
+        - name: discussionTopic
+          field_id: discussionTopic
+          type: textarea
+          component: textarea (native)
+          required: false
+          visible_when: componentType == "discussion"
+          section: "Type-Specific Config: Discussion"
+          rows: 3
+
+        - name: externalLink
+          field_id: externalLink
+          type: url
+          component: Input (url)
+          required: false
+          visible_when: componentType == "link"
+          section: "Type-Specific Config: Link"
+          validation:
+            - rule: valid_url
+              message: components.validation.invalidUrl
+
+        - name: fileUpload
+          field_id: fileUpload
+          type: file_upload
+          component: FileUpload
+          required: false
+          visible_when: componentType == "file"
+          section: "Type-Specific Config: File"
+          config:
+            maxSizeMB: 50
+
+        - name: readingContent
+          field_id: readingContent
+          type: richtext
+          component: RichTextEditor
+          required: false
+          visible_when: componentType == "text"
+          section: "Type-Specific Config: Text"
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back (history -1)
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Save Component
+          type: form_submit
+          effect: Creates component via useCreateComponent mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useCreateComponent
+
+        - name: Back
+          type: navigation
+          effect: Navigates back (history -1)
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    ComponentEditRoute:
+      source_file: routes/educational/ComponentEdit/ComponentEditRoute.tsx
+      description: Form to edit an existing component. Same fields as create with data loading.
+
+      data_loading:
+        hook: useComponent(id)
+        source: URL param :id
+
+      fields:
+        - name: unitId
+          field_id: unitId
+          type: select
+          component: Select (shadcn)
+          required: true
+          validation:
+            - rule: not_empty
+              message: components.validation.unitRequired
+          data_source: useUnits (published only)
+          pre_populated: true
+
+        - name: componentType
+          field_id: componentType
+          type: select
+          component: Select (shadcn)
+          required: true
+          validation:
+            - rule: not_empty
+              message: components.validation.typeRequired
+          options:
+            - value: "video"
+              label: components.types.video
+            - value: "text"
+              label: components.types.text
+            - value: "quiz"
+              label: components.types.quiz
+            - value: "formative_assessment"
+              label: components.types.formativeAssessment
+            - value: "summative_assessment"
+              label: components.types.summativeAssessment
+            - value: "assignment"
+              label: components.types.assignment
+            - value: "discussion"
+              label: components.types.discussion
+            - value: "link"
+              label: components.types.link
+            - value: "file"
+              label: components.types.file
+            - value: "interactive"
+              label: components.types.interactive
+            - value: "live_session"
+              label: components.types.liveSession
+          pre_populated: true
+
+        - name: subtype
+          field_id: subtype
+          type: text
+          component: Input
+          required: false
+          validation: none
+          pre_populated: true
+
+        - name: title
+          field_id: title
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: components.validation.titleRequired
+          pre_populated: true
+
+        - name: description
+          field_id: description
+          type: textarea
+          component: textarea (native)
+          required: false
+          validation: none
+          rows: 4
+          pre_populated: true
+
+        - name: thumbnailUrl
+          field_id: thumbnailUrl
+          type: image_upload
+          component: ImageUpload
+          required: false
+          validation: none
+          config:
+            entityType: component
+            imageType: thumbnail
+            maxSizeMB: 5
+          pre_populated: true
+
+        # Feature Flags (all pre-populated)
+        - name: xapiEnabled
+          field_id: xapiEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          section: Feature Flags
+          pre_populated: true
+
+        - name: aiEnabled
+          field_id: aiEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          section: Feature Flags
+          pre_populated: true
+
+        - name: annotationsEnabled
+          field_id: annotationsEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          section: Feature Flags
+          pre_populated: true
+
+        - name: aiQaEnabled
+          field_id: aiQaEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          section: Feature Flags
+          pre_populated: true
+
+        - name: groupWorkEnabled
+          field_id: groupWorkEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          section: Feature Flags
+          pre_populated: true
+
+        - name: discussionEnabled
+          field_id: discussionEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          section: Feature Flags
+          pre_populated: true
+
+        - name: proctoringEnabled
+          field_id: proctoringEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          section: Feature Flags
+          pre_populated: true
+
+        - name: antiPlagiarismEnabled
+          field_id: antiPlagiarismEnabled
+          type: checkbox
+          component: Checkbox (shadcn)
+          required: false
+          section: Feature Flags
+          pre_populated: true
+
+        # Type-specific configs (all pre-populated, conditionally visible same as create)
+        - name: videoProvider
+          field_id: videoProvider
+          type: select
+          component: Select (shadcn)
+          required: false
+          visible_when: componentType == "video"
+          section: "Type-Specific Config: Video"
+          pre_populated: true
+
+        - name: videoDuration
+          field_id: videoDuration
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType == "video"
+          section: "Type-Specific Config: Video"
+          pre_populated: true
+
+        - name: xapiTrackingOptions
+          field_id: xapiTrackingOptions
+          type: multi_select
+          component: MultiSelect
+          required: false
+          visible_when: componentType == "video" AND xapiEnabled == true
+          section: "Type-Specific Config: Video"
+          pre_populated: true
+
+        - name: timeLimit
+          field_id: timeLimit
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType in ["quiz", "formative_assessment", "summative_assessment"]
+          section: "Type-Specific Config: Assessment"
+          pre_populated: true
+
+        - name: maxAttempts
+          field_id: maxAttempts
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType in ["quiz", "formative_assessment", "summative_assessment"]
+          section: "Type-Specific Config: Assessment"
+          pre_populated: true
+
+        - name: assessmentWeight
+          field_id: assessmentWeight
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType in ["formative_assessment", "summative_assessment"]
+          section: "Type-Specific Config: Assessment"
+          pre_populated: true
+
+        - name: activityMode
+          field_id: activityMode
+          type: select
+          component: Select (shadcn)
+          required: false
+          visible_when: componentType == "assignment"
+          section: "Type-Specific Config: Assignment"
+          pre_populated: true
+
+        - name: groupMembers
+          field_id: groupMembers
+          type: number
+          component: Input (number)
+          required: false
+          visible_when: componentType == "assignment" AND activityMode == "group"
+          section: "Type-Specific Config: Assignment"
+          pre_populated: true
+
+        - name: discussionTopic
+          field_id: discussionTopic
+          type: textarea
+          component: textarea (native)
+          required: false
+          visible_when: componentType == "discussion"
+          section: "Type-Specific Config: Discussion"
+          rows: 3
+          pre_populated: true
+
+        - name: externalLink
+          field_id: externalLink
+          type: url
+          component: Input (url)
+          required: false
+          visible_when: componentType == "link"
+          section: "Type-Specific Config: Link"
+          pre_populated: true
+
+        - name: fileUpload
+          field_id: fileUpload
+          type: file_upload
+          component: FileUpload
+          required: false
+          visible_when: componentType == "file"
+          section: "Type-Specific Config: File"
+          pre_populated: true
+
+        - name: readingContent
+          field_id: readingContent
+          type: richtext
+          component: RichTextEditor
+          required: false
+          visible_when: componentType == "text"
+          section: "Type-Specific Config: Text"
+          pre_populated: true
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/components/{id}
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Update Component
+          type: form_submit
+          effect: Updates component via useUpdateComponent mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useUpdateComponent
+
+        - name: Back
+          type: navigation
+          effect: Navigates back to /educational/components/{id}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    ComponentDetailRoute:
+      source_file: routes/educational/ComponentDetail/ComponentDetailRoute.tsx
+      description: Read-only detail view of a component showing all metadata, feature flags, and type-specific config.
+
+      data_loading:
+        hook: useComponent(id)
+        source: URL param :id
+
+      fields: []
+      note: "Read-only detail view. Displays component metadata, feature flags, and type-specific configuration."
+
+      display_sections:
+        - name: Metadata
+          fields_displayed:
+            - unitId
+            - componentType
+            - subtype
+            - title
+            - description
+            - thumbnailUrl
+            - createdAt
+            - updatedAt
+
+        - name: Feature Flags
+          fields_displayed:
+            - xapiEnabled
+            - aiEnabled
+            - annotationsEnabled
+            - aiQaEnabled
+            - groupWorkEnabled
+            - discussionEnabled
+            - proctoringEnabled
+            - antiPlagiarismEnabled
+
+        - name: Type-Specific Configuration
+          note: "Displays relevant config fields based on componentType"
+
+      modals: []
+
+      actions:
+        - name: Edit Component
+          type: navigation
+          effect: Navigates to /educational/components/{id}/edit
+          trigger: Edit button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Delete Component
+          type: destructive
+          effect: Deletes component via useDeleteComponent mutation, navigates to list
+          trigger: Delete button click
+          reversible: false
+          confirmation_required: true
+          confirmation_method: window.confirm
+          mutation: useDeleteComponent
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/components
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    ComponentBuilderRoute:
+      source_file: routes/educational/ComponentBuilder/ComponentBuilderRoute.tsx
+      description: Visual builder for creating and arranging components within a unit context.
+
+      data_loading:
+        hook: useUnit(unitId)
+        source: URL param :unitId
+
+      fields: []
+      note: "Visual drag-and-drop builder interface. Components are created and ordered within the unit context."
+
+      features:
+        - drag_drop_ordering: true
+        - inline_component_creation: true
+        - preview_mode: true
+        - component_type_palette: true
+
+      modals: []
+
+      actions:
+        - name: Save Layout
+          type: form_submit
+          effect: Saves component order and layout via useUpdateUnitComponents mutation
+          trigger: Save button click
+          reversible: false
+          confirmation_required: false
+          mutation: useUpdateUnitComponents
+
+        - name: Back to Unit
+          type: navigation
+          effect: Navigates to /educational/units/{unitId}
+          trigger: ArrowLeft button click or Back button
+          reversible: true
+          confirmation_required: false
+
+  # ===========================================================================
+  # CLASS INSTANCES MODULE
+  # ===========================================================================
+  class_instances:
+    ClassInstanceListRoute:
+      source_file: routes/educational/ClassInstanceList/ClassInstanceListRoute.tsx
+      description: Lists all class instances with search, status, and delivery mode filtering.
+
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          component: SearchBar
+          required: false
+          validation: none
+          purpose: Filter by name, code, or institution
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          default_value: "all"
+          options:
+            - value: "all"
+              label: classInstances.filters.all
+            - value: "active"
+              label: classInstances.status.active
+            - value: "completed"
+              label: classInstances.status.completed
+            - value: "cancelled"
+              label: classInstances.status.cancelled
+
+        - name: deliveryFilter
+          field_id: deliveryFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          default_value: "all"
+          options:
+            - value: "all"
+              label: classInstances.filters.allModes
+            - value: "in_person"
+              label: classInstances.deliveryMode.in_person
+            - value: "online"
+              label: classInstances.deliveryMode.online
+            - value: "hybrid"
+              label: classInstances.deliveryMode.hybrid
+
+      modals: []
+
+      actions:
+        - name: Create Class Instance
+          type: navigation
+          effect: Navigates to /educational/class-instances/new
+          trigger: SearchBar button click
+          reversible: true
+          confirmation_required: false
+
+        - name: View Class Instance Detail
+          type: navigation
+          effect: Navigates to /educational/class-instances/{id}
+          trigger: Card click or Enter/Space key
+          reversible: true
+          confirmation_required: false
+          accessibility: role=listitem, tabIndex=0, onKeyDown handler
+
+    ClassInstanceCreateRoute:
+      source_file: routes/educational/ClassInstanceCreate/ClassInstanceCreateRoute.tsx
+      description: Multi-section form to create a class instance with content selection, configuration, and identification.
+
+      fields:
+        # Section 1: Content Selection
+        - name: institution
+          field_id: institution
+          type: select
+          component: select (native)
+          required: true
+          validation:
+            - rule: not_empty
+              message: classInstances.validation.institutionRequired
+          data_source: useCompanies
+          section: "Section 1: Content Selection"
+
+        - name: contentType
+          field_id: contentType
+          type: select
+          component: select (native)
+          required: true
+          default_value: "collection"
+          section: "Section 1: Content Selection"
+          options:
+            - value: "collection"
+              label: classInstances.content.collection
+            - value: "series"
+              label: classInstances.content.series
+          description: classInstances.content.contentTypeDescription
+          note: Changing this clears contentId
+
+        - name: contentId
+          field_id: contentId
+          type: select
+          component: select (native)
+          required: true
+          validation:
+            - rule: not_empty
+              message_collection: classInstances.validation.collectionRequired
+              message_series: classInstances.validation.seriesRequired
+          section: "Section 1: Content Selection"
+          dynamic_options: true
+          note: "Options change based on contentType. Shows collections (useCollections) or series (useSeries)."
+
+        - name: pathwayDurations
+          field_id: pathwayDurations
+          type: dynamic_field_array
+          component: Input (number) + select (native) per pathway
+          required: false
+          visible_when: contentType == "collection" AND contentId is set AND pathways exist
+          section: "Section 1: Content Selection"
+          note: "One duration row per pathway in the selected collection. Used for pathway duration tracking."
+          sub_fields:
+            - name: value
+              type: number
+              min: 1
+              default: 1
+            - name: unit
+              type: select
+              default: "months"
+              options:
+                - value: "days"
+                  label: classInstances.pathwayDurations.days
+                - value: "weeks"
+                  label: classInstances.pathwayDurations.weeks
+                - value: "months"
+                  label: classInstances.pathwayDurations.months
+
+        # Section 2: Class Configuration
+        - name: startDate
+          field_id: startDate
+          type: date
+          component: Input (date)
+          required: true
+          validation:
+            - rule: not_empty
+              message: classInstances.validation.startDateRequired
+          section: "Section 2: Class Configuration"
+
+        - name: scheduleType
+          field_id: scheduleType
+          type: select
+          component: select (native)
+          required: true
+          default_value: "morning"
+          section: "Section 2: Class Configuration"
+          options:
+            - value: "morning"
+              label: classInstances.scheduleType.morning
+            - value: "afternoon"
+              label: classInstances.scheduleType.afternoon
+            - value: "evening"
+              label: classInstances.scheduleType.evening
+            - value: "full_time"
+              label: classInstances.scheduleType.full_time
+            - value: "flexible"
+              label: classInstances.scheduleType.flexible
+            - value: "weekend"
+              label: classInstances.scheduleType.weekend
+
+        - name: maxStudents
+          field_id: maxStudents
+          type: number
+          component: Input (number)
+          required: false
+          default_value: 30
+          validation:
+            - rule: min
+              value: 0
+          section: "Section 2: Class Configuration"
+
+        - name: deliveryMode
+          field_id: deliveryMode
+          type: select
+          component: select (native)
+          required: false
+          default_value: "in_person"
+          section: "Section 2: Class Configuration"
+          options:
+            - value: "in_person"
+              label: classInstances.deliveryMode.in_person
+            - value: "online"
+              label: classInstances.deliveryMode.online
+            - value: "hybrid"
+              label: classInstances.deliveryMode.hybrid
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          default_value: "active"
+          section: "Section 2: Class Configuration"
+          options:
+            - value: "active"
+              label: classInstances.status.active
+            - value: "inactive"
+              label: classInstances.status.inactive
+            - value: "completed"
+              label: classInstances.status.completed
+            - value: "cancelled"
+              label: classInstances.status.cancelled
+
+        - name: endDate
+          field_id: endDate
+          type: date
+          component: Input (date)
+          required: false
+          section: "Section 2: Class Configuration"
+          note: "Auto-calculated from start date + pathway durations or workload hours. For series, can be toggled to manual edit mode."
+          editable_when: "contentType == 'series' AND isEndDateManual == true"
+
+        - name: certificateIssuerType
+          field_id: certificateIssuer
+          type: select
+          component: select (native)
+          required: false
+          default_value: "tenant"
+          section: "Section 2: Class Configuration"
+          options:
+            - value: "tenant"
+              label: classInstances.certificateIssuer.tenant
+            - value: "unit"
+              label: classInstances.certificateIssuer.unit
+          note: "Controls which company ID is set as certificateIssuerCompanyId"
+
+        # Section 3: Identification
+        - name: code
+          field_id: code
+          type: text
+          component: Input (disabled/auto-generated)
+          required: true
+          validation:
+            - rule: not_empty
+              message: classInstances.validation.codeRequired
+          section: "Section 3: Identification"
+          auto_generated: true
+          format: "INST-CONT-MMYY-SCHEDULE"
+          pattern_description: "{INSTITUTION_3CHARS}-{CONTENT_3CHARS}-{MMYY}-{SCHEDULE_INITIAL}"
+          note: "Auto-generated from institution, content, start date, and schedule type"
+
+        - name: name
+          field_id: name
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: classInstances.validation.nameRequired
+          section: "Section 3: Identification"
+
+        - name: classType
+          field_id: classType
+          type: text
+          component: Input (free text)
+          required: false
+          section: "Section 3: Identification"
+          description: classInstances.fields.classTypeDescription
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/class-instances
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Create Class
+          type: form_submit
+          effect: Creates class instance via useCreateClassInstance mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useCreateClassInstance
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/class-instances
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Toggle End Date Manual Mode
+          type: toggle
+          effect: Switches end date between auto-calculated and manual edit mode
+          trigger: Pencil icon button click
+          reversible: true
+          confirmation_required: false
+          visible_when: contentType == "series"
+
+    ClassInstanceEditRoute:
+      source_file: routes/educational/ClassInstanceEdit/ClassInstanceEditRoute.tsx
+      description: Form to edit an existing class instance. Same fields as create with data loading.
+
+      data_loading:
+        hook: useClassInstance(id)
+        source: URL param :id
+
+      fields:
+        # Section 1: Content Selection (read-only in edit mode)
+        - name: institution
+          field_id: institution
+          type: select
+          component: select (native)
+          required: true
+          section: "Section 1: Content Selection"
+          pre_populated: true
+          note: "May be read-only in edit mode to prevent content reassignment"
+
+        - name: contentType
+          field_id: contentType
+          type: select
+          component: select (native)
+          required: true
+          section: "Section 1: Content Selection"
+          pre_populated: true
+
+        - name: contentId
+          field_id: contentId
+          type: select
+          component: select (native)
+          required: true
+          section: "Section 1: Content Selection"
+          pre_populated: true
+
+        - name: pathwayDurations
+          field_id: pathwayDurations
+          type: dynamic_field_array
+          component: Input (number) + select (native) per pathway
+          required: false
+          visible_when: contentType == "collection" AND contentId is set AND pathways exist
+          section: "Section 1: Content Selection"
+          pre_populated: true
+
+        # Section 2: Class Configuration
+        - name: startDate
+          field_id: startDate
+          type: date
+          component: Input (date)
+          required: true
+          section: "Section 2: Class Configuration"
+          pre_populated: true
+
+        - name: scheduleType
+          field_id: scheduleType
+          type: select
+          component: select (native)
+          required: true
+          section: "Section 2: Class Configuration"
+          options:
+            - value: "morning"
+              label: classInstances.scheduleType.morning
+            - value: "afternoon"
+              label: classInstances.scheduleType.afternoon
+            - value: "evening"
+              label: classInstances.scheduleType.evening
+            - value: "full_time"
+              label: classInstances.scheduleType.full_time
+            - value: "flexible"
+              label: classInstances.scheduleType.flexible
+            - value: "weekend"
+              label: classInstances.scheduleType.weekend
+          pre_populated: true
+
+        - name: maxStudents
+          field_id: maxStudents
+          type: number
+          component: Input (number)
+          required: false
+          validation:
+            - rule: min
+              value: 0
+          section: "Section 2: Class Configuration"
+          pre_populated: true
+
+        - name: deliveryMode
+          field_id: deliveryMode
+          type: select
+          component: select (native)
+          required: false
+          section: "Section 2: Class Configuration"
+          options:
+            - value: "in_person"
+              label: classInstances.deliveryMode.in_person
+            - value: "online"
+              label: classInstances.deliveryMode.online
+            - value: "hybrid"
+              label: classInstances.deliveryMode.hybrid
+          pre_populated: true
+
+        - name: status
+          field_id: status
+          type: select
+          component: select (native)
+          required: false
+          section: "Section 2: Class Configuration"
+          options:
+            - value: "active"
+              label: classInstances.status.active
+            - value: "inactive"
+              label: classInstances.status.inactive
+            - value: "completed"
+              label: classInstances.status.completed
+            - value: "cancelled"
+              label: classInstances.status.cancelled
+          pre_populated: true
+
+        - name: endDate
+          field_id: endDate
+          type: date
+          component: Input (date)
+          required: false
+          section: "Section 2: Class Configuration"
+          pre_populated: true
+
+        - name: certificateIssuerType
+          field_id: certificateIssuer
+          type: select
+          component: select (native)
+          required: false
+          section: "Section 2: Class Configuration"
+          options:
+            - value: "tenant"
+              label: classInstances.certificateIssuer.tenant
+            - value: "unit"
+              label: classInstances.certificateIssuer.unit
+          pre_populated: true
+
+        # Section 3: Identification
+        - name: code
+          field_id: code
+          type: text
+          component: Input (disabled/auto-generated)
+          required: true
+          section: "Section 3: Identification"
+          pre_populated: true
+          note: "Auto-generated code, typically not editable"
+
+        - name: name
+          field_id: name
+          type: text
+          component: Input
+          required: true
+          validation:
+            - rule: not_empty
+              message: classInstances.validation.nameRequired
+          section: "Section 3: Identification"
+          pre_populated: true
+
+        - name: classType
+          field_id: classType
+          type: text
+          component: Input (free text)
+          required: false
+          section: "Section 3: Identification"
+          pre_populated: true
+
+      modals: []
+
+      actions:
+        - name: Cancel
+          type: navigation
+          effect: Navigates back to /educational/class-instances/{id}
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Update Class Instance
+          type: form_submit
+          effect: Updates class instance via useUpdateClassInstance mutation, then navigates to detail page
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          mutation: useUpdateClassInstance
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/class-instances/{id}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    ClassInstanceDetailRoute:
+      source_file: routes/educational/ClassInstanceDetail/ClassInstanceDetailRoute.tsx
+      description: Read-only detail view of a class instance with action buttons, notification modal, and chat integration.
+
+      data_loading:
+        hook: useClassInstance(id)
+        source: URL param :id
+
+      fields: []
+      note: "This is a read-only detail view. No form fields. Display-only data."
+
+      modals:
+        - name: Send Notification Modal
+          trigger: "Enviar Notificacao" button click
+          purpose: Send push notification to all enrolled students in the class
+          component: Dialog (shadcn)
+          fields:
+            - name: title
+              field_id: title
+              type: text
+              component: Input
+              required: true
+              validation:
+                - rule: not_empty
+                  message: "Notificacao requer titulo e mensagem"
+              placeholder: "Ex: Mudanca de horario"
+
+            - name: type
+              field_id: type
+              type: select
+              component: Select (shadcn)
+              required: false
+              default_value: "info"
+              options:
+                - value: "info"
+                  label: "Informacao"
+                - value: "warning"
+                  label: "Aviso"
+                - value: "error"
+                  label: "Urgente/Erro"
+                - value: "success"
+                  label: "Sucesso"
+
+            - name: priority
+              field_id: priority
+              type: select
+              component: Select (shadcn)
+              required: false
+              default_value: "Normal"
+              options:
+                - value: "Low"
+                  label: "Baixa"
+                - value: "Normal"
+                  label: "Normal"
+                - value: "High"
+                  label: "Alta"
+                - value: "Critical"
+                  label: "Critica"
+
+            - name: message
+              field_id: message
+              type: textarea
+              component: Textarea (shadcn)
+              required: true
+              validation:
+                - rule: not_empty
+                  message: "Notificacao requer titulo e mensagem"
+              rows: 4
+              placeholder: "Digite sua mensagem aqui..."
+
+            - name: sendClassNotification
+              field_id: sendClassNotification
+              type: checkbox
+              component: Checkbox (shadcn)
+              required: false
+              default_value: true
+              description: "Send notification to all enrolled students in this class"
+
+          actions:
+            - name: Cancel
+              type: close_modal
+              effect: Closes modal, resets form
+              reversible: true
+              confirmation_required: false
+
+            - name: Send
+              type: api_call
+              effect: Sends notification to all enrolled students via apiClient.sendClassNotification
+              reversible: false
+              confirmation_required: false
+              api_method: apiClient.sendClassNotification
+
+      actions:
+        - name: Manage Activities
+          type: navigation
+          effect: Navigates to /educational/class-instances/{id}/activities
+          trigger: "Gerenciar Atividades" button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Class Chat
+          type: open_chat
+          effect: Opens the class chat conversation via ChatContext.openChat
+          trigger: "Chat da Turma" button click
+          reversible: true
+          confirmation_required: false
+          integration: ChatContext.openChat
+
+        - name: Send Notification
+          type: open_modal
+          effect: Opens the notification modal
+          trigger: "Enviar Notificacao" button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Recommendations
+          type: navigation
+          effect: Navigates to /educational/class-instances/{id}/recommendations
+          trigger: "Recomendacoes" button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Enroll Student
+          type: navigation
+          effect: Navigates to /educational/class-instances/{id}/enrollments/new
+          trigger: Enroll student button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Edit Class Instance
+          type: navigation
+          effect: Navigates to /educational/class-instances/{id}/edit
+          trigger: Edit button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Delete Class Instance
+          type: destructive
+          effect: Deletes the class instance via useDeleteClassInstance mutation, navigates to list
+          trigger: Delete button (destructive variant) click
+          reversible: false
+          confirmation_required: true
+          confirmation_method: window.confirm
+          mutation: useDeleteClassInstance
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/class-instances
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    ClassInstanceDetailStudentViewRoute:
+      source_file: routes/educational/ClassInstanceDetailStudentView/ClassInstanceDetailStudentViewRoute.tsx
+      description: Student-facing read-only view of a class instance showing enrolled content, progress, and available actions.
+
+      data_loading:
+        hook: useClassInstance(id)
+        source: URL param :id
+
+      fields: []
+      note: "Read-only student view. Shows class content structure, progress tracking, and student-specific actions."
+
+      display_sections:
+        - name: Class Info
+          fields_displayed:
+            - name
+            - code
+            - institution
+            - deliveryMode
+            - startDate
+            - endDate
+            - status
+
+        - name: Progress Overview
+          description: "Shows student progress across pathways/series/units"
+          features:
+            - progress_bar: true
+            - completion_percentage: true
+
+        - name: Content Navigation
+          description: "Navigable tree of pathways, series, units, and components"
+
+      modals: []
+
+      actions:
+        - name: Navigate to Component
+          type: navigation
+          effect: Opens the component viewer/player
+          trigger: Component card click
+          reversible: true
+          confirmation_required: false
+
+        - name: Back
+          type: navigation
+          effect: Navigates to student dashboard
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    RecommendationsRoute:
+      source_file: routes/educational/Recommendations/RecommendationsRoute.tsx
+      description: AI-generated recommendations for a specific class instance based on student performance and engagement data.
+
+      data_loading:
+        hook: useClassInstanceRecommendations(classInstanceId)
+        source: URL param :classInstanceId
+
+      fields: []
+      note: "Display-only page showing AI-generated recommendations per class instance."
+
+      display_sections:
+        - name: Recommendations List
+          description: "Lists AI recommendations with priority, category, and actionable suggestions"
+          features:
+            - priority_badges: true
+            - category_grouping: true
+            - action_buttons: true
+
+      modals: []
+
+      actions:
+        - name: Apply Recommendation
+          type: action
+          effect: Executes the recommended action (e.g., send notification, adjust content)
+          trigger: Apply button click per recommendation
+          reversible: true
+          confirmation_required: true
+
+        - name: Dismiss Recommendation
+          type: action
+          effect: Marks recommendation as dismissed
+          trigger: Dismiss button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Back to Class
+          type: navigation
+          effect: Navigates to /educational/class-instances/{classInstanceId}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+  # ===========================================================================
+  # ENROLLMENTS MODULE
+  # ===========================================================================
+  enrollments:
+    EnrollmentListRoute:
+      source_file: routes/educational/ClassEnrollmentList/ClassEnrollmentListRoute.tsx
+      description: Lists all enrollments for a specific class instance with search and status filtering.
+
+      fields:
+        - name: searchTerm
+          field_id: searchTerm
+          type: text
+          component: SearchBar
+          required: false
+          validation: none
+          purpose: Filter enrollments by student name or email
+
+        - name: statusFilter
+          field_id: statusFilter
+          type: select
+          component: Select (shadcn)
+          required: false
+          default_value: "all"
+          options:
+            - value: "all"
+              label: enrollments.status.all
+            - value: "enrolled"
+              label: enrollments.status.enrolled
+            - value: "completed"
+              label: enrollments.status.completed
+            - value: "dropped"
+              label: enrollments.status.dropped
+            - value: "suspended"
+              label: enrollments.status.suspended
+
+      inline_fields:
+        - name: enrollmentStatus
+          field_id: enrollment_status_select
+          type: select
+          component: select (native, inline per row)
+          purpose: Change individual enrollment status inline
+          options:
+            - value: "enrolled"
+              label: enrollments.status.enrolled
+            - value: "completed"
+              label: enrollments.status.completed
+            - value: "dropped"
+              label: enrollments.status.dropped
+            - value: "suspended"
+              label: enrollments.status.suspended
+            - value: "transferred"
+              label: enrollments.status.transferred
+          accessibility: aria-label with student name
+
+      modals: []
+
+      actions:
+        - name: Enroll Student
+          type: navigation
+          effect: Navigates to /educational/class-instances/{classInstanceId}/enrollments/new
+          trigger: SearchBar button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Change Enrollment Status
+          type: inline_mutation
+          effect: Updates enrollment status via useUpdateClassEnrollment mutation
+          trigger: Status dropdown change per enrollment row
+          reversible: true
+          confirmation_required: false
+          mutation: useUpdateClassEnrollment
+
+        - name: Drop Enrollment
+          type: destructive
+          effect: Drops enrollment via useDropClassEnrollment mutation
+          trigger: Trash icon button click per enrollment row
+          reversible: false
+          confirmation_required: true
+          confirmation_method: window.confirm
+          mutation: useDropClassEnrollment
+
+        - name: Back to Class
+          type: navigation
+          effect: Navigates to /educational/class-instances/{classInstanceId}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+    EnrollmentCreateRoute:
+      source_file: routes/educational/ClassEnrollmentCreate/ClassEnrollmentCreateRoute.tsx
+      description: Form to enroll students in a class instance, supporting single and batch enrollment modes.
+
+      fields:
+        - name: enrollmentMode
+          field_id: enrollmentMode
+          type: toggle_button
+          component: Custom toggle buttons
+          required: false
+          default_value: "single"
+          options:
+            - value: "single"
+              label: enrollments.singleEnrollment
+              icon: UserPlus
+            - value: "batch"
+              label: enrollments.batchEnrollment
+              icon: Users
+
+        # Single enrollment fields
+        - name: userId
+          field_id: userId
+          type: select
+          component: select (native)
+          required: true
+          visible_when: enrollmentMode == "single"
+          validation:
+            - rule: not_empty
+              message: enrollments.validation.selectStudent
+          data_source: apiClient.listUsers (userType=student, limit=100)
+          display_format: "{fullName} ({email or id})"
+
+        # Batch enrollment fields
+        - name: batchFile
+          field_id: batch-file-input
+          type: file_upload
+          component: input[type=file] (hidden) with drag-and-drop zone
+          required: true (when batch mode)
+          visible_when: enrollmentMode == "batch"
+          accepted_formats: ".xlsx, .xls"
+          validation:
+            - rule: file_type
+              accepted:
+                - "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                - "application/vnd.ms-excel"
+              message: enrollments.batch.invalidFileType
+          interaction: click or drag-and-drop
+
+      modals:
+        - name: Batch Results Modal
+          trigger: Automatically after batch upload completes, or "View Details" button click
+          purpose: Display detailed results of batch enrollment processing
+          component: Dialog (shadcn)
+          fields: []
+          display_data:
+            - totalRows: total number of rows processed
+            - successCount: successfully enrolled count
+            - errorCount: failed enrollment count
+            - results: per-row detail with row number, email, fullName, success/error status
+          actions:
+            - name: Close
+              type: close_modal
+              effect: Closes the results modal
+              reversible: true
+              confirmation_required: false
+
+      actions:
+        - name: Cancel (Single Mode)
+          type: navigation
+          effect: Navigates to /educational/class-instances/{classInstanceId}/enrollments
+          trigger: Cancel button click
+          reversible: true
+          confirmation_required: false
+          visible_when: enrollmentMode == "single"
+
+        - name: Enroll Student (Single Mode)
+          type: form_submit
+          effect: Enrolls student via useEnrollUser mutation, navigates to enrollment list
+          trigger: Submit button click
+          reversible: false
+          confirmation_required: false
+          visible_when: enrollmentMode == "single"
+          mutation: useEnrollUser
+
+        - name: Clear File (Batch Mode)
+          type: reset
+          effect: Clears selected file and batch results
+          trigger: Clear button click
+          reversible: true
+          confirmation_required: false
+          visible_when: enrollmentMode == "batch"
+
+        - name: Upload Batch (Batch Mode)
+          type: api_call
+          effect: Uploads Excel file as base64 to /api/class-instances/{classInstanceId}/batch-enroll endpoint
+          trigger: Upload button click
+          reversible: false
+          confirmation_required: false
+          visible_when: enrollmentMode == "batch"
+
+        - name: Back
+          type: navigation
+          effect: Navigates to /educational/class-instances/{classInstanceId}/enrollments
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+  # ===========================================================================
+  # ACTIVITIES MODULE
+  # ===========================================================================
+  activities:
+    ActivityManagementRoute:
+      source_file: routes/educational/ActivityManagement/ActivityManagementRoute.tsx
+      description: >
+        Management dashboard for class activities. Displays attendance proof components
+        and group work components in expandable cards organized by tabs.
+        No form fields - this is a read/manage view with expandable sections.
+
+      fields:
+        - name: activeTab
+          field_id: activeTab
+          type: tab_selector
+          component: Tabs/TabsList/TabsTrigger (shadcn)
+          required: false
+          default_value: "attendance"
+          options:
+            - value: "attendance"
+              label: "Comprovantes de Presenca"
+              icon: FileCheck
+              badge: attendanceComponents.length
+            - value: "groupwork"
+              label: "Trabalhos em Grupo"
+              icon: Users
+              badge: groupWorkComponents.length
+
+      modals: []
+      note: >
+        This page does not have its own form fields or modals. It delegates to child
+        components (AttendanceProofList, GroupWorkManagement) which have their own
+        forms and modals. The page itself manages expandable component cards.
+
+      child_components:
+        - name: AttendanceProofList
+          rendered_in: attendance tab, inside expanded component card
+          props:
+            - componentId
+            - classInstanceId
+            - showBulkActions (true)
+
+        - name: GroupWorkManagement
+          rendered_in: groupwork tab, inside expanded component card
+          props:
+            - componentId
+            - maxMembersDefault (5)
+            - allowCreateGroups (true)
+
+      activity_component_types:
+        - presencial_activity
+        - hybrid_activity
+        - online_activity
+
+      attendance_subtypes:
+        - in_person_class
+        - internship
+        - technical_visit
+        - cultural_activity_professor
+        - cultural_activity_student
+        - lecture
+
+      group_work_subtypes:
+        - group_project
+
+      stats_cards:
+        - label: "Atividades Presenciais"
+          value: attendanceComponents.length
+        - label: "Trabalhos em Grupo"
+          value: groupWorkComponents.length
+        - label: "Unidades"
+          value: unitsData.data.length
+        - label: "Total de Atividades"
+          value: activityComponents.length
+
+      actions:
+        - name: Back to Class
+          type: navigation
+          effect: Navigates to /educational/class-instances/{classInstanceId}
+          trigger: ArrowLeft button click
+          reversible: true
+          confirmation_required: false
+
+        - name: Toggle Expand Component
+          type: toggle
+          effect: Expands or collapses individual activity component card to show management UI
+          trigger: Component card header click or chevron button
+          reversible: true
+          confirmation_required: false
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+summary:
+  total_pages_analyzed: 26
+  pages_with_forms: 14
+  pages_with_modals: 2
+  total_form_fields: 112
+  total_modal_fields: 5
+  total_actions: 62
+
+  pages_by_module:
+    collections:
+      - CollectionListRoute (list/filter)
+      - CollectionCreateRoute (create form)
+      - CollectionEditRoute (edit form)
+      - CollectionDetailRoute (detail/metadata grid + linked pathways with drag-drop)
+    pathways:
+      - PathwayListRoute (list/filter)
+      - PathwayCreateRoute (create form)
+      - PathwayEditRoute (edit form)
+      - PathwayDetailRoute (detail/metadata + linked series with drag-drop)
+    series:
+      - SeriesListRoute (list/filter)
+      - SeriesCreateRoute (create form)
+      - SeriesEditRoute (edit form)
+      - SeriesDetailRoute (detail/metadata + linked units with drag-drop)
+    units:
+      - UnitListRoute (list/filter)
+      - UnitCreateRoute (create form)
+      - UnitEditRoute (edit form)
+      - UnitDetailRoute (detail/metadata + linked components + Open Builder)
+    components:
+      - ComponentListRoute (list/filter by title and unitId)
+      - ComponentCreateRoute (create form with 11 types, 8 feature flags, type-specific configs)
+      - ComponentEditRoute (edit form)
+      - ComponentDetailRoute (read-only detail)
+      - ComponentBuilderRoute (visual builder within unit context)
+    class_instances:
+      - ClassInstanceListRoute (list/filter)
+      - ClassInstanceCreateRoute (create form with 3 sections, auto-code INST-CONT-MMYY-SCHEDULE)
+      - ClassInstanceEditRoute (edit form)
+      - ClassInstanceDetailRoute (detail/actions/notifications/chat)
+      - ClassInstanceDetailStudentViewRoute (student-facing read-only view)
+      - RecommendationsRoute (AI recommendations per class)
+    enrollments:
+      - EnrollmentListRoute (list/filter/inline-edit)
+      - EnrollmentCreateRoute (create single + batch)
+    activities:
+      - ActivityManagementRoute (management dashboard)
+
+  shared_patterns:
+    search: "SearchBar component used consistently across all list pages"
+    status_filter: "Status filter (all/draft/published/archived or all/active/completed/cancelled) on all list pages"
+    multi_parent: "Multi-parent support via MultiSelect for collectionIds, pathwayIds, seriesIds"
+    sku_validation: "Consistent SKU validation pattern: required, min 3 chars, ^[A-Z0-9-]+$ regex, auto-uppercase"
+    image_upload: "ImageUpload component for thumbnail and banner on Collections and Series"
+    form_submission: "Consistent pattern: validate() -> mutateAsync() -> toast.success -> navigate to detail"
+    cancel_pattern: "Cancel buttons consistently navigate back to list pages"
+    route_suffix: "All route component names use 'Route' suffix consistently"
+    url_patterns: "All create URLs use /new pattern (not /create). All enrollment create URLs use /enrollments/new."
+    edit_pages: "All entities have Edit pages with same fields as Create plus data loading from useEntity(id)"
+    detail_pages: "All entities have Detail pages with metadata grid and linked child entities with drag-drop"
+    chat_integration: "ClassInstanceDetail integrates with ChatContext.openChat for class messaging"
+    notifications: "ClassInstanceDetail has notification modal with title, type, priority, message, sendClassNotification"

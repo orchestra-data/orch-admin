@@ -1,0 +1,2086 @@
+# ============================================================================
+# GUIA DE PAGINAS DO SISTEMA COGEDU - ASSISTENTE ORCH ADMIN
+# ============================================================================
+# Versao: 2.0
+# Data: 2026-02-12
+# Proposito: Base de conhecimento para navegacao e uso do sistema
+# ============================================================================
+
+metadata:
+  sistema: "Cogedu - Sistema de Gestao Educacional"
+  versao_cogedu: "3.10.0"
+  versao_orch: "3.7.0"
+  total_modulos: 8
+  total_paginas: 45
+
+# ============================================================================
+# GLOSSARIO GERAL - Mapeamento de Termos
+# ============================================================================
+glossario_geral:
+  descricao: "Traducao de termos tecnicos do sistema para linguagem do usuario"
+
+  termos_educacionais:
+    Collection: "Curso completo (ex: Bacharelado em Direito)"
+    Colecao: "Curso completo (ex: Bacharelado em Direito)"
+    Pathway: "Trilha de aprendizagem - conjunto de disciplinas"
+    Trilha: "Trilha de aprendizagem - conjunto de disciplinas"
+    Series: "Disciplina ou materia (ex: Calculo I)"
+    Disciplina: "Disciplina ou materia (ex: Calculo I)"
+    Unit: "Modulo de ensino - parte de uma disciplina"
+    Modulo: "Modulo de ensino - parte de uma disciplina"
+    Component: "Conteudo especifico (video, texto, quiz, atividade)"
+    Componente: "Conteudo especifico (video, texto, quiz, atividade)"
+
+  termos_administrativos:
+    ClassInstance: "Turma - oferta de curso com alunos matriculados"
+    Turma: "Oferta de curso com alunos matriculados"
+    Enrollment: "Matricula - vinculo entre aluno e turma"
+    Matricula: "Vinculo entre aluno e turma"
+    Admission: "Processo Seletivo"
+    Offer: "Oferta de vaga no processo seletivo"
+    Candidate: "Candidato inscrito no processo seletivo"
+
+  termos_avaliacoes:
+    Assessment: "Avaliacao ou prova"
+    Quiz: "Questionario rapido"
+    Assignment: "Atividade ou tarefa"
+    Rubric: "Rubrica - criterios de avaliacao"
+    Grading: "Correcao de avaliacao"
+
+  status_comum:
+    draft: "Rascunho"
+    published: "Publicado"
+    active: "Ativo"
+    inactive: "Inativo"
+    completed: "Concluido"
+    cancelled: "Cancelado"
+    archived: "Arquivado"
+
+# ============================================================================
+# NAVEGACAO PRINCIPAL
+# ============================================================================
+navegacao_principal:
+  descricao: "Estrutura do menu principal do sistema"
+
+  menu_principal:
+    - nome: "Dashboard"
+      icone: "Home"
+      url: "/"
+      descricao: "Pagina inicial com visao geral"
+
+    - nome: "Usuarios"
+      icone: "Users"
+      url: "/users"
+      descricao: "Gestao de alunos e funcionarios"
+
+    - nome: "Empresas"
+      icone: "Building"
+      url: "/companies"
+      descricao: "Gestao de empresas e instituicoes"
+
+    - nome: "Educacional"
+      icone: "GraduationCap"
+      url: "/educational"
+      descricao: "Conteudo educacional e turmas"
+      submenu:
+        - { nome: "Colecoes (Cursos)", url: "/educational/collections" }
+        - { nome: "Trilhas", url: "/educational/pathways" }
+        - { nome: "Series (Disciplinas)", url: "/educational/series" }
+        - { nome: "Unidades (Modulos)", url: "/educational/units" }
+        - { nome: "Turmas", url: "/educational/class-instances" }
+        - { nome: "Processo Seletivo", url: "/educational/admission" }
+        - { nome: "Avaliacoes", url: "/educational/exams" }
+        - { nome: "Certificados", url: "/educational/certificates" }
+
+    - nome: "Business Intelligence"
+      icone: "BarChart"
+      url: "/bi"
+      descricao: "Relatorios e dashboards"
+
+# ============================================================================
+# MODULO 1: USUARIOS
+# ============================================================================
+modulo_usuarios:
+  descricao: "Gerenciamento completo de usuarios do sistema (alunos e funcionarios)"
+  base_url: "/users"
+
+  paginas:
+    lista_usuarios:
+      url: "/users"
+      nome: "Lista de Usuarios"
+
+      o_que_faz: |
+        Esta e a pagina principal de usuarios. Aqui voce pode:
+        - Ver todos os usuarios cadastrados (alunos e funcionarios)
+        - Buscar usuarios por nome ou email
+        - Alternar entre visualizacao de funcionarios e alunos
+        - Criar novos usuarios
+        - Excluir usuarios
+        - Importar alunos em lote (via planilha Excel)
+
+      como_usar:
+        - passo: 1
+          acao: "Use o toggle no topo para escolher 'Funcionarios' ou 'Alunos'"
+        - passo: 2
+          acao: "Digite no campo de busca para filtrar por nome ou email"
+        - passo: 3
+          acao: "Clique em um usuario para ver detalhes"
+        - passo: 4
+          acao: "Use o botao 'Novo Colaborador' ou 'Novo Aluno' para criar"
+        - passo: 5
+          acao: "No modo alunos, clique no botao de upload para importar planilha"
+
+      filtros:
+        - nome: "Tipo de Usuario"
+          tipo: "toggle"
+          opcoes: ["Funcionarios", "Alunos"]
+
+        - nome: "Busca"
+          tipo: "texto"
+          placeholder: "Buscar por nome ou email"
+          busca_em: ["Nome completo", "Email", "CPF"]
+
+      colunas_tabela:
+        - campo: "Foto"
+          descricao: "Foto do perfil do usuario"
+        - campo: "Nome"
+          descricao: "Nome completo"
+        - campo: "Email"
+          descricao: "Email de acesso"
+        - campo: "CPF"
+          descricao: "Documento principal"
+        - campo: "Status"
+          descricao: "Ativo ou Inativo"
+
+      acoes_disponiveis:
+        - nome: "Ver Detalhes"
+          como: "Clique no card do usuario"
+          leva_para: "/users/{id}"
+
+        - nome: "Novo Usuario"
+          como: "Botao no topo da pagina"
+          leva_para: "/users/new"
+
+        - nome: "Importar Alunos"
+          como: "Botao de upload (apenas para alunos)"
+          leva_para: "/users/batch-students"
+
+        - nome: "Excluir Usuario"
+          como: "Icone de lixeira no card"
+          requer: "Confirmacao"
+          reversivel: false
+
+    criar_usuario:
+      url: "/users/new"
+      nome: "Criar Novo Usuario"
+
+      o_que_faz: |
+        Formulario completo para cadastrar um novo usuario no sistema.
+        O formulario e dividido em abas para facilitar o preenchimento.
+        Os dados sao salvos automaticamente como rascunho enquanto voce preenche.
+
+      como_usar:
+        - passo: 1
+          acao: "Preencha a aba 'Identidade' com dados pessoais basicos"
+        - passo: 2
+          acao: "Na aba 'Vinculo', escolha a empresa/instituicao e cargo/curso"
+        - passo: 3
+          acao: "Adicione enderecos na aba 'Enderecos' (opcional)"
+        - passo: 4
+          acao: "Configure permissoes se for funcionario (aba 'Permissoes')"
+        - passo: 5
+          acao: "Clique em 'Salvar' para criar o usuario"
+
+      abas:
+        identidade:
+          nome: "Identidade"
+          descricao: "Dados pessoais basicos do usuario"
+          campos:
+            - nome: "Nome Completo"
+              obrigatorio: sim
+              tipo: "texto"
+              exemplo: "João da Silva Santos"
+
+            - nome: "Nome Social"
+              obrigatorio: nao
+              tipo: "texto"
+              quando_usar: "Para usuarios que preferem ser chamados por outro nome"
+
+            - nome: "Genero"
+              obrigatorio: sim
+              tipo: "selecao"
+              opcoes: ["Masculino", "Feminino", "Outro"]
+              padrao: "Outro"
+
+            - nome: "Email"
+              obrigatorio: sim
+              tipo: "email"
+              importante: "Este email sera usado para login no sistema"
+
+            - nome: "Telefone"
+              obrigatorio: nao
+              tipo: "texto"
+              formato: "(00) 00000-0000"
+
+            - nome: "Data de Nascimento"
+              obrigatorio: nao
+              tipo: "data"
+
+            - nome: "Documento Principal"
+              obrigatorio: sim
+              tipo: "composto"
+              subcampos:
+                - nome: "Tipo"
+                  opcoes: ["CPF", "CNPJ", "RG", "Passaporte"]
+                - nome: "Numero"
+                  validacao: "CPF precisa ter 11 digitos, CNPJ 14 digitos"
+
+            - nome: "Foto"
+              obrigatorio: nao
+              tipo: "upload"
+              aceita: "Imagens (JPG, PNG)"
+              tamanho_max: "5MB"
+
+        vinculo:
+          nome: "Vinculo"
+          descricao: "Vinculo do usuario com empresa/instituicao"
+
+          para_funcionarios:
+            - nome: "Empresa"
+              obrigatorio: sim
+              tipo: "selecao"
+              descricao: "Empresa onde o funcionario trabalha"
+
+            - nome: "Cargo"
+              obrigatorio: sim
+              tipo: "texto"
+              exemplo: "Coordenador Pedagogico"
+
+            - nome: "Nivel de Governanca"
+              obrigatorio: nao
+              tipo: "selecao"
+              descricao: "Define o nivel de acesso administrativo"
+
+          para_alunos:
+            - nome: "Instituicao"
+              obrigatorio: sim
+              tipo: "selecao"
+              descricao: "Instituicao de ensino onde o aluno estuda"
+
+            - nome: "Curso"
+              obrigatorio: sim
+              tipo: "texto"
+              exemplo: "Bacharelado em Direito"
+
+        enderecos:
+          nome: "Enderecos"
+          descricao: "Enderecos do usuario (pode adicionar varios)"
+          pode_repetir: sim
+          campos:
+            - nome: "CEP"
+              formato: "00000-000"
+              dica: "Ao preencher o CEP, o sistema busca o endereco automaticamente"
+            - nome: "Estado"
+              preenchimento: "automatico (apos CEP)"
+            - nome: "Cidade"
+              preenchimento: "automatico (apos CEP)"
+            - nome: "Bairro"
+              preenchimento: "automatico (apos CEP)"
+            - nome: "Rua"
+              preenchimento: "automatico (apos CEP)"
+            - nome: "Numero"
+              obrigatorio: sim
+            - nome: "Complemento"
+              obrigatorio: nao
+              exemplo: "Apto 101, Bloco B"
+
+        mais_informacoes:
+          nome: "Mais Informacoes"
+          descricao: "Campos customizaveis adicionais"
+          nota: "Campos dinamicos configurados pelo administrador"
+
+        permissoes:
+          nome: "Permissoes"
+          descricao: "Configuracao de permissoes de acesso (apenas funcionarios)"
+          aparece_para: "funcionarios"
+          nota: "Define o que o usuario pode fazer no sistema"
+
+      dicas_importantes:
+        - "Os dados sao salvos como rascunho automaticamente"
+        - "Campos com asterisco (*) sao obrigatorios"
+        - "O email sera usado como login do usuario"
+        - "Ao preencher o CEP, aguarde o carregamento dos dados do endereco"
+
+    detalhes_usuario:
+      url: "/users/{id}"
+      nome: "Detalhes do Usuario"
+
+      o_que_faz: |
+        Mostra todas as informacoes de um usuario especifico.
+        Permite editar dados, trocar senha e realizar acoes administrativas.
+
+      como_usar:
+        - passo: 1
+          acao: "Visualize os dados do usuario organizados por secoes"
+        - passo: 2
+          acao: "Clique em 'Editar' em cada bloco para alterar informacoes"
+        - passo: 3
+          acao: "Use o botao 'Alterar Senha' se for o proprio usuario"
+        - passo: 4
+          acao: "Use 'Reset de Senha' (admin) para redefinir senha de outro usuario"
+
+      secoes:
+        - nome: "Foto de Perfil"
+          conteudo: "Foto do usuario com opcao de alterar"
+
+        - nome: "Dados Pessoais"
+          conteudo: "Nome, email, CPF, telefone, data de nascimento"
+          editavel: sim
+
+        - nome: "Vinculo"
+          conteudo: "Empresa/Instituicao, cargo/curso"
+          editavel: sim
+
+        - nome: "Enderecos"
+          conteudo: "Lista de enderecos cadastrados"
+          editavel: sim
+          pode_adicionar: sim
+
+        - nome: "Permissoes"
+          conteudo: "Permissoes de acesso (apenas funcionarios)"
+          editavel: sim
+          requer: "permissao administrativa"
+
+      acoes_disponiveis:
+        alterar_senha:
+          nome: "Alterar Senha"
+          quem_pode: "O proprio usuario"
+          o_que_precisa:
+            - "Senha atual"
+            - "Nova senha (minimo 8 caracteres, 1 maiuscula, 1 minuscula, 1 numero)"
+            - "Confirmacao da nova senha"
+
+        reset_senha_admin:
+          nome: "Reset de Senha (Administrador)"
+          quem_pode: "Apenas administradores"
+          o_que_precisa:
+            - "Justificativa (minimo 10 caracteres)"
+            - "Opcao: Senha temporaria (usuario deve trocar no primeiro login)"
+            - "Opcao: Notificar usuario por email"
+          importante: "Esta acao e auditada e registrada no sistema"
+
+        editar_dados:
+          nome: "Editar Dados"
+          como: "Clique no botao 'Editar' em cada secao"
+
+        excluir_usuario:
+          nome: "Excluir Usuario"
+          requer: "Confirmacao"
+          reversivel: false
+          cuidado: "Acao permanente, nao pode ser desfeita"
+
+    importar_alunos:
+      url: "/users/batch-students"
+      nome: "Importar Alunos em Lote"
+
+      o_que_faz: |
+        Permite importar varios alunos de uma vez usando uma planilha Excel (.xlsx).
+        Ideal para matricular turmas inteiras de uma vez.
+
+      como_usar:
+        - passo: 1
+          acao: "Baixe o modelo de planilha clicando no botao 'Download Template'"
+        - passo: 2
+          acao: "Preencha a planilha com os dados dos alunos"
+        - passo: 3
+          acao: "Certifique-se de preencher todos os campos obrigatorios"
+        - passo: 4
+          acao: "Faca upload da planilha preenchida"
+        - passo: 5
+          acao: "O sistema validara os dados e mostrara erros, se houver"
+        - passo: 6
+          acao: "Confirme a importacao"
+
+      campos_obrigatorios:
+        - "Nome Completo"
+        - "Email"
+        - "CPF"
+        - "Instituicao"
+
+      campos_opcionais:
+        - "Telefone"
+        - "Data de Nascimento"
+        - "Curso"
+
+      validacoes:
+        - "Emails devem ser unicos (nao podem estar ja cadastrados)"
+        - "CPFs devem ser validos e unicos"
+        - "Instituicao deve existir no sistema"
+
+      dicas:
+        - "Use o template fornecido para evitar erros de formatacao"
+        - "Nao altere os nomes das colunas do template"
+        - "Verifique se nao ha linhas vazias no meio da planilha"
+        - "O sistema permite ate 1000 alunos por importacao"
+
+# ============================================================================
+# MODULO 2: EMPRESAS
+# ============================================================================
+modulo_empresas:
+  descricao: "Gerenciamento de empresas e instituicoes (sistema multi-tenant)"
+  base_url: "/companies"
+
+  paginas:
+    lista_empresas:
+      url: "/companies"
+      nome: "Lista de Empresas"
+
+      o_que_faz: |
+        Lista todas as empresas e instituicoes cadastradas no sistema.
+        Permite gerenciar tanto empresas internas (sua organizacao) quanto externas (parceiros).
+
+      como_usar:
+        - passo: 1
+          acao: "Use o toggle para filtrar entre empresas 'Internas' ou 'Externas'"
+        - passo: 2
+          acao: "Digite no campo de busca para procurar por nome ou CNPJ"
+        - passo: 3
+          acao: "Clique em uma empresa para ver detalhes"
+        - passo: 4
+          acao: "Use 'Nova Empresa' para cadastrar"
+
+      filtros:
+        - nome: "Grupo"
+          tipo: "toggle"
+          opcoes: ["Interna", "Externa"]
+          explica: "Interna = sua organizacao | Externa = parceiros"
+
+        - nome: "Busca"
+          tipo: "texto"
+          placeholder: "Buscar por nome ou CNPJ"
+          busca_em: ["Nome fantasia", "Razao social", "CNPJ"]
+
+      colunas:
+        - campo: "Nome"
+          descricao: "Nome fantasia da empresa"
+        - campo: "CNPJ"
+          descricao: "Numero de registro (formatado)"
+        - campo: "Grupo"
+          descricao: "Interna ou Externa"
+        - campo: "Tipo"
+          descricao: "Tipo institucional (Matriz, Filial, etc)"
+        - campo: "Responsavel Legal"
+          descricao: "Empresa mae (se for filial)"
+        - campo: "Status"
+          descricao: "Ativa ou Inativa"
+
+      acoes:
+        - nome: "Ver Detalhes"
+          como: "Clique no card da empresa"
+        - nome: "Nova Empresa"
+          como: "Botao no topo"
+        - nome: "Editar"
+          como: "Botao de editar no card"
+        - nome: "Desativar/Ativar"
+          como: "Botao de status"
+
+    criar_empresa:
+      url: "/companies/new"
+      nome: "Criar Nova Empresa"
+
+      o_que_faz: |
+        Formulario completo para cadastrar uma nova empresa ou instituicao.
+        Organizado em abas para facilitar o preenchimento.
+
+      como_usar:
+        - passo: 1
+          acao: "Preencha os dados basicos (nome, CNPJ, tipo)"
+        - passo: 2
+          acao: "Adicione enderecos e contatos"
+        - passo: 3
+          acao: "Configure parametros educacionais (se aplicavel)"
+        - passo: 4
+          acao: "Salve a empresa"
+
+      campos_principais:
+        - nome: "Nome Fantasia"
+          obrigatorio: sim
+          exemplo: "Faculdade de Tecnologia ABC"
+
+        - nome: "Razao Social"
+          obrigatorio: sim
+          exemplo: "Faculdade ABC Educacao LTDA"
+
+        - nome: "CNPJ"
+          obrigatorio: sim
+          formato: "00.000.000/0000-00"
+          validacao: "Deve ser CNPJ valido"
+
+        - nome: "Grupo"
+          obrigatorio: sim
+          opcoes: ["Interna", "Externa"]
+
+        - nome: "Tipo Institucional"
+          obrigatorio: sim
+          opcoes: ["Matriz", "Filial", "Unidade", "Campus"]
+
+        - nome: "Empresa Mae"
+          obrigatorio: "se tipo for Filial ou Unidade"
+          descricao: "Selecione a empresa responsavel"
+
+    detalhes_empresa:
+      url: "/companies/{id}"
+      nome: "Detalhes da Empresa"
+
+      o_que_faz: |
+        Mostra informacoes completas da empresa e permite edicao.
+
+      secoes:
+        - "Dados cadastrais (nome, CNPJ, tipo)"
+        - "Enderecos"
+        - "Contatos"
+        - "Configuracoes educacionais"
+        - "Usuarios vinculados"
+
+# ============================================================================
+# MODULO 3: PROCESSO SELETIVO (ADMISSION)
+# ============================================================================
+modulo_processo_seletivo:
+  descricao: "Gerenciamento completo de processos seletivos, desde criacao ate aprovacao de candidatos"
+  base_url: "/educational/admission"
+  conceitos_importantes:
+    processo_seletivo: "E o vestibular/processo de admissao. Ex: Vestibular 2025.1"
+    oferta: "E uma vaga especifica dentro do processo. Ex: Oferta para curso de Direito"
+    candidato: "Pessoa inscrita em uma oferta"
+    pipeline: "Etapas que o candidato deve passar (inscricao, documentacao, avaliacao, etc)"
+
+  paginas:
+    lista_processos:
+      url: "/educational/admission"
+      nome: "Lista de Processos Seletivos"
+
+      o_que_faz: |
+        Mostra todos os processos seletivos cadastrados com metricas de desempenho.
+        Aqui voce tem uma visao geral de quantos candidatos se inscreveram,
+        quantos foram aprovados, reprovados, etc.
+
+      como_usar:
+        - passo: 1
+          acao: "Visualize os cards com todos os processos seletivos"
+        - passo: 2
+          acao: "Use a busca para encontrar um processo especifico"
+        - passo: 3
+          acao: "Filtre por status (Ativo, Rascunho, Encerrado)"
+        - passo: 4
+          acao: "Clique em um processo para ver detalhes"
+        - passo: 5
+          acao: "Use 'Nova Admissao' para criar um novo processo"
+
+      filtros:
+        - nome: "Busca"
+          placeholder: "Buscar processos seletivos..."
+          busca_em: ["Nome", "Codigo", "Descricao"]
+
+        - nome: "Status"
+          opcoes:
+            - { valor: "all", nome: "Todos" }
+            - { valor: "draft", nome: "Rascunho" }
+            - { valor: "active", nome: "Ativas" }
+            - { valor: "closed", nome: "Encerradas" }
+
+      informacoes_exibidas:
+        - "Nome do processo"
+        - "Codigo"
+        - "Status (badge colorido)"
+        - "Total de candidatos"
+        - "Aprovados"
+        - "Reprovados"
+        - "Taxa de aprovacao (%)"
+
+      acoes:
+        - nome: "Ver Detalhes"
+          como: "Clique no card do processo"
+        - nome: "Nova Admissao"
+          como: "Botao no topo"
+          leva_para: "/educational/admission/new"
+
+    criar_processo:
+      url: "/educational/admission/new"
+      nome: "Criar Processo Seletivo"
+
+      o_que_faz: |
+        Cria um novo processo seletivo completo.
+        Voce define nome, periodo de inscricoes, e como os candidatos
+        aprovados serao matriculados (turma unica ou escolha entre turmas).
+
+      como_usar:
+        - passo: 1
+          acao: "Escolha a empresa responsavel"
+        - passo: 2
+          acao: "De um nome ao processo (ex: Vestibular 2025.1)"
+        - passo: 3
+          acao: "Escolha o modo de matricula"
+        - passo: 4
+          acao: "Configure as datas (inicio/fim de inscricoes, resultado)"
+        - passo: 5
+          acao: "Defina se permite multiplas candidaturas e pagamento"
+        - passo: 6
+          acao: "Salve o processo"
+
+      campos:
+        empresa:
+          nome: "Empresa"
+          obrigatorio: sim
+          tipo: "selecao"
+          descricao: "Selecione a instituicao responsavel pelo processo"
+
+        nome:
+          nome: "Nome"
+          obrigatorio: sim
+          tipo: "texto"
+          exemplo: "Processo Seletivo 2025.1"
+
+        descricao:
+          nome: "Descricao"
+          obrigatorio: nao
+          tipo: "area de texto"
+          exemplo: "Processo seletivo para ingresso no primeiro semestre de 2025"
+
+        modo_matricula:
+          nome: "Modo de Matricula"
+          obrigatorio: sim
+          tipo: "escolha"
+          opcoes:
+            matricula_unica:
+              nome: "Matricula Unica"
+              descricao: "Todos os aprovados vao para a mesma turma"
+              quando_usar: "Quando ha apenas uma turma disponivel"
+              campo_adicional:
+                nome: "Turma"
+                obrigatorio: sim
+                descricao: "Selecione a turma onde os aprovados serao matriculados"
+
+            escolha_multipla:
+              nome: "Escolha Multipla"
+              descricao: "Candidatos escolhem entre varias turmas"
+              quando_usar: "Quando ha turnos diferentes (manha, tarde, noite)"
+              campo_adicional:
+                nome: "Turmas Disponiveis"
+                obrigatorio: sim
+                minimo: 2
+                descricao: "Candidatos poderao ordenar suas preferencias"
+
+        datas:
+          inicio_inscricoes:
+            nome: "Inicio das Inscricoes"
+            obrigatorio: nao
+            tipo: "data e hora"
+
+          fim_inscricoes:
+            nome: "Termino das Inscricoes"
+            obrigatorio: nao
+            tipo: "data e hora"
+            validacao: "Deve ser posterior ao inicio"
+
+          divulgacao_resultado:
+            nome: "Divulgacao do Resultado"
+            obrigatorio: nao
+            tipo: "data e hora"
+            validacao: "Deve ser posterior ao fim das inscricoes"
+
+        configuracoes:
+          multiplas_candidaturas:
+            nome: "Permitir multiplas candidaturas"
+            tipo: "checkbox"
+            descricao: "Candidato pode se inscrever em mais de uma oferta"
+
+          requer_pagamento:
+            nome: "Requer pagamento"
+            tipo: "checkbox"
+            descricao: "Cobranca de taxa de inscricao"
+
+      proximo_passo:
+        "Apos criar o processo seletivo, voce deve criar OFERTAS dentro dele"
+
+    detalhes_processo:
+      url: "/educational/admission/{id}"
+      nome: "Detalhes do Processo Seletivo"
+
+      o_que_faz: |
+        Mostra informacoes completas do processo seletivo e lista
+        todas as ofertas vinculadas. Aqui voce pode publicar o processo,
+        editar dados ou adicionar novas ofertas.
+
+      informacoes_exibidas:
+        - "Nome e status do processo"
+        - "Descricao"
+        - "Metricas: Total de candidatos, aprovados, reprovados, taxa de aprovacao"
+        - "Codigo do processo"
+        - "Empresa responsavel"
+        - "Datas (inicio/fim/divulgacao)"
+        - "Configuracoes (multiplas candidaturas, pagamento)"
+        - "Lista de ofertas vinculadas"
+
+      acoes:
+        - nome: "Editar"
+          icone: "Editar"
+          leva_para: "/educational/admission/{id}/edit"
+
+        - nome: "Excluir"
+          icone: "Lixeira"
+          requer: "Confirmacao"
+          cuidado: "Exclui o processo e todas as ofertas"
+
+        - nome: "Publicar"
+          icone: "Foguete"
+          aparece_quando: "Status = Rascunho"
+          o_que_faz: "Torna o processo visivel e ativo"
+
+        - nome: "Adicionar Oferta"
+          icone: "Plus"
+          leva_para: "/educational/admission/{id}/offers/new"
+
+    criar_oferta:
+      url: "/educational/admission/{admissionId}/offers/new"
+      nome: "Criar Oferta"
+
+      o_que_faz: |
+        Cria uma oferta de vaga dentro de um processo seletivo.
+        A oferta e onde voce define: quantas vagas, taxa de inscricao,
+        etapas do pipeline, e o formulario que o candidato deve preencher.
+
+      como_usar:
+        - passo: 1
+          acao: "De um nome a oferta (ex: Oferta Bacharelado em Direito)"
+        - passo: 2
+          acao: "Defina taxa de inscricao e numero de vagas"
+        - passo: 3
+          acao: "Selecione as etapas do pipeline (inscricao, avaliacao, etc)"
+        - passo: 4
+          acao: "Salve a oferta"
+        - passo: 5
+          acao: "Configure o formulario de inscricao no Form Builder"
+
+      campos:
+        - nome: "Nome da Oferta"
+          obrigatorio: sim
+          exemplo: "Oferta 2025.1 - Graduacao em Direito"
+
+        - nome: "Descricao"
+          obrigatorio: nao
+
+        - nome: "Tipo de Oferta"
+          obrigatorio: nao
+          exemplo: "Regular, Vestibular, ENEM"
+
+        - nome: "Taxa de Inscricao (R$)"
+          obrigatorio: nao
+          tipo: "numero decimal"
+          exemplo: "50.00"
+
+        - nome: "Desconto (%)"
+          obrigatorio: nao
+          tipo: "numero"
+          intervalo: "0 a 100"
+
+        - nome: "Vagas Totais"
+          obrigatorio: nao
+          tipo: "numero inteiro"
+
+        - nome: "Vagas Reservadas"
+          obrigatorio: nao
+          tipo: "numero inteiro"
+          descricao: "Ex: vagas para cotistas"
+
+        - nome: "Etapas do Pipeline"
+          obrigatorio: sim
+          tipo: "multipla escolha"
+          opcoes:
+            - { id: "inscricao", nome: "Inscricao" }
+            - { id: "documentacao", nome: "Documentacao" }
+            - { id: "avaliacao", nome: "Avaliacao" }
+            - { id: "pagamento", nome: "Pagamento" }
+            - { id: "contrato", nome: "Contrato" }
+            - { id: "resultado", nome: "Resultado" }
+
+      proximo_passo:
+        "Apos criar a oferta, clique em 'Editar Formulario' para configurar o formulario de inscricao"
+
+    form_builder:
+      url: "/educational/admission/offers/{offerId}/form-builder"
+      nome: "Construtor de Formulario"
+
+      o_que_faz: |
+        Editor visual para montar o formulario de inscricao que os candidatos
+        vao preencher. Voce arrasta e solta componentes (campos, documentos,
+        pagamento, etc) para criar o fluxo ideal.
+
+      como_usar:
+        - passo: 1
+          acao: "Arraste componentes da barra lateral para o centro"
+        - passo: 2
+          acao: "Clique em um componente para configurar seus detalhes"
+        - passo: 3
+          acao: "Reordene os componentes arrastando"
+        - passo: 4
+          acao: "Salve o formulario"
+
+      componentes_disponiveis:
+        - nome: "Dados Pessoais"
+          descricao: "Etapa fixa com nome, CPF, email, telefone"
+          obrigatorio: sim
+
+        - nome: "Campos Customizados"
+          descricao: "Adicione campos de texto, email, select, etc"
+          tipos: ["texto", "email", "telefone", "CPF", "data", "select", "checkbox"]
+
+        - nome: "Documentos"
+          descricao: "Upload de documentos (RG, historico, etc)"
+
+        - nome: "Pagamento"
+          descricao: "Processamento de pagamento da taxa"
+
+        - nome: "Avaliacao"
+          descricao: "Etapa de prova ou teste"
+
+        - nome: "Contrato"
+          descricao: "Assinatura digital de contrato"
+
+      dica:
+        "A primeira etapa 'Dados Pessoais' e obrigatoria e nao pode ser removida"
+
+    lista_candidatos:
+      url: "/educational/admission/candidates"
+      nome: "Lista de Candidatos"
+
+      o_que_faz: |
+        Lista todos os candidatos inscritos com filtros por processo,
+        oferta e status. Ao clicar em um candidato, abre um painel lateral
+        com detalhes completos (linha do tempo, documentos, notas).
+
+      como_usar:
+        - passo: 1
+          acao: "Use os filtros para encontrar candidatos"
+        - passo: 2
+          acao: "Veja os cards coloridos com totais por status"
+        - passo: 3
+          acao: "Clique em um candidato para ver detalhes"
+        - passo: 4
+          acao: "No painel lateral, veja linha do tempo, documentos e notas"
+
+      filtros:
+        - nome: "Busca"
+          placeholder: "Buscar por nome, email ou CPF..."
+        - nome: "Admissao"
+          tipo: "selecao"
+          descricao: "Filtrar por processo seletivo"
+        - nome: "Oferta"
+          tipo: "selecao"
+          descricao: "Filtrar por oferta"
+        - nome: "Status"
+          opcoes: ["Todos", "Em Andamento", "Aprovado", "Reprovado", "Cancelado"]
+
+      cards_de_status:
+        - nome: "Em Andamento"
+          cor: "azul"
+          icone: "Relogio"
+        - nome: "Aprovados"
+          cor: "verde"
+          icone: "Check"
+        - nome: "Reprovados"
+          cor: "vermelho"
+          icone: "X"
+        - nome: "Cancelados"
+          cor: "cinza"
+          icone: "X"
+
+      painel_detalhes:
+        abas:
+          - nome: "Linha do Tempo"
+            conteudo: "Historico de mudancas de etapa do candidato"
+          - nome: "Documentos"
+            conteudo: "Documentos enviados pelo candidato"
+          - nome: "Notas"
+            conteudo: "Notas de avaliacoes realizadas"
+
+    kanban_candidatos:
+      url: "/educational/admission/candidates/kanban"
+      nome: "Kanban de Candidatos"
+
+      o_que_faz: |
+        Visualizacao em quadro kanban com os candidatos organizados por etapa.
+        Voce pode arrastar candidatos de uma etapa para outra para
+        avancar ou retroceder no processo.
+
+      como_usar:
+        - passo: 1
+          acao: "Veja as colunas representando cada etapa do pipeline"
+        - passo: 2
+          acao: "Arraste um card de candidato para outra coluna"
+        - passo: 3
+          acao: "Clique no candidato para ver detalhes completos"
+
+      colunas:
+        - "Inscricao"
+        - "Documentacao"
+        - "Avaliacao"
+        - "Pagamento"
+        - "Contrato"
+        - "Resultado"
+
+      dica:
+        "Esta visualizacao e ideal para processos seletivos ativos com muitos candidatos"
+
+    detalhes_candidato:
+      url: "/educational/admission/candidates/{candidateId}"
+      nome: "Detalhes do Candidato"
+
+      o_que_faz: |
+        Pagina completa com todas as informacoes do candidato.
+        Permite aprovar, reprovar, revisar documentos e adicionar notas.
+
+      secoes:
+        - "Dados pessoais (nome, email, CPF, telefone)"
+        - "Informacoes da oferta (processo, oferta, etapa atual)"
+        - "Preferencias de turma (se aplicavel)"
+        - "Resultados de avaliacao"
+        - "Documentos enviados"
+        - "Contratos assinados"
+        - "Notas e observacoes"
+
+      acoes:
+        aprovar:
+          nome: "Aprovar Candidato"
+          o_que_faz: "Aprova o candidato e o matricula automaticamente"
+          campos:
+            - nome: "Nota (0-100)"
+              obrigatorio: sim
+            - nome: "Observacoes"
+              obrigatorio: nao
+
+        reprovar:
+          nome: "Reprovar Candidato"
+          o_que_faz: "Reprova o candidato"
+          campos:
+            - nome: "Motivo"
+              obrigatorio: sim
+
+        revisar_documento:
+          nome: "Revisar Documento"
+          opcoes: ["Aprovar", "Rejeitar", "Solicitar Reenvio"]
+          campos:
+            - nome: "Motivo (se rejeitar)"
+              obrigatorio: sim
+
+# ============================================================================
+# MODULO 4: CONTEUDO EDUCACIONAL
+# ============================================================================
+modulo_conteudo_educacional:
+  descricao: "Gerenciamento da estrutura de conteudo: Cursos, Trilhas, Disciplinas, Modulos e Componentes"
+  base_url: "/educational"
+
+  hierarquia:
+    descricao: "Estrutura hierarquica do conteudo educacional"
+    niveis:
+      1:
+        nome: "Colecao (Curso)"
+        exemplo: "Bacharelado em Direito"
+        contem: "Trilhas"
+      2:
+        nome: "Trilha (Pathway)"
+        exemplo: "Primeiro Semestre"
+        contem: "Series (Disciplinas)"
+      3:
+        nome: "Serie (Disciplina)"
+        exemplo: "Introducao ao Direito"
+        contem: "Unidades (Modulos)"
+      4:
+        nome: "Unidade (Modulo)"
+        exemplo: "Modulo 1 - Conceitos Basicos"
+        contem: "Componentes"
+      5:
+        nome: "Componente"
+        exemplo: "Video-aula, Quiz, Texto"
+        contem: "Conteudo final"
+
+  paginas:
+    lista_colecoes:
+      url: "/educational/collections"
+      nome: "Lista de Colecoes (Cursos)"
+
+      o_que_faz: |
+        Mostra todos os cursos completos cadastrados.
+        Uma colecao e o nivel mais alto (ex: Bacharelado em Direito,
+        MBA em Gestao, Curso de Ingles Basico).
+
+      como_usar:
+        - passo: 1
+          acao: "Visualize os cards de cursos"
+        - passo: 2
+          acao: "Use busca para encontrar um curso"
+        - passo: 3
+          acao: "Filtre por status (Rascunho, Publicado, Arquivado)"
+        - passo: 4
+          acao: "Filtre por marketplace (publico ou privado)"
+        - passo: 5
+          acao: "Clique em um curso para ver detalhes"
+
+      filtros:
+        - nome: "Busca"
+          busca_em: ["Titulo", "Descricao", "SKU"]
+        - nome: "Status"
+          opcoes: ["Todos", "Rascunho", "Publicado", "Arquivado"]
+        - nome: "Marketplace"
+          opcoes: ["Todos", "Marketplace (publico)", "Privado"]
+
+      acoes:
+        - nome: "Nova Colecao"
+          leva_para: "/educational/collections/new"
+        - nome: "Ver Detalhes"
+          leva_para: "/educational/collections/{id}"
+
+    criar_colecao:
+      url: "/educational/collections/new"
+      nome: "Criar Colecao (Curso)"
+
+      o_que_faz: |
+        Cria um novo curso completo no sistema.
+
+      campos:
+        - nome: "Empresa"
+          obrigatorio: sim
+          descricao: "Instituicao responsavel pelo curso"
+
+        - nome: "Titulo"
+          obrigatorio: sim
+          exemplo: "Bacharelado em Direito"
+
+        - nome: "Descricao"
+          obrigatorio: nao
+          tipo: "area de texto"
+
+        - nome: "SKU"
+          obrigatorio: sim
+          formato: "LETRAS MAIUSCULAS E NUMEROS"
+          exemplo: "DIR-001"
+          minimo: 3
+          descricao: "Codigo unico do curso"
+
+        - nome: "Status"
+          obrigatorio: sim
+          opcoes: ["Rascunho", "Publicado", "Arquivado"]
+          padrao: "Rascunho"
+
+        - nome: "Disponivel no Marketplace"
+          tipo: "checkbox"
+          padrao: sim
+          descricao: "Marca se o curso aparece no marketplace publico"
+
+        - nome: "Thumbnail"
+          tipo: "upload de imagem"
+          tamanho_max: "5MB"
+          descricao: "Imagem pequena do curso"
+
+        - nome: "Banner"
+          tipo: "upload de imagem"
+          tamanho_max: "5MB"
+          descricao: "Imagem grande do curso"
+
+      proximo_passo:
+        "Apos criar a colecao, adicione TRILHAS a ela"
+
+    detalhes_colecao:
+      url: "/educational/collections/{id}"
+      nome: "Detalhes da Colecao"
+
+      o_que_faz: |
+        Mostra informacoes completas do curso e lista as trilhas vinculadas.
+        Voce pode reordenar as trilhas arrastando.
+
+      informacoes_exibidas:
+        - "Titulo e descricao"
+        - "SKU"
+        - "Status"
+        - "Disponibilidade no marketplace"
+        - "Thumbnail e Banner"
+        - "Lista de trilhas (com drag-and-drop para reordenar)"
+
+      acoes:
+        - nome: "Publicar"
+          aparece_quando: "Status = Rascunho"
+        - nome: "Editar"
+        - nome: "Excluir"
+          cuidado: "Exclui a colecao e todas as trilhas"
+        - nome: "Adicionar Trilha"
+          leva_para: "/educational/pathways/new?collectionId={id}"
+
+    criar_trilha:
+      url: "/educational/pathways/new"
+      nome: "Criar Trilha"
+
+      o_que_faz: |
+        Cria uma trilha de aprendizagem dentro de uma ou mais colecoes.
+        Trilha e um conjunto de disciplinas (ex: Primeiro Semestre).
+
+      campos:
+        - nome: "Colecoes"
+          obrigatorio: sim
+          tipo: "multipla escolha"
+          descricao: "Uma trilha pode estar em varias colecoes"
+
+        - nome: "Titulo"
+          obrigatorio: sim
+          exemplo: "Primeiro Semestre - Direito"
+
+        - nome: "Objetivo"
+          obrigatorio: nao
+          tipo: "area de texto"
+
+        - nome: "SKU"
+          obrigatorio: sim
+          formato: "MAIUSCULAS"
+          exemplo: "TRAIL-DIR-01"
+
+        - nome: "Regra de Progressao"
+          obrigatorio: sim
+          opcoes:
+            flexivel:
+              nome: "Flexivel"
+              descricao: "Aluno pode fazer as disciplinas em qualquer ordem"
+            linear:
+              nome: "Linear"
+              descricao: "Aluno deve seguir a ordem sequencial"
+
+        - nome: "Max % para Matricula Tardia"
+          tipo: "numero"
+          intervalo: "0 a 100"
+          descricao: "Ate qual % do curso o aluno pode se matricular tardiamente"
+
+        - nome: "% de Alerta (Checkpoint)"
+          tipo: "numero"
+          intervalo: "0 a 100"
+          descricao: "Ponto de verificacao intermediaria"
+
+        - nome: "Verificacoes"
+          tipo: "checkboxes"
+          opcoes:
+            - "Checar pagamento"
+            - "Checar presenca"
+            - "Checar nota"
+
+        - nome: "Status"
+          opcoes: ["Publicado", "Rascunho", "Arquivado"]
+
+      proximo_passo:
+        "Apos criar a trilha, adicione SERIES (disciplinas) a ela"
+
+    criar_serie:
+      url: "/educational/series/new"
+      nome: "Criar Serie (Disciplina)"
+
+      o_que_faz: |
+        Cria uma disciplina/materia que fara parte de trilhas.
+        Serie e o nivel de disciplina (ex: Calculo I, Introducao ao Direito).
+
+      campos:
+        - nome: "Trilhas"
+          obrigatorio: "se nao escolher empresa"
+          tipo: "multipla escolha"
+          descricao: "Trilhas onde esta disciplina aparecera"
+
+        - nome: "Empresa"
+          obrigatorio: "se nao escolher trilhas"
+          descricao: "Caso queira criar disciplina avulsa"
+
+        - nome: "Titulo"
+          obrigatorio: sim
+          minimo: 3
+          exemplo: "Calculo Diferencial e Integral I"
+
+        - nome: "Objetivo"
+          obrigatorio: nao
+
+        - nome: "SKU"
+          obrigatorio: sim
+          maximo: 50
+
+        - nome: "Carga Horaria"
+          tipo: "numero"
+          minimo: 0
+          descricao: "Horas totais da disciplina"
+
+        - nome: "Thumbnail"
+          tipo: "upload"
+
+        - nome: "Banner"
+          tipo: "upload"
+
+        - nome: "Presenca Minima %"
+          tipo: "numero"
+          intervalo: "0 a 100"
+          exemplo: "75"
+
+        - nome: "Nota Minima"
+          tipo: "numero"
+          intervalo: "0 a 10"
+          exemplo: "6.0"
+
+        - nome: "Status"
+          opcoes: ["Publicado", "Rascunho", "Arquivado"]
+
+      proximo_passo:
+        "Apos criar a serie, adicione UNIDADES (modulos) a ela"
+
+    criar_unidade:
+      url: "/educational/units/new"
+      nome: "Criar Unidade (Modulo)"
+
+      o_que_faz: |
+        Cria um modulo de ensino dentro de uma disciplina.
+        Unidade e uma parte da disciplina (ex: Modulo 1 - Introducao).
+
+      campos:
+        - nome: "Series"
+          obrigatorio: sim
+          tipo: "multipla escolha"
+          descricao: "Disciplinas onde este modulo aparecera"
+
+        - nome: "Titulo"
+          obrigatorio: sim
+          minimo: 3
+          exemplo: "Modulo 1 - Conceitos Fundamentais"
+
+        - nome: "Descricao"
+          obrigatorio: nao
+
+        - nome: "Ordem"
+          obrigatorio: sim
+          tipo: "numero"
+          minimo: 1
+          descricao: "Posicao deste modulo na sequencia"
+
+        - nome: "Condicao de Liberacao"
+          obrigatorio: sim
+          tipo: "opcao"
+          opcoes:
+            sempre_disponivel:
+              nome: "Sempre Disponivel"
+              descricao: "Aluno pode acessar imediatamente"
+
+            agendada:
+              nome: "Agendada"
+              descricao: "Liberado em data/hora especifica"
+              campo_adicional:
+                nome: "Data e Hora de Liberacao"
+                obrigatorio: sim
+
+            relativa:
+              nome: "Relativa"
+              descricao: "Liberado X tempo depois de um evento"
+              campos_adicionais:
+                - nome: "Quantidade"
+                  tipo: "numero"
+                  minimo: 1
+                - nome: "Unidade de Tempo"
+                  opcoes: ["Horas", "Dias", "Semanas"]
+                - nome: "Evento de Referencia"
+                  opcoes:
+                    - "Matricula do Aluno"
+                    - "Inicio da Serie"
+                    - "Conclusao da Unidade Anterior"
+                    - "Conclusao do Componente Anterior"
+
+      proximo_passo:
+        "Apos criar a unidade, use o BUILDER para adicionar COMPONENTES (videos, textos, quizzes)"
+
+    component_builder:
+      url: "/educational/units/{unitId}/builder"
+      nome: "Builder de Componentes"
+
+      o_que_faz: |
+        Editor visual drag-and-drop para montar o conteudo dentro de um modulo.
+        Voce arrasta componentes (videos, textos, quizzes) para criar a aula.
+
+      layout:
+        - area: "Barra Lateral Esquerda"
+          conteudo: "Templates de componentes para arrastar"
+        - area: "Centro (Canvas)"
+          conteudo: "Area onde voce solta os componentes"
+        - area: "Painel Direito"
+          conteudo: "Configuracao do componente selecionado"
+
+      como_usar:
+        - passo: 1
+          acao: "Arraste um tipo de componente da esquerda para o centro"
+        - passo: 2
+          acao: "Clique no componente adicionado"
+        - passo: 3
+          acao: "Configure no painel direito (titulo, descricao, URL, etc)"
+        - passo: 4
+          acao: "Repita para adicionar mais componentes"
+        - passo: 5
+          acao: "Reordene arrastando os componentes"
+        - passo: 6
+          acao: "Salve o modulo"
+
+      tipos_de_componente:
+        - nome: "Video/Streaming"
+          descricao: "Video-aula ou live streaming"
+          provedores: ["YouTube", "Vimeo", "Wistia", "SmartPlayer", "Zoom", "Teams", "Meet"]
+
+        - nome: "Texto/Leitura"
+          descricao: "Conteudo escrito, artigos, apostilas"
+
+        - nome: "Quiz/Avaliacao"
+          descricao: "Questionario simples"
+
+        - nome: "Avaliacao Formativa"
+          descricao: "Avaliacao durante o aprendizado"
+
+        - nome: "Avaliacao Somativa"
+          descricao: "Avaliacao final/prova"
+
+        - nome: "Atividade"
+          descricao: "Tarefa para o aluno fazer"
+
+        - nome: "Discussao"
+          descricao: "Forum de discussao"
+
+        - nome: "Link Externo"
+          descricao: "Link para site externo"
+
+        - nome: "Arquivo/Recurso"
+          descricao: "PDF, documento, planilha"
+
+        - nome: "Atividade Interativa"
+          descricao: "Jogos, simulacoes"
+
+        - nome: "Sessao ao Vivo"
+          descricao: "Aula ao vivo agendada"
+
+      recursos_avancados:
+        - nome: "Rastreamento xAPI"
+          descricao: "Rastreia todas as acoes do aluno"
+
+        - nome: "Recursos de IA"
+          descricao: "Habilita funcionalidades com inteligencia artificial"
+
+        - nome: "Anotacoes"
+          descricao: "Permite aluno fazer anotacoes"
+
+        - nome: "Assistente IA Q&A"
+          descricao: "Chatbot para tirar duvidas"
+
+        - nome: "Trabalho em Grupo"
+          descricao: "Atividades colaborativas"
+
+        - nome: "Grupos de Discussao"
+          descricao: "Forums de discussao em grupo"
+
+        - nome: "Proctoring"
+          descricao: "Monitoramento de provas online"
+
+        - nome: "Anti-Plagio"
+          descricao: "Deteccao de plagio em trabalhos"
+
+    criar_turma:
+      url: "/educational/class-instances/new"
+      nome: "Criar Turma"
+
+      o_que_faz: |
+        Cria uma turma (oferta de curso) onde alunos serao matriculados.
+        Turma e a instancia real de um curso acontecendo (ex: Direito 2025.1 - Noturno).
+
+      como_usar:
+        - passo: 1
+          acao: "Escolha a instituicao"
+        - passo: 2
+          acao: "Escolha se a turma e de Colecao (curso completo) ou Serie (disciplina avulsa)"
+        - passo: 3
+          acao: "Selecione o curso ou disciplina"
+        - passo: 4
+          acao: "Defina data de inicio, turno, modalidade"
+        - passo: 5
+          acao: "Configure maximo de alunos e emissor do certificado"
+        - passo: 6
+          acao: "De um nome a turma e salve"
+
+      campos:
+        - nome: "Instituicao"
+          obrigatorio: sim
+          descricao: "Unidade onde a turma acontecera"
+
+        - nome: "Tipo de Conteudo"
+          obrigatorio: sim
+          opcoes:
+            - nome: "Colecao"
+              quando: "Turma de curso completo"
+            - nome: "Serie"
+              quando: "Turma de disciplina avulsa"
+
+        - nome: "Colecao/Serie"
+          obrigatorio: sim
+          descricao: "Selecione o conteudo que sera ministrado"
+
+        - nome: "Data de Inicio"
+          obrigatorio: sim
+          tipo: "data"
+
+        - nome: "Turno"
+          obrigatorio: sim
+          opcoes:
+            - "Matutino"
+            - "Vespertino"
+            - "Noturno"
+            - "Integral"
+            - "Flexivel"
+            - "Final de Semana"
+
+        - nome: "Maximo de Alunos"
+          tipo: "numero"
+          descricao: "Limite de vagas"
+
+        - nome: "Modalidade"
+          opcoes:
+            - "Presencial"
+            - "Online"
+            - "Hibrido"
+
+        - nome: "Status"
+          opcoes: ["Ativa", "Inativa", "Concluida", "Cancelada"]
+          padrao: "Ativa"
+
+        - nome: "Data de Termino"
+          tipo: "data"
+          nota: "Auto-calculada para colecoes"
+
+        - nome: "Emissor do Certificado"
+          opcoes:
+            - nome: "Tenant (Matriz)"
+              quando: "Certificado emitido pela organizacao central"
+            - nome: "Unit (Unidade)"
+              quando: "Certificado emitido pela instituicao local"
+
+        - nome: "Codigo da Turma"
+          automatico: sim
+          descricao: "Gerado automaticamente pelo sistema"
+
+        - nome: "Nome da Turma"
+          obrigatorio: sim
+          exemplo: "Direito - Noturno - 2025.1"
+
+        - nome: "Tipo da Turma"
+          obrigatorio: nao
+          exemplo: "Regular, Intensivo, Ferias"
+
+# ============================================================================
+# MODULO 5: AVALIACOES E EXAMES
+# ============================================================================
+modulo_avaliacoes:
+  descricao: "Gerenciamento de avaliacoes, banco de questoes, rubricas e correcao"
+  base_url: "/educational/exams"
+
+  paginas:
+    banco_questoes:
+      url: "/educational/exams/bank"
+      nome: "Banco de Questoes"
+
+      o_que_faz: |
+        Repositorio central de questoes reutilizaveis.
+        Voce pode criar questoes manualmente ou gerar com IA,
+        organizar por tags e dificuldade, e reutilizar em varias avaliacoes.
+
+      como_usar:
+        - passo: 1
+          acao: "Visualize todas as questoes cadastradas"
+        - passo: 2
+          acao: "Use filtros para encontrar questoes (dificuldade, tipo, tags)"
+        - passo: 3
+          acao: "Clique em 'Nova Questao' para criar manualmente"
+        - passo: 4
+          acao: "Ou clique em 'IA' para gerar questoes automaticamente"
+        - passo: 5
+          acao: "Edite ou exclua questoes conforme necessario"
+
+      filtros:
+        - nome: "Busca"
+          placeholder: "Buscar por titulo, materia, topico ou tags..."
+
+        - nome: "Dificuldade"
+          opcoes: ["Todas", "Facil", "Medio", "Dificil"]
+
+        - nome: "Tipo"
+          opcoes:
+            - "Todos"
+            - "Multipla Escolha"
+            - "Verdadeiro/Falso"
+            - "Dissertativa"
+            - "Associacao"
+            - "Ordenacao"
+            - "Oral"
+            - "Mista"
+
+        - nome: "Tags"
+          tipo: "multipla escolha"
+
+      criar_questao_manual:
+        nome: "Criar Questao"
+        campos:
+          - nome: "Enunciado"
+            obrigatorio: sim
+            tipo: "area de texto"
+            placeholder: "Digite o enunciado da questao..."
+
+          - nome: "Tipo"
+            obrigatorio: sim
+            padrao: "Multipla Escolha"
+            opcoes: ["Multipla Escolha", "Verdadeiro/Falso", "Dissertativa", "Associacao"]
+
+          - nome: "Dificuldade"
+            opcoes: ["Facil", "Medio", "Dificil"]
+
+          - nome: "Pontos"
+            tipo: "numero"
+            minimo: 0
+            padrao: 1
+
+          - nome: "Anexar Arquivos"
+            tipo: "upload"
+            aceita: "Imagens, PDFs"
+            tamanho_max: "10MB"
+
+          - nome: "Alternativas"
+            aparece_quando: "Tipo = Multipla Escolha"
+            minimo: 2
+            para_cada_alternativa:
+              - "Texto da alternativa"
+              - "Valor (peso)"
+              - "Correta (checkbox)"
+
+          - nome: "Tags"
+            tipo: "tag input"
+            placeholder: "Digite e pressione Enter"
+            exemplo: "matematica, calculo, derivada"
+
+          - nome: "Justificativa"
+            tipo: "area de texto"
+            descricao: "Explicacao da resposta correta"
+
+          - nome: "BNCC"
+            tipo: "texto"
+            placeholder: "Ex: EM13MAT301"
+            descricao: "Codigo da Base Nacional Comum Curricular"
+
+          - nome: "MUFA"
+            tipo: "texto"
+            placeholder: "Ex: C2.1"
+            descricao: "Codigo do framework MUFA"
+
+      gerar_com_ia:
+        nome: "Gerar Questoes com IA"
+        aviso: "A IA nao e 100% confiavel. Valide todas as questoes antes de usar."
+        campos:
+          - nome: "Contexto"
+            obrigatorio: sim
+            tipo: "texto ou area de texto"
+            exemplo: "Gere questoes sobre derivadas basicas em Calculo I"
+
+          - nome: "Dificuldade"
+            tipo: "slider"
+            opcoes: ["Facil", "Medio", "Dificil"]
+
+          - nome: "Quantidade"
+            tipo: "numero"
+            minimo: 1
+            maximo: 3
+            descricao: "Maximo 3 questoes por vez"
+
+          - nome: "Tags"
+            tipo: "tag input"
+
+    construtor_avaliacoes:
+      url: "/educational/exams/builder"
+      nome: "Construtor de Avaliacoes"
+
+      o_que_faz: |
+        Cria e gerencia avaliacoes completas compostas por questoes do banco.
+        Voce pode montar avaliacoes de duas formas:
+        - Modo Automatico: Sistema seleciona questoes por tags e proporcao
+        - Modo Manual: Voce escolhe cada questao individualmente
+
+      como_usar:
+        - passo: 1
+          acao: "Clique em 'Criar Avaliacao'"
+        - passo: 2
+          acao: "De um nome a avaliacao"
+        - passo: 3
+          acao: "Escolha se quer usar banco de questoes (automatico) ou nao"
+        - passo: 4
+          acao: "Se automatico: selecione tags e quantidade de questoes"
+        - passo: 5
+          acao: "Configure proporcao de dificuldade e tipo"
+        - passo: 6
+          acao: "Salve a avaliacao"
+
+      criar_avaliacao:
+        campos:
+          - nome: "Nome"
+            obrigatorio: sim
+            exemplo: "Avaliacao de Matematica - Modulo 1"
+
+          - nome: "Descricao"
+            obrigatorio: nao
+
+          - nome: "Usar Banco de Questoes"
+            tipo: "toggle"
+            descricao: "Ativa selecao automatica por tags"
+
+          - nome: "Tags"
+            aparece_quando: "Usar Banco = sim"
+            tipo: "multipla escolha"
+            descricao: "Sistema buscara questoes com estas tags"
+
+          - nome: "Quantidade de Questoes"
+            aparece_quando: "Usar Banco = sim"
+            tipo: "numero"
+            minimo: 1
+            maximo: 100
+
+          - nome: "Usar TRI"
+            tipo: "toggle"
+            descricao: "Teoria de Resposta ao Item (avaliacao adaptativa)"
+
+          - nome: "Proporcao de Dificuldade"
+            tipo: "slider"
+            intervalo: "0 a 100"
+            descricao: "Ex: 30% facil, 50% medio, 20% dificil"
+
+          - nome: "Proporcao de Tipo"
+            tipo: "slider"
+            intervalo: "0 a 100"
+            labels: ["Multipla Escolha", "Dissertativas"]
+
+    suas_avaliacoes_tutor:
+      url: "/educational/exams/your-evaluations"
+      nome: "Suas Avaliacoes (Tutor)"
+
+      o_que_faz: |
+        Lista de tentativas de alunos aguardando correcao.
+        Aparece apenas para tutores/professores.
+        Aqui voce ve todas as avaliacoes que precisa corrigir.
+
+      como_usar:
+        - passo: 1
+          acao: "Veja a lista de avaliacoes aguardando correcao"
+        - passo: 2
+          acao: "Use filtros para encontrar avaliacoes especificas"
+        - passo: 3
+          acao: "Clique em uma avaliacao para corrigir"
+
+      filtros:
+        - nome: "Status"
+          opcoes:
+            - "Todos"
+            - "Aguardando Correcao"
+            - "Corrigido"
+            - "Em Progresso"
+            - "Cancelado"
+
+        - nome: "Tipo"
+          opcoes:
+            - "Todos"
+            - "Apenas Avaliacoes"
+            - "Apenas Comprovantes"
+
+        - nome: "Empresa"
+          tipo: "selecao"
+
+        - nome: "Colecao"
+          tipo: "selecao"
+
+        - nome: "Serie"
+          tipo: "selecao"
+
+    correcao_avaliacao:
+      url: "/educational/exams/your-evaluations/assessments/{attemptId}"
+      nome: "Correcao de Avaliacao"
+
+      o_que_faz: |
+        Tela de correcao individual de uma tentativa de aluno.
+        Mostra cada questao com a resposta do aluno e permite
+        dar nota e feedback.
+
+      como_usar:
+        - passo: 1
+          acao: "Leia a questao e a resposta do aluno"
+        - passo: 2
+          acao: "Marque se a resposta esta correta (checkbox)"
+        - passo: 3
+          acao: "Atribua uma nota (0 ate o valor maximo da questao)"
+        - passo: 4
+          acao: "Escreva feedback especifico para a questao (opcional)"
+        - passo: 5
+          acao: "Repita para todas as questoes"
+        - passo: 6
+          acao: "Clique em 'Finalizar Correcao'"
+        - passo: 7
+          acao: "Digite nota final e feedback geral"
+        - passo: 8
+          acao: "Confirme"
+
+      para_cada_questao:
+        - nome: "Considerar Correta"
+          tipo: "checkbox"
+
+        - nome: "Nota"
+          tipo: "numero"
+          maximo: "valor maximo da questao"
+
+        - nome: "Feedback"
+          tipo: "area de texto"
+          placeholder: "Feedback especifico para esta questao..."
+
+      ao_finalizar:
+        - nome: "Nota Final"
+          tipo: "numero"
+          calculado: "automaticamente com base nas questoes"
+
+        - nome: "Feedback Geral"
+          tipo: "area de texto"
+          placeholder: "Comentarios gerais sobre o desempenho do aluno..."
+
+# ============================================================================
+# MODULO 6: CERTIFICADOS
+# ============================================================================
+modulo_certificados:
+  descricao: "Gerenciamento de certificados, templates e documentos academicos"
+  base_url: "/educational/certificates"
+
+  paginas:
+    certificados_emitidos:
+      url: "/educational/certificates/issued"
+      nome: "Certificados Emitidos"
+
+      o_que_faz: |
+        Lista todos os certificados ja emitidos para alunos.
+        Permite filtrar por status (emitido, assinado, revogado, expirado).
+
+      filtros:
+        - nome: "Status"
+          opcoes:
+            - "Todos"
+            - "Emitido"
+            - "Assinado"
+            - "Revogado"
+            - "Expirado"
+
+        - nome: "Busca"
+          busca_em: ["Nome do aluno", "Nome do curso", "Codigo de validacao"]
+
+      cards_de_estatisticas:
+        - nome: "Total"
+          cor: "cinza"
+        - nome: "Emitidos"
+          cor: "verde"
+        - nome: "Assinados"
+          cor: "azul"
+        - nome: "Revogados"
+          cor: "vermelho"
+
+    templates_certificado:
+      url: "/educational/certificates/templates"
+      nome: "Templates de Certificado"
+
+      o_que_faz: |
+        Gerenciar modelos de certificado editaveis.
+        Permite criar layouts customizados para diferentes tipos de curso.
+
+    documentos_academicos:
+      url: "/educational/certificates/documents"
+      nome: "Documentos Academicos"
+
+      o_que_faz: |
+        Gerenciamento de outros documentos academicos
+        (historicos, declaracoes, diplomas, etc).
+
+# ============================================================================
+# MODULO 7: TURMAS (GESTAO)
+# ============================================================================
+modulo_turmas:
+  descricao: "Gestao de turmas ativas, matriculas e acompanhamento de alunos"
+  base_url: "/educational/class-instances"
+
+  conceitos:
+    turma: "Instancia de um curso/disciplina acontecendo (ex: Direito 2025.1 Noturno)"
+    matricula: "Vinculo de um aluno a uma turma"
+
+  tarefas_comuns:
+    ver_turmas:
+      como: "Acesse /educational/class-instances"
+
+    matricular_aluno:
+      como: "Na pagina de detalhes da turma, clique em 'Matricular Aluno'"
+
+    ver_alunos_da_turma:
+      como: "Na pagina de detalhes da turma, veja a lista de matriculas"
+
+    cancelar_matricula:
+      como: "Na lista de alunos, clique em 'Cancelar Matricula' (requer confirmacao)"
+
+# ============================================================================
+# MODULO 8: BUSINESS INTELLIGENCE
+# ============================================================================
+modulo_bi:
+  descricao: "Relatorios e dashboards analiticos"
+  base_url: "/bi"
+
+  o_que_faz: |
+    Modulo de relatorios e dashboards com metricas educacionais,
+    desempenho de alunos, taxa de conclusao, etc.
+
+# ============================================================================
+# FAQ - PERGUNTAS FREQUENTES
+# ============================================================================
+faq:
+  usuarios:
+    - pergunta: "Como busco um aluno especifico?"
+      resposta: |
+        1. Va em /users
+        2. Clique no toggle 'Alunos'
+        3. Digite nome, email ou CPF no campo de busca
+        4. Clique no aluno para ver detalhes
+
+    - pergunta: "Como crio um novo funcionario?"
+      resposta: |
+        1. Va em /users
+        2. Clique no toggle 'Funcionarios'
+        3. Clique em 'Novo Colaborador'
+        4. Preencha as abas (Identidade, Vinculo, Enderecos, Permissoes)
+        5. Salve
+
+    - pergunta: "Como importo varios alunos de uma vez?"
+      resposta: |
+        1. Va em /users
+        2. Clique no toggle 'Alunos'
+        3. Clique no botao de upload
+        4. Baixe o template, preencha e faca upload
+
+    - pergunta: "Como redefinir a senha de um usuario?"
+      resposta: |
+        1. Va em /users/{id} (detalhes do usuario)
+        2. Clique em 'Reset de Senha'
+        3. Digite justificativa (obrigatorio, sera auditado)
+        4. Escolha se quer senha temporaria
+        5. Confirme
+
+  processo_seletivo:
+    - pergunta: "Como crio um processo seletivo completo?"
+      resposta: |
+        1. Va em /educational/admission
+        2. Clique em 'Nova Admissao'
+        3. Preencha dados basicos (nome, datas, modo de matricula)
+        4. Salve o processo
+        5. Dentro do processo, clique em 'Adicionar Oferta'
+        6. Preencha dados da oferta (vagas, taxa, etapas)
+        7. Clique em 'Editar Formulario' para montar o formulario de inscricao
+
+    - pergunta: "Qual a diferenca entre Processo Seletivo e Oferta?"
+      resposta: |
+        - PROCESSO SELETIVO: E o vestibular completo (ex: Vestibular 2025.1)
+        - OFERTA: E uma vaga especifica dentro do processo (ex: Oferta para Direito, Oferta para Medicina)
+        Um processo pode ter varias ofertas.
+
+    - pergunta: "Como aprovo um candidato?"
+      resposta: |
+        1. Va em /educational/admission/candidates
+        2. Encontre o candidato (use filtros)
+        3. Clique no candidato
+        4. Clique em 'Aprovar'
+        5. Digite nota e observacoes
+        6. Confirme (candidato sera matriculado automaticamente)
+
+    - pergunta: "Como vejo candidatos por etapa do processo?"
+      resposta: |
+        Va em /educational/admission/candidates/kanban para ver visualizacao kanban
+
+  conteudo:
+    - pergunta: "Qual a hierarquia do conteudo educacional?"
+      resposta: |
+        1. COLECAO (Curso completo) - ex: Bacharelado em Direito
+        2. TRILHA (Conjunto de disciplinas) - ex: Primeiro Semestre
+        3. SERIE (Disciplina) - ex: Introducao ao Direito
+        4. UNIDADE (Modulo) - ex: Modulo 1 - Conceitos Basicos
+        5. COMPONENTE (Conteudo) - ex: Video-aula, Quiz, Texto
+
+    - pergunta: "Como crio um curso completo do zero?"
+      resposta: |
+        1. Crie COLECAO em /educational/collections/new
+        2. Dentro da colecao, adicione TRILHAS
+        3. Dentro das trilhas, adicione SERIES (disciplinas)
+        4. Dentro das series, adicione UNIDADES (modulos)
+        5. Dentro das unidades, use o BUILDER para adicionar COMPONENTES
+
+    - pergunta: "Como adiciono um video em uma aula?"
+      resposta: |
+        1. Va em /educational/units/{id}/builder
+        2. Arraste o componente 'Video/Streaming' para o canvas
+        3. Clique no componente
+        4. Configure titulo, descricao, provedor (YouTube, Vimeo, etc) e URL
+        5. Salve
+
+    - pergunta: "Como crio uma turma para um curso?"
+      resposta: |
+        1. Va em /educational/class-instances/new
+        2. Escolha instituicao
+        3. Escolha 'Colecao' e selecione o curso
+        4. Defina data de inicio, turno, modalidade
+        5. De um nome a turma
+        6. Salve
+
+  avaliacoes:
+    - pergunta: "Como crio uma prova?"
+      resposta: |
+        1. Primeiro, crie questoes no Banco (/educational/exams/bank)
+        2. Depois, va em /educational/exams/builder
+        3. Clique em 'Criar Avaliacao'
+        4. Escolha modo automatico (por tags) ou manual
+        5. Configure e salve
+
+    - pergunta: "Como corrijo uma avaliacao de um aluno?"
+      resposta: |
+        1. Va em /educational/exams/your-evaluations
+        2. Encontre a tentativa do aluno
+        3. Clique para abrir
+        4. Revise cada questao, de nota e feedback
+        5. Clique em 'Finalizar Correcao'
+        6. Digite nota final e feedback geral
+
+  geral:
+    - pergunta: "O que significa SKU?"
+      resposta: |
+        SKU e um codigo unico para identificar cursos, disciplinas, trilhas.
+        Geralmente em letras maiusculas (ex: DIR-001, CALC-01).
+
+    - pergunta: "O que e 'marketplace' em colecoes?"
+      resposta: |
+        Quando um curso esta marcado como 'Disponivel no marketplace',
+        ele aparece como oferta publica que outras instituicoes podem adquirir.
+
+    - pergunta: "Como sei se um campo e obrigatorio?"
+      resposta: |
+        Campos obrigatorios tem asterisco (*) vermelho ao lado do nome.
+
+# ============================================================================
+# TAREFAS COMUNS POR OBJETIVO
+# ============================================================================
+tarefas_comuns:
+  cadastrar_aluno:
+    titulo: "Cadastrar um novo aluno"
+    passos:
+      - "Acesse /users"
+      - "Clique no toggle 'Alunos'"
+      - "Clique em 'Novo Aluno'"
+      - "Preencha Identidade (nome, email, CPF)"
+      - "Preencha Vinculo (instituicao, curso)"
+      - "Adicione endereco (opcional)"
+      - "Salve"
+
+  importar_turma_alunos:
+    titulo: "Importar uma turma inteira de alunos"
+    passos:
+      - "Acesse /users"
+      - "Clique no toggle 'Alunos'"
+      - "Clique no botao de upload"
+      - "Baixe o template Excel"
+      - "Preencha com dados dos alunos"
+      - "Faca upload da planilha"
+      - "Confirme a importacao"
+
+  criar_processo_seletivo:
+    titulo: "Criar um processo seletivo do zero"
+    passos:
+      - "Acesse /educational/admission"
+      - "Clique em 'Nova Admissao'"
+      - "Preencha nome, datas, modo de matricula"
+      - "Salve o processo"
+      - "Clique em 'Adicionar Oferta'"
+      - "Preencha dados da oferta"
+      - "Clique em 'Editar Formulario'"
+      - "Monte o formulario de inscricao"
+      - "Publique o processo"
+
+  criar_curso_completo:
+    titulo: "Criar um curso completo do zero"
+    passos:
+      - "Acesse /educational/collections/new"
+      - "Crie a COLECAO (curso)"
+      - "Dentro da colecao, adicione TRILHAS"
+      - "Dentro das trilhas, adicione SERIES (disciplinas)"
+      - "Dentro das series, adicione UNIDADES (modulos)"
+      - "Use o BUILDER para adicionar COMPONENTES (videos, textos, quizzes)"
+      - "Publique o curso"
+
+  criar_turma:
+    titulo: "Criar uma turma para um curso"
+    passos:
+      - "Acesse /educational/class-instances/new"
+      - "Escolha instituicao"
+      - "Escolha Colecao e selecione o curso"
+      - "Defina data de inicio, turno, modalidade"
+      - "De um nome a turma"
+      - "Salve"
+
+  matricular_aluno_turma:
+    titulo: "Matricular um aluno em uma turma"
+    passos:
+      - "Acesse /educational/class-instances/{id}"
+      - "Clique em 'Matricular Aluno'"
+      - "Selecione o aluno"
+      - "Confirme"
+
+  criar_avaliacao:
+    titulo: "Criar uma avaliacao/prova"
+    passos:
+      - "Acesse /educational/exams/bank"
+      - "Crie questoes (manual ou com IA)"
+      - "Acesse /educational/exams/builder"
+      - "Clique em 'Criar Avaliacao'"
+      - "Configure (nome, tags, quantidade, proporcao)"
+      - "Salve"
+
+  corrigir_prova:
+    titulo: "Corrigir uma prova de aluno"
+    passos:
+      - "Acesse /educational/exams/your-evaluations"
+      - "Encontre a tentativa do aluno"
+      - "Clique para abrir"
+      - "Revise cada questao e de nota"
+      - "Clique em 'Finalizar Correcao'"
+      - "Digite nota final e feedback geral"
+      - "Confirme"
+
+# ============================================================================
+# DICAS E BOAS PRATICAS
+# ============================================================================
+dicas:
+  geral:
+    - "Sempre salve rascunhos antes de sair de formularios longos"
+    - "Use a busca para encontrar rapidamente ao inves de rolar listas longas"
+    - "Preste atencao em campos com asterisco (*) - sao obrigatorios"
+    - "Ao excluir, tenha certeza - a maioria das exclusoes e permanente"
+
+  processo_seletivo:
+    - "Crie o processo como Rascunho primeiro, revise tudo, depois Publique"
+    - "Configure o formulario de inscricao com cuidado - candidatos vao preencher"
+    - "Use etapas de pipeline de acordo com seu fluxo (nao precisa usar todas)"
+
+  conteudo:
+    - "Monte a estrutura (colecao > trilha > serie > unidade) antes de adicionar conteudo"
+    - "Use SKUs padronizados para facilitar organizacao (ex: DIR-001, DIR-002)"
+    - "Configure condicoes de liberacao de unidades para controlar ritmo dos alunos"
+    - "No builder de componentes, reordene arrastando para ajustar a sequencia"
+
+  avaliacoes:
+    - "Organize questoes com tags para facilitar reutilizacao"
+    - "Valide SEMPRE questoes geradas por IA antes de usar"
+    - "Use o banco de questoes para evitar recriar questoes repetidamente"

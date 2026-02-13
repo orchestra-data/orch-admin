@@ -1,0 +1,440 @@
+# =============================================================================
+# CogEdu AVA - Paginas, Rotas e Componentes
+# Versao: 1.0.0
+# Descricao: Inventario completo de todas as paginas, rotas, formularios e componentes
+# Fonte: cogedu-ava-main/frontend/src/
+# =============================================================================
+
+# =============================================================================
+# ROTAS (25+ paginas)
+# =============================================================================
+
+routes:
+  auth:
+    - path: "/login"
+      component: "Login"
+      protection: "none"
+      layout: "plain"
+      description: "Autenticacao via Keycloak SSO + modo guest (dev)"
+
+    - path: "/forgot-password"
+      component: "ForgotPassword"
+      protection: "none"
+      layout: "plain"
+      description: "Recuperacao de senha"
+
+  core:
+    - path: "/"
+      component: "InitialRedirect"
+      protection: "ProtectedRoute"
+      layout: "none"
+      description: "Smart redirect baseado em role/contexto"
+
+    - path: "/home"
+      component: "Home"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Dashboard com gamificacao, colecoes, cursos e continue watching"
+      fields:
+        hero: "Level, XP, Streak, Achievements"
+        filters: "Search, Free Only, Producer, Graduation"
+        cards: "Course title, producer, video count, price, isFree badge"
+
+    - path: "/series/:seriesId"
+      component: "SeriesOverview"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Pagina detalhada da serie com unidades e componentes"
+      fields: "Series info, progress, badges, unit expansion"
+
+    - path: "/series/:seriesId/player"
+      component: "Player"
+      protection: "ProtectedRoute"
+      layout: "none (fullscreen)"
+      description: "Player de conteudo com 28+ tipos de player"
+      features:
+        - "Left sidebar: navegacao por unidades"
+        - "Main area: renderizacao do conteudo"
+        - "Right sidebar: notes, materials, AI chat, case studies"
+
+    - path: "/collection/:collectionId"
+      component: "CollectionDetail"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Detalhes da colecao com pathways e series"
+
+    - path: "/search"
+      component: "Search"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Busca global em colecoes e series"
+      query_params: "q (query string)"
+
+    - path: "/notes"
+      component: "NotesBoard"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Quadro de anotacoes (redireciona para Progress)"
+
+  progress:
+    - path: "/progress"
+      component: "Progress"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Dashboard de progresso do aluno"
+      tabs:
+        - name: "Grades"
+          fields: "Completion %, videos watched, quizzes, essays, AI interactions"
+        - name: "Certificates"
+          fields: "Certificate title, course, validation code, issue date"
+        - name: "Documents"
+          fields: "Transcripts, diplomas, download"
+        - name: "Attendance"
+          fields: "Summary cards, detailed records, risk indicators"
+      gamification: "Level, XP, Streak, Achievements, Badges"
+
+    - path: "/journey"
+      component: "Journey"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Jornada de aprendizagem"
+      tabs:
+        - "Timeline - Linha do tempo"
+        - "Calendar - Calendario de atividades"
+
+    - path: "/recommendations"
+      component: "RecommendationsTab"
+      protection: "ProtectedRoute"
+      layout: "none"
+      description: "Recomendacoes personalizadas de conteudo"
+
+  certificates:
+    - path: "/certificados/:id"
+      component: "CertificateDetailPage"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Detalhes do certificado com QR code de verificacao"
+      fields: "Title, course, validation code, issue date, issuer, skills, QR code"
+
+  communities:
+    - path: "/communities"
+      component: "Communities"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Hub de comunidades"
+      tabs:
+        - "Explore - Descobrir comunidades"
+        - "My Communities - Comunidades do usuario"
+        - "Feed - Feed de posts"
+      fields_community: "Name, description, banner, member count, privacy (public/private/restricted)"
+      fields_post: "Title, content, attachments, images, votes, comments"
+
+    - path: "/community/:communityId"
+      component: "Community"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Pagina da comunidade com posts e membros"
+
+    - path: "/community/:communityId/post/:postId"
+      component: "PostDetail"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Post com comentarios aninhados, likes"
+
+  admission:
+    - path: "/admissao"
+      component: "AdmissionCatalog"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Catalogo de processos seletivos"
+      fields: "Course name, description, periodo, vagas"
+
+    - path: "/admissao/:courseId"
+      component: "AdmissionCourseDetail"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Detalhes do curso para admissao"
+
+    - path: "/admissao/inscricao/:processId"
+      component: "AdmissionRegistration"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Formulario multi-step de inscricao"
+      steps:
+        - name: "StepBasicData"
+          fields: "First name, last name, email, phone, CPF"
+        - name: "StepComplementaryData"
+          fields: "Education level, experience"
+        - name: "StepDocuments"
+          fields: "File uploads (ID, comprovante de endereco)"
+        - name: "StepContract"
+          fields: "Checkbox de aceite dos termos"
+        - name: "StepEvaluation"
+          fields: "Quiz/assessment questions"
+        - name: "StepPayment"
+          fields: "Payment method, card details"
+
+    - path: "/admissao/minhas"
+      component: "MyAdmissions"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Minhas inscricoes com status"
+      fields: "Application ID, Course, Status (completed/approved/rejected/pending), Date"
+
+  attendance:
+    - path: "/my-attendance"
+      component: "MyAttendance"
+      protection: "ProtectedRoute"
+      layout: "none"
+      description: "Frequencia do aluno"
+      summary_cards: "Total classes, avg attendance %, at-risk classes, pending justifications"
+      table_columns: "Component Name, Session Date, Status (present/absent/late/excused), Justification, Action"
+
+    - path: "/justifications"
+      component: "MyJustifications"
+      protection: "ProtectedRoute"
+      layout: "none"
+      description: "Justificativas de falta"
+      fields: "Status (pending/approved/rejected), submission form"
+
+    - path: "/check-in"
+      component: "AttendanceCheckIn"
+      protection: "self-managed"
+      layout: "none"
+      query_params: "token"
+      description: "Check-in via QR code + geolocalizacao"
+
+  settings:
+    - path: "/settings"
+      component: "Settings"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Configuracoes da conta"
+      tabs:
+        - name: "Profile"
+          fields: "Name, email, birthday, phone, address (CEP autocomplete via ViaCEP)"
+        - name: "Security"
+          fields: "Password change, 2FA settings"
+        - name: "Social"
+          fields: "LinkedIn, Instagram, Facebook URLs"
+
+    - path: "/privacy-center"
+      component: "PrivacyCenter"
+      protection: "ProtectedRoute"
+      layout: "RootLayout"
+      description: "Centro de privacidade (GDPR/LGPD)"
+      features: "Privacy preferences, data sharing, cookie preferences, consent management"
+
+# =============================================================================
+# NAVEGACAO
+# =============================================================================
+
+navigation:
+  header:
+    component: "PageHeader"
+    elements:
+      - "Logo/App name"
+      - "Search bar"
+      - "Menu de navegacao (context-aware)"
+      - "Notification bell (NotificationButton)"
+      - "User avatar dropdown"
+      - "Theme toggle (light/dark)"
+      - "Settings icon"
+      - "Logout"
+
+  sidebar:
+    component: "StandardMenu"
+    items:
+      - "Home"
+      - "Communities"
+      - "Progress"
+      - "Journey"
+      - "Search"
+      - "My Attendance"
+      - "Justifications"
+      - "Certificates"
+      - "Settings"
+      - "Privacy Center"
+
+  footer:
+    component: "Footer"
+    elements: "Company info, links to policies, social media, copyright"
+
+  role_based:
+    - "InitialRedirect - Smart routing baseado no estado do usuario"
+    - "NavigateToRoleBasedRoute - Navegacao dinamica por role"
+
+# =============================================================================
+# MODAIS E DIALOGS (15+)
+# =============================================================================
+
+modals:
+  - name: "ConsentModal"
+    purpose: "GDPR/Cookie consent banner"
+  - name: "CreateCommunityModal"
+    purpose: "Criar nova comunidade"
+    fields: "Name, description, privacy level, banner, profile picture, tags"
+  - name: "CommunitySettingsModal"
+    purpose: "Configuracoes e moderacao da comunidade"
+  - name: "CollectionOverviewModal"
+    purpose: "Popup com informacoes da colecao"
+  - name: "SeriesOverviewModal"
+    purpose: "Popup com informacoes da serie"
+  - name: "GradeCurricularModal"
+    purpose: "Detalhes de notas/grade curricular"
+  - name: "JustificationForm"
+    purpose: "Submeter justificativa de falta"
+    fields: "Absence date/session, reason, supporting documents"
+  - name: "NewChatDialog"
+    purpose: "Iniciar nova conversa"
+  - name: "FloatingAIAssistant"
+    purpose: "Widget flutuante de IA"
+  - name: "ContextualAIHelper"
+    purpose: "Sugestoes contextuais de IA"
+
+# =============================================================================
+# INVENTARIO DE COMPONENTES (114 arquivos)
+# =============================================================================
+
+components:
+  layout:
+    - "RootLayout.tsx - Layout principal"
+    - "PageHeader.tsx - Cabecalho com navegacao"
+    - "Footer.tsx - Rodape"
+    - "StandardMenu.tsx - Menu principal"
+    - "Logo.tsx - Logo/branding"
+
+  player:
+    wrapper:
+      - "Player.tsx - Wrapper principal"
+      - "PlayerRenderer.tsx - Seletor dinamico de tipo"
+      - "ContentPlayerWrapper.tsx - Area de conteudo"
+      - "VideoInfoPanel.tsx - Info do video"
+      - "VideoControls.tsx - Controles de video"
+      - "TabsPanel.tsx - Container de tabs"
+      - "LessonItem.tsx - Item de licao"
+      - "CollapsibleSidebarLeft.tsx - Sidebar esquerda"
+      - "CollapsibleSidebarrRight.tsx - Sidebar direita"
+    tabs:
+      - "AIChatTab.tsx - Chat com IA"
+      - "MaterialsTab.tsx - Materiais"
+      - "NotesTab.tsx - Anotacoes"
+      - "CaseStudyTab.tsx - Estudos de caso"
+      - "NewsTab.tsx - Noticias"
+    types: "28+ players especializados (ver architecture.yaml)"
+
+  dashboard:
+    - "ContinueWatching.tsx - Resume last watched"
+    - "HeroCarousel.tsx - Hero section carousel"
+    - "RecommendationsTab.tsx - Recomendacoes"
+    - "JourneyTab.tsx - Timeline de jornada"
+    - "JourneySidebar.tsx - Navegacao da jornada"
+    - "CertificatesTab.tsx - Certificados"
+    - "GradesTab.tsx - Notas"
+    - "CalendarTab.tsx - Calendario"
+    - "NotebookSection.tsx - Anotacoes"
+
+  admission:
+    - "MultiStepForm.tsx - Stepper multi-step"
+    - "AddressForm.tsx - Endereco com CEP"
+    - "CourseCard.tsx - Card de curso"
+    - "UnitsAccordion.tsx - Accordion de unidades"
+    - "StepBasicData.tsx - Dados basicos"
+    - "StepComplementaryData.tsx - Dados complementares"
+    - "StepDocuments.tsx - Upload de documentos"
+    - "StepContract.tsx - Aceite de contrato"
+    - "StepEvaluation.tsx - Avaliacao"
+    - "StepPayment.tsx - Pagamento"
+
+  attendance:
+    - "AttendanceSummaryCard.tsx - Card de resumo"
+    - "CheckinButton.tsx - Botao de check-in"
+    - "CheckinCamera.tsx - Camera QR/facial"
+    - "GeolocationCapture.tsx - Captura GPS"
+    - "JustificationForm.tsx - Formulario de justificativa"
+    - "MyQRCode.tsx - QR code do aluno"
+
+  chat:
+    - "ChatView.tsx - Interface de chat"
+    - "ConversationList.tsx - Lista de conversas"
+    - "NewChatDialog.tsx - Nova conversa"
+
+  ai:
+    - "AIAssistant.tsx - Assistente IA full-screen"
+    - "FloatingAIAssistant.tsx - Widget flutuante"
+    - "ContextualAIHelper.tsx - Ajuda contextual"
+
+  notifications:
+    - "NotificationHub.tsx - Centro de notificacoes"
+    - "NotificationButton.tsx - Botao de notificacao"
+    - "NotificationItem.tsx - Item de notificacao"
+
+  multi_tenant:
+    - "CompanySwitcher.tsx - Seletor de empresa"
+    - "TenantSwitcher.tsx - Seletor de tenant"
+    - "NavigateToRoleBasedRoute.tsx - Navegacao por role"
+
+  community:
+    - "CreateCommunityModal.tsx - Criar comunidade"
+    - "CommunitySettingsModal.tsx - Config comunidade"
+    - "CommentInput.tsx - Input de comentario"
+
+  accessibility:
+    - "VLibras.tsx - Widget de Libras"
+
+  ui_kit:
+    library: "Radix UI + Tailwind"
+    components:
+      - "accordion, badge, button, card, dialog"
+      - "input, label, popover, progress, scroll-area"
+      - "select, separator, slider, switch, tabs"
+      - "textarea, theme-toggle, toast"
+
+# =============================================================================
+# TIPOS TypeScript (7 arquivos)
+# =============================================================================
+
+type_definitions:
+  - file: "types/index.ts"
+    types:
+      - "ContentType - 20+ enum de tipos de conteudo"
+      - "Component - Interface de componente"
+      - "Unit - Unidade de curso"
+      - "Series - Serie de aprendizagem"
+      - "Pathway - Trilha de aprendizagem"
+      - "CollectionSummary - Metadata de colecao"
+      - "ActivityAttempt - Submissao de atividade"
+      - "User - Perfil do usuario"
+      - "SubmissionType - Tipos de submissao"
+
+  - file: "types/admission.ts"
+    types: "Admission processes, courses, registrations"
+
+  - file: "types/certificates.ts"
+    types: "Certificate data, validation"
+
+  - file: "types/chat.ts"
+    types: "Chat messages, conversations"
+
+  - file: "types/community.ts"
+    types: "Community, spaces, discussions, members"
+
+  - file: "types/gamification.ts"
+    types: "Badges, achievements, leaderboards, XP"
+
+  - file: "types/scorm-again.d.ts"
+    types: "SCORM type definitions"
+
+# =============================================================================
+# DADOS MOCK (8 arquivos)
+# =============================================================================
+
+mock_data:
+  - "data/collections.ts - Colecoes de exemplo"
+  - "data/courses.ts - Cursos de exemplo"
+  - "data/communities.ts - Comunidades de exemplo"
+  - "data/notes.ts - Anotacoes de exemplo"
+  - "data/mockAdmission.ts - Mock de admissao (VITE_USE_ADMISSION_MOCK=true)"
+  - "data/mockAIChat.ts - Mock de chat IA"
+  - "data/mockCaseStudy.ts - Mock de case study"
+  - "data/mockNews.ts - Mock de noticias"

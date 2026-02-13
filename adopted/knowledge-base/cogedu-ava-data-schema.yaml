@@ -1,0 +1,1028 @@
+# =============================================================================
+# CogEdu AVA - Data Schema (Entidades e Relacionamentos)
+# Versao: 1.0.0
+# Descricao: Schema completo do banco de dados do AVA
+# Fonte: cogedu-ava-main/API_DOCUMENTATION_COMPLETE.md
+# =============================================================================
+
+# =============================================================================
+# HIERARQUIA EDUCACIONAL
+# Collection > Pathway > Series > Unit > Component
+# =============================================================================
+
+entities:
+  Collection:
+    description: "Container de nivel mais alto (graduacao, curso, programa)"
+    table: "collections"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "tenant_id"
+        type: "UUID"
+        required: true
+      - name: "company_id"
+        type: "UUID"
+        required: true
+      - name: "author_user_id"
+        type: "UUID"
+        required: true
+      - name: "title"
+        type: "TEXT"
+        required: true
+      - name: "description"
+        type: "TEXT"
+      - name: "thumbnail_url"
+        type: "TEXT"
+      - name: "sku"
+        type: "TEXT"
+        unique: true
+      - name: "status"
+        type: "ENUM"
+        values: ["draft", "published", "archived"]
+      - name: "syllabus"
+        type: "JSONB"
+      - name: "taxonomy"
+        type: "JSONB"
+      - name: "certification_rules"
+        type: "JSONB"
+      - name: "is_offerable"
+        type: "BOOLEAN"
+        description: "Pode ser vendida no marketplace"
+      - name: "created_at"
+        type: "TIMESTAMPTZ"
+      - name: "updated_at"
+        type: "TIMESTAMPTZ"
+      - name: "deleted_at"
+        type: "TIMESTAMPTZ"
+        description: "Soft delete"
+    relationships:
+      - "has_many: Pathway"
+
+  Pathway:
+    description: "Trilha de aprendizagem dentro de uma colecao"
+    table: "pathways"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "collection_id"
+        type: "UUID"
+        fk: "collections.id"
+      - name: "company_id"
+        type: "UUID"
+      - name: "author_user_id"
+        type: "UUID"
+      - name: "title"
+        type: "TEXT"
+        required: true
+      - name: "objective"
+        type: "TEXT"
+      - name: "progression_rule"
+        type: "ENUM"
+        values: ["linear", "flexible"]
+      - name: "prerequisites"
+        type: "JSONB"
+      - name: "sequence_order"
+        type: "INTEGER"
+      - name: "taxonomy"
+        type: "JSONB"
+      - name: "metadata"
+        type: "JSONB"
+    relationships:
+      - "belongs_to: Collection"
+      - "has_many: Series"
+
+  Series:
+    description: "Disciplina/Curso dentro de uma trilha"
+    table: "series"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "pathway_id"
+        type: "UUID"
+        fk: "pathways.id"
+      - name: "company_id"
+        type: "UUID"
+      - name: "author_user_id"
+        type: "UUID"
+      - name: "title"
+        type: "TEXT"
+        required: true
+      - name: "description"
+        type: "TEXT"
+      - name: "code"
+        type: "TEXT"
+        example: "CS101"
+      - name: "workload_hours"
+        type: "NUMERIC"
+        constraint: ">= 0"
+      - name: "objectives"
+        type: "JSONB"
+        description: "Array de objetivos"
+      - name: "assessment_types"
+        type: "JSONB"
+        description: "Array de tipos de avaliacao"
+      - name: "grading_config"
+        type: "JSONB"
+        description: "Pesos, threshold de aprovacao"
+      - name: "certification_rules"
+        type: "JSONB"
+      - name: "sequence_order"
+        type: "INTEGER"
+    relationships:
+      - "belongs_to: Pathway"
+      - "has_many: Unit"
+
+  Unit:
+    description: "Modulo/Capitulo dentro de uma serie"
+    table: "units"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "series_id"
+        type: "UUID"
+        fk: "series.id"
+      - name: "company_id"
+        type: "UUID"
+      - name: "author_user_id"
+        type: "UUID"
+      - name: "title"
+        type: "TEXT"
+        required: true
+      - name: "description"
+        type: "TEXT"
+      - name: "objectives"
+        type: "JSONB"
+        description: "Array de objetivos"
+      - name: "estimated_duration_minutes"
+        type: "INTEGER"
+        constraint: ">= 0"
+      - name: "sequence_order"
+        type: "INTEGER"
+      - name: "taxonomy"
+        type: "JSONB"
+      - name: "metadata"
+        type: "JSONB"
+    relationships:
+      - "belongs_to: Series"
+      - "has_many: Component"
+
+  Component:
+    description: "Recurso individual de aprendizagem (HYBRID ARCHITECTURE)"
+    table: "components"
+    fields:
+      core:
+        - name: "id"
+          type: "UUID"
+          pk: true
+        - name: "tenant_id"
+          type: "UUID"
+        - name: "unit_id"
+          type: "UUID"
+          fk: "units.id"
+        - name: "company_id"
+          type: "UUID"
+        - name: "author_user_id"
+          type: "UUID"
+        - name: "component_type"
+          type: "ENUM"
+          values: ["video", "text", "quiz", "assignment", "discussion", "link", "file", "interactive", "live_session", "ai_qa"]
+        - name: "subtype"
+          type: "TEXT"
+          description: "Classificacao granular (29 valores)"
+        - name: "title"
+          type: "TEXT"
+          required: true
+        - name: "description"
+          type: "TEXT"
+        - name: "content_url"
+          type: "TEXT"
+        - name: "content_data"
+          type: "JSONB"
+          description: "Configuracao especifica do tipo"
+        - name: "estimated_duration_minutes"
+          type: "INTEGER"
+        - name: "is_required"
+          type: "BOOLEAN"
+          default: true
+        - name: "sku"
+          type: "TEXT"
+          unique: true
+        - name: "taxonomy"
+          type: "JSONB"
+        - name: "grading_info"
+          type: "JSONB"
+        - name: "provider"
+          type: "TEXT"
+          values: ["youtube", "vimeo", "smartplayer", "wistia"]
+        - name: "source_identifier"
+          type: "TEXT"
+        - name: "sequence_order"
+          type: "INTEGER"
+        - name: "metadata"
+          type: "JSONB"
+          note: "Inclui release_condition"
+
+      feature_flags:
+        - name: "enable_xapi_tracking"
+          type: "BOOLEAN"
+          default: false
+        - name: "enable_ai_features"
+          type: "BOOLEAN"
+        - name: "enable_annotations"
+          type: "BOOLEAN"
+        - name: "enable_ai_qa"
+          type: "BOOLEAN"
+        - name: "group_work_enabled"
+          type: "BOOLEAN"
+        - name: "discussion_enabled"
+          type: "BOOLEAN"
+        - name: "proctoring_enabled"
+          type: "BOOLEAN"
+        - name: "anti_plagiarism_enabled"
+          type: "BOOLEAN"
+
+      assessment_fields:
+        - name: "assessment_mode"
+          type: "ENUM"
+          values: ["presencial", "online"]
+        - name: "question_generation_mode"
+          type: "ENUM"
+          values: ["banco_randomizado", "manual", "ia_adaptativo"]
+
+      conference_fields:
+        - name: "conference_provider"
+          type: "ENUM"
+          values: ["zoom", "teams", "meet"]
+        - name: "conference_date"
+          type: "TIMESTAMPTZ"
+        - name: "conference_link"
+          type: "TEXT"
+
+    subtypes:
+      video: ["video_on_demand", "live_streaming", "live_broadcast", "video_conference"]
+      audio: ["audio", "audio_podcast", "audio_lecture"]
+      online_activity: ["trabalho_individual", "trabalho_grupo", "forum_discussion"]
+      presencial_activity: ["aula_presencial", "estagio", "palestra", "visita_tecnica", "atividade_cultural"]
+      hybrid_activity: ["hybrid types"]
+      quiz: ["formative_assessment", "summative_assessment", "self_assessment", "online_quiz", "proctored_exam"]
+      assignment: ["assignment submission"]
+      interactive: ["h5p", "practice_exercise", "peer_review", "reflection", "interactive_simulation"]
+      file: ["downloadable"]
+      link: ["external"]
+      text: ["document", "reference_material", "reading_text"]
+      ai_qa: ["ai_assistant"]
+
+    relationships:
+      - "belongs_to: Unit"
+
+# =============================================================================
+# CONTENT_DATA STRUCTURES (JSONB)
+# =============================================================================
+
+  content_data_schemas:
+    streaming:
+      video:
+        source: "url"
+        url: "TEXT"
+        duration_seconds: "INTEGER"
+        provider: "youtube|vimeo|zoom|smartplayer|wistia"
+        video_id: "TEXT"
+        thumbnail_url: "TEXT"
+        captions_url: "TEXT"
+      xapi_config:
+        track_playback_speed: "BOOLEAN"
+        track_tab_switches: "BOOLEAN"
+        track_sentiment: "BOOLEAN"
+        track_time_on_screen: "BOOLEAN"
+      ai_generated:
+        enable_role_play: "BOOLEAN"
+        enable_case_studies: "BOOLEAN"
+      annotations:
+        enabled: "BOOLEAN"
+        enable_pdf_export: "BOOLEAN"
+      ai_qa:
+        enabled: "BOOLEAN"
+        mode: "V1|V2"
+        topic: "TEXT"
+      conference:
+        provider: "zoom|teams|meet"
+        link: "TEXT"
+        date: "ISO 8601"
+        capacity: "INTEGER"
+        recording_enabled: "BOOLEAN"
+        whiteboard_enabled: "BOOLEAN"
+
+    assessment:
+      template:
+        assessment_mode: "online|presencial"
+      grading:
+        system: "notas_0_10|conceito_abcde|rubricas"
+        mode: "manual|ia_sem_validacao|ia_com_validacao"
+        anti_plagiarism_enabled: "BOOLEAN"
+        rubric: "Array[{criterion, weight}]"
+      parameters:
+        time_limit_minutes: "INTEGER"
+        max_attempts: "INTEGER"
+        weight: "INTEGER"
+      questions:
+        generation_mode: "banco_randomizado|manual|ia_adaptativo"
+        formats: "{multipla_escolha: N, dissertativas: N}"
+      proctoring:
+        enabled: "BOOLEAN"
+        mode: "senha_mensageria|geolocation"
+
+    activity:
+      group_work:
+        enabled: "BOOLEAN"
+        formation_mode: "manual|automatic"
+        min_members: "INTEGER"
+        max_members: "INTEGER"
+        balancing_criteria: "random|performance"
+      submission:
+        type: "code_upload|file_upload|text"
+        deadline: "ISO 8601"
+        file_types: "Array[string]"
+        max_file_size_mb: "INTEGER"
+      grading:
+        rubric: "Array[{criterion, weight}]"
+        auto_grade_enabled: "BOOLEAN"
+
+    resource:
+      link: "{url, name, description}"
+      reading: "{name, description, pdf_url OR text_content}"
+      file: "{file_url, file_name, file_size_bytes}"
+
+    ai_qa:
+      active: "BOOLEAN"
+      linked_series_id: "UUID"
+      mode: "V1|V2"
+      library: "openai-gpt4"
+
+    validation_rules:
+      - "Rubric weights devem somar 100"
+      - "Group work: max_members >= min_members"
+      - "Reading: deve ter pdf_url OU text_content"
+      - "Proctoring geolocation: unit_id obrigatorio"
+
+# =============================================================================
+# TURMAS E MATRICULAS
+# =============================================================================
+
+  ClassInstance:
+    description: "Turma (oferta de classe)"
+    table: "class_instances"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "company_id"
+        type: "UUID"
+      - name: "content_type"
+        type: "ENUM"
+        values: ["collection", "series"]
+      - name: "content_id"
+        type: "UUID"
+        description: "Link para collection OU series"
+      - name: "code"
+        type: "TEXT"
+        unique: true
+        example: "SENAC-JS101-2025-1"
+      - name: "name"
+        type: "TEXT"
+      - name: "institution"
+        type: "TEXT"
+      - name: "class_type"
+        type: "TEXT"
+      - name: "schedule_type"
+        type: "ENUM"
+        values: ["morning", "afternoon", "evening", "full_time", "flexible", "weekend"]
+      - name: "delivery_mode"
+        type: "ENUM"
+        values: ["in_person", "online", "hybrid"]
+      - name: "max_students"
+        type: "INTEGER"
+        note: "0 = ilimitado"
+      - name: "start_date"
+        type: "DATE"
+      - name: "end_date"
+        type: "DATE"
+      - name: "status"
+        type: "ENUM"
+        values: ["active", "inactive", "completed", "cancelled"]
+      - name: "enrolled_students_count"
+        type: "INTEGER"
+      - name: "engagement_score"
+        type: "NUMERIC"
+      - name: "churn_rate"
+        type: "NUMERIC"
+      - name: "certificate_issuer_company_id"
+        type: "UUID"
+        optional: true
+      - name: "metadata"
+        type: "JSONB"
+        note: "pathwayDurations, totalWorkloadHours"
+
+  ClassEnrollment:
+    description: "Matricula de aluno em turma"
+    table: "class_enrollments"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "class_instance_id"
+        type: "UUID"
+        fk: "class_instances.id"
+      - name: "user_id"
+        type: "UUID"
+        fk: "users.id"
+      - name: "status"
+        type: "ENUM"
+        values: ["enrolled", "dropped", "completed"]
+      - name: "enrollment_date"
+        type: "DATE"
+      - name: "dropped_date"
+        type: "DATE"
+      - name: "completed_date"
+        type: "DATE"
+      - name: "grade"
+        type: "NUMERIC"
+      - name: "progress_percentage"
+        type: "NUMERIC"
+      - name: "last_activity_at"
+        type: "TIMESTAMPTZ"
+
+# =============================================================================
+# PROGRESSO
+# =============================================================================
+
+  Progress:
+    description: "Rastreamento de progresso em todos os niveis"
+    table: "progress"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "user_id"
+        type: "UUID"
+      - name: "collection_id"
+        type: "UUID"
+        optional: true
+      - name: "series_id"
+        type: "UUID"
+        optional: true
+      - name: "unit_id"
+        type: "UUID"
+        optional: true
+      - name: "component_id"
+        type: "UUID"
+        optional: true
+      - name: "status"
+        type: "ENUM"
+        values: ["not_started", "in_progress", "completed"]
+      - name: "started_at"
+        type: "TIMESTAMPTZ"
+      - name: "completed_at"
+        type: "TIMESTAMPTZ"
+      - name: "progress_percentage"
+        type: "NUMERIC"
+        range: "0-100"
+      - name: "time_spent_seconds"
+        type: "INTEGER"
+    note: "Rollup automatico de componente -> unidade -> serie -> colecao"
+
+# =============================================================================
+# AVALIACOES
+# =============================================================================
+
+  AssessmentQuestion:
+    description: "Questao de avaliacao"
+    table: "assessment_questions"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "component_id"
+        type: "UUID"
+      - name: "question_bank_id"
+        type: "UUID"
+      - name: "company_id"
+        type: "UUID"
+      - name: "question_text"
+        type: "TEXT"
+      - name: "question_type"
+        type: "ENUM"
+        values: ["multipla_escolha", "dissertativa", "oral", "verdadeiro_falso", "mista"]
+      - name: "correct_answer"
+        type: "JSONB"
+      - name: "options"
+        type: "JSONB"
+        description: "Array de opcoes"
+      - name: "points"
+        type: "NUMERIC"
+      - name: "tags"
+        type: "TEXT[]"
+      - name: "difficulty"
+        type: "ENUM"
+        values: ["easy", "medium", "hard"]
+      - name: "attachments"
+        type: "JSONB"
+      - name: "justification"
+        type: "TEXT"
+        description: "Explicacao da resposta"
+      - name: "ai_generated"
+        type: "BOOLEAN"
+      - name: "irt_difficulty"
+        type: "NUMERIC"
+        description: "IRT difficulty"
+      - name: "irt_discrimination"
+        type: "NUMERIC"
+        description: "IRT discrimination"
+      - name: "question_order"
+        type: "INTEGER"
+
+  AssessmentAttempt:
+    description: "Tentativa de avaliacao do aluno"
+    table: "assessment_attempts"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "component_id"
+        type: "UUID"
+      - name: "student_user_id"
+        type: "UUID"
+      - name: "attempt_number"
+        type: "INTEGER"
+        note: "1, 2, 3..."
+      - name: "started_at"
+        type: "TIMESTAMPTZ"
+      - name: "submitted_at"
+        type: "TIMESTAMPTZ"
+      - name: "score"
+        type: "NUMERIC"
+      - name: "max_score"
+        type: "NUMERIC"
+      - name: "status"
+        type: "ENUM"
+        values: ["in_progress", "submitted", "graded", "cancelled"]
+      - name: "feedback"
+        type: "JSONB"
+
+  AssessmentAnswer:
+    description: "Resposta do aluno a uma questao"
+    table: "assessment_answers"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "attempt_id"
+        type: "UUID"
+        fk: "assessment_attempts.id"
+      - name: "question_id"
+        type: "UUID"
+        fk: "assessment_questions.id"
+      - name: "student_user_id"
+        type: "UUID"
+      - name: "student_answer"
+        type: "JSONB"
+      - name: "is_correct"
+        type: "BOOLEAN"
+        nullable: true
+      - name: "points_earned"
+        type: "NUMERIC"
+        nullable: true
+      - name: "graded_by_user_id"
+        type: "UUID"
+      - name: "graded_at"
+        type: "TIMESTAMPTZ"
+      - name: "feedback_text"
+        type: "TEXT"
+      - name: "feedback_media_url"
+        type: "TEXT"
+      - name: "feedback_media_type"
+        type: "TEXT"
+
+# =============================================================================
+# COMUNIDADES
+# =============================================================================
+
+  Community:
+    description: "Comunidade de aprendizagem"
+    table: "communities"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "company_id"
+        type: "UUID"
+      - name: "owner_user_id"
+        type: "UUID"
+      - name: "name"
+        type: "TEXT"
+      - name: "description"
+        type: "TEXT"
+      - name: "avatar_url"
+        type: "TEXT"
+      - name: "banner_url"
+        type: "TEXT"
+      - name: "type"
+        type: "ENUM"
+        values: ["course", "discipline", "class", "community"]
+      - name: "privacy"
+        type: "ENUM"
+        values: ["public", "private", "restricted"]
+
+  CommunityMember:
+    description: "Membro de comunidade"
+    table: "community_members"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "user_id"
+        type: "UUID"
+      - name: "community_id"
+        type: "UUID"
+      - name: "role"
+        type: "ENUM"
+        values: ["owner", "moderator", "member", "pending", "banned"]
+        hierarchy: "owner > moderator > member > pending > banned"
+      - name: "joined_at"
+        type: "TIMESTAMPTZ"
+      - name: "banned_at"
+        type: "TIMESTAMPTZ"
+      - name: "bannedBy"
+        type: "UUID"
+      - name: "banReason"
+        type: "TEXT"
+
+  CommunitySpace:
+    description: "Area de discussao dentro de comunidade"
+    table: "community_spaces"
+    fields:
+      - name: "id"
+        type: "UUID"
+      - name: "community_id"
+        type: "UUID"
+      - name: "title"
+        type: "TEXT"
+      - name: "description"
+        type: "TEXT"
+      - name: "type"
+        type: "ENUM"
+        values: ["course", "discipline", "class", "community", "group"]
+      - name: "linkedEntityId"
+        type: "UUID"
+        optional: true
+      - name: "privacy"
+        type: "ENUM"
+        values: ["public", "private", "restricted"]
+      - name: "topicsCount"
+        type: "INTEGER"
+
+  DiscussionTopic:
+    description: "Topico de discussao"
+    table: "discussion_topics"
+    fields:
+      - name: "id"
+        type: "UUID"
+      - name: "community_id"
+        type: "UUID"
+      - name: "space_id"
+        type: "UUID"
+      - name: "author_id"
+        type: "UUID"
+      - name: "title"
+        type: "TEXT"
+      - name: "description"
+        type: "TEXT"
+      - name: "isEvaluative"
+        type: "BOOLEAN"
+      - name: "evaluationWeight"
+        type: "INTEGER"
+        range: "1-100"
+      - name: "countsToGradebook"
+        type: "BOOLEAN"
+      - name: "rubric"
+        type: "JSONB"
+      - name: "attachments"
+        type: "JSONB"
+      - name: "dueAt"
+        type: "TIMESTAMPTZ"
+
+  TopicReply:
+    description: "Resposta a topico"
+    table: "topic_replies"
+    fields:
+      - name: "id"
+        type: "UUID"
+      - name: "topic_id"
+        type: "UUID"
+      - name: "author_id"
+        type: "UUID"
+      - name: "parent_reply_id"
+        type: "UUID"
+        optional: true
+        description: "Respostas aninhadas"
+      - name: "text"
+        type: "TEXT"
+      - name: "attachments"
+        type: "JSONB"
+      - name: "votes"
+        type: "INTEGER"
+      - name: "upvotes"
+        type: "INTEGER"
+      - name: "downvotes"
+        type: "INTEGER"
+
+# =============================================================================
+# IDENTIDADE
+# =============================================================================
+
+  User:
+    description: "Usuario do sistema"
+    table: "users"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "email"
+        type: "TEXT"
+        unique: true
+      - name: "fullName"
+        type: "TEXT"
+      - name: "socialName"
+        type: "TEXT"
+      - name: "gender"
+        type: "TEXT"
+      - name: "phone"
+        type: "TEXT"
+      - name: "countryCode"
+        type: "TEXT"
+      - name: "birthDate"
+        type: "DATE"
+      - name: "userType"
+        type: "ENUM"
+        values: ["student", "employee"]
+      - name: "status"
+        type: "ENUM"
+        values: ["active", "inactive", "suspended"]
+      - name: "primaryDocument"
+        type: "JSONB"
+        structure: "{type, value, countryCode}"
+      - name: "documents"
+        type: "JSONB"
+        description: "Array de documentos"
+      - name: "guardian"
+        type: "JSONB"
+      - name: "addresses"
+        type: "JSONB"
+        description: "Array de enderecos"
+      - name: "employeeProfile"
+        type: "JSONB"
+      - name: "studentProfile"
+        type: "JSONB"
+      - name: "customFields"
+        type: "JSONB"
+      - name: "deleted_at"
+        type: "TIMESTAMPTZ"
+        description: "Soft delete"
+
+  Company:
+    description: "Empresa/Instituicao"
+    table: "companies"
+    fields:
+      - name: "id"
+        type: "UUID"
+        pk: true
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "parent_id"
+        type: "UUID"
+        description: "Hierarquia"
+      - name: "legalName"
+        type: "TEXT"
+      - name: "displayName"
+        type: "TEXT"
+      - name: "countryCode"
+        type: "TEXT"
+      - name: "registrationNumber"
+        type: "TEXT"
+      - name: "institutionalType"
+        type: "TEXT"
+      - name: "addresses"
+        type: "JSONB"
+      - name: "documents"
+        type: "JSONB"
+      - name: "complementaryInfo"
+        type: "JSONB"
+      - name: "hierarchy"
+        type: "JSONB"
+        structure: "{ancestorIds: UUID[]}"
+
+# =============================================================================
+# RBAC (Role-Based Access Control)
+# =============================================================================
+
+  Role:
+    table: "roles"
+    fields:
+      - name: "id"
+        type: "UUID"
+      - name: "slug"
+        type: "TEXT"
+        unique: true
+      - name: "name"
+        type: "TEXT"
+      - name: "description"
+        type: "TEXT"
+      - name: "company_id"
+        type: "UUID"
+        optional: true
+
+  Permission:
+    table: "permissions"
+    fields:
+      - name: "id"
+        type: "UUID"
+      - name: "slug"
+        type: "TEXT"
+        unique: true
+      - name: "name"
+        type: "TEXT"
+      - name: "scope"
+        type: "TEXT"
+        format: "resource.action (ex: edu.collection.create)"
+      - name: "category"
+        type: "ENUM"
+        values: ["edu", "identity", "community", "analytics"]
+
+  RolePermission:
+    table: "role_permissions"
+    description: "Many-to-many: roles <-> permissions"
+    fields:
+      - name: "role_id"
+        type: "UUID"
+      - name: "permission_id"
+        type: "UUID"
+
+  UserCompanyRole:
+    table: "user_company_roles"
+    description: "Atribuicao de roles a usuarios em empresas"
+    fields:
+      - name: "user_id"
+        type: "UUID"
+      - name: "company_id"
+        type: "UUID"
+      - name: "role_id"
+        type: "UUID"
+
+# =============================================================================
+# EXPERIENCE EVENTS (xAPI)
+# =============================================================================
+
+  ExperienceEvent:
+    description: "Evento de experiencia (xAPI compliance)"
+    table: "experience_events"
+    fields:
+      - name: "id"
+        type: "UUID"
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "actor_id"
+        type: "UUID"
+      - name: "actor_type"
+        type: "ENUM"
+        values: ["student", "teacher", "group", "system"]
+      - name: "cohort_id"
+        type: "UUID"
+        optional: true
+      - name: "timestamp"
+        type: "TIMESTAMPTZ"
+      - name: "verb"
+        type: "ENUM"
+        values: ["started", "completed", "viewed", "paused", "resumed", "seeked", "created", "updated", "deleted", "upvoted", "joined", "downloaded", "attempted", "submitted", "answered", "logged_in", "logged_out"]
+      - name: "object_type"
+        type: "ENUM"
+        values: ["component", "system", "collection", "series", "unit", "post", "comment", "community", "note", "material", "pdf", "quiz", "dissertation", "assignment", "live_session", "assessment", "question", "user"]
+      - name: "object_id"
+        type: "UUID"
+      - name: "result_score"
+        type: "NUMERIC"
+      - name: "result_success"
+        type: "BOOLEAN"
+      - name: "result_duration"
+        type: "INTEGER"
+        description: "Segundos (ou minutos para assessments)"
+      - name: "completion"
+        type: "BOOLEAN"
+      - name: "response"
+        type: "TEXT"
+      - name: "result_metadata"
+        type: "JSONB"
+        structure:
+          componentType: "required when objectType='component'"
+          componentId: "UUID"
+          componentSubtype: "TEXT"
+          unitId: "UUID"
+          seriesId: "UUID"
+          pathwayId: "UUID"
+          collectionId: "UUID"
+          attemptId: "UUID"
+          assessmentId: "UUID"
+          questionId: "UUID"
+          questionType: "TEXT"
+          maxScore: "NUMERIC"
+          correctCount: "INTEGER"
+          totalQuestions: "INTEGER"
+          attemptNumber: "INTEGER"
+          timeSpentMinutes: "NUMERIC"
+      - name: "context_data"
+        type: "JSONB"
+
+# =============================================================================
+# DOCUMENTOS (S3)
+# =============================================================================
+
+  AdmissionDocument:
+    description: "Documento de admissao (S3)"
+    table: "admission_documents"
+    fields:
+      - name: "id"
+        type: "UUID"
+      - name: "tenant_id"
+        type: "UUID"
+      - name: "candidate_id"
+        type: "UUID"
+      - name: "document_type"
+        type: "TEXT"
+      - name: "file_url"
+        type: "TEXT"
+      - name: "file_name"
+        type: "TEXT"
+      - name: "file_size_bytes"
+        type: "INTEGER"
+      - name: "mime_type"
+        type: "TEXT"
+      - name: "versions"
+        type: "JSONB"
+        description: "Array de versoes"
+      - name: "current_version"
+        type: "INTEGER"
+      - name: "status"
+        type: "ENUM"
+        values: ["pending", "approved", "rejected", "requires_reupload"]
+      - name: "reviewed_by_user_id"
+        type: "UUID"
+      - name: "reviewed_at"
+        type: "TIMESTAMPTZ"
+      - name: "review_notes"
+        type: "TEXT"
+
+# =============================================================================
+# DIAGRAMA DE RELACIONAMENTOS
+# =============================================================================
+
+relationships_diagram: |
+  Collection (1) --< Pathway (N)
+  Pathway (1) --< Series (N)
+  Series (1) --< Unit (N)
+  Unit (1) --< Component (N)
+
+  ClassInstance (1) --> Collection|Series (1)
+  ClassInstance (1) --< ClassEnrollment (N)
+  ClassEnrollment (N) --> User (1)
+
+  User (N) --< Progress (N) --> Component|Unit|Series|Collection
+
+  Component (1) --< AssessmentQuestion (N)
+  Component (1) --< AssessmentAttempt (N)
+  AssessmentAttempt (1) --< AssessmentAnswer (N)
+
+  Community (1) --< CommunityMember (N) --> User
+  Community (1) --< CommunitySpace (N)
+  CommunitySpace (1) --< DiscussionTopic (N)
+  DiscussionTopic (1) --< TopicReply (N)
+
+  User (N) --< UserCompanyRole (N) --> Company + Role
+  Role (N) --< RolePermission (N) --> Permission
+
+  Company (1) --< Company (N) [parent_id hierarchy]
+
+  User|Component|System --> ExperienceEvent [xAPI tracking]

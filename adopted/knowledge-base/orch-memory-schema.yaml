@@ -1,0 +1,375 @@
+# ============================================================
+# Orch Memory Schema - Sistema de Memoria Persistente
+# Define estrutura de logs, politicas de retencao e regras
+# de carregamento de contexto entre sessoes
+# ============================================================
+
+version: "1.0.0"
+updated: "2026-02-03"
+description: "Schema do sistema de memoria persistente do Orch baseado em logs de conversa"
+
+# ============================================================
+# ESTRUTURA DE ARMAZENAMENTO
+# ============================================================
+storage:
+  # FONTE DE VERDADE: PostgreSQL (monolito Cogedu)
+  # Tabelas definidas em GUIA-IMPLANTACAO-CTO.md, FASE 1, Passo 1.1
+  primary: "postgresql"
+  tables:
+    conversations: "orch_conversations"   # messages JSONB, entities JSONB, sentiment, resolution
+    feedback: "orch_feedback"             # type, description, priority, status
+    analytics: "orch_analytics_events"    # event_type, metadata JSONB
+  indexes:
+    - "idx_orch_conv_user (user_id, started_at DESC)"
+    - "idx_orch_conv_tenant (tenant_id)"
+    - "idx_orch_feedback_tenant (tenant_id, created_at DESC)"
+    - "idx_orch_analytics_user (user_id, created_at DESC)"
+
+  # ARCHIVE OPCIONAL: filesystem YAML para debug/auditoria
+  archive:
+    enabled: false                         # Ativar se necessario para compliance
+    format: "yaml"
+    base_path: "logs/"
+    structure: |
+      logs/
+        {user_id}/
+          YYYY/
+            MM/
+              YYYY-MM-DD_HH-MM-SS.yaml    # Export do banco para auditoria
+    note: "Export opcional. A fonte de verdade e SEMPRE o PostgreSQL."
+
+# ============================================================
+# ESTRUTURA DO LOG DE CONVERSA
+# ============================================================
+conversation_log:
+  description: "Cada conversa com o Orch gera um arquivo de log"
+  schema:
+    metadata:
+      conversation_id: "string (uuid)"
+      user_id: "string"
+      user_name: "string"
+      user_role: "string"
+      company_id: "string"
+      started_at: "ISO 8601 timestamp"
+      ended_at: "ISO 8601 timestamp"
+      duration_seconds: "integer"
+      total_messages: "integer"
+      pages_visited: "string[]"
+      primary_intent: "string (explain | fill | navigate | query | feedback | error)"
+      overall_sentiment: "number (-1 a 1)"
+      resolution_status: "resolved | partially_resolved | unresolved | escalated"
+
+    # Entidades mencionadas na conversa (para busca futura)
+    entities_mentioned:
+      description: "Pessoas, turmas, processos referenciados na conversa"
+      schema:
+        - entity_type: "student | class | employee | admission | content"
+          entity_id: "string (uuid ou null se nao identificado)"
+          entity_name: "string (nome mencionado pelo usuario)"
+          context: "string (resumo de por que foi mencionado)"
+          first_mention_turn: "integer"
+
+    # Resumo gerado automaticamente
+    summary:
+      description: "Resumo da conversa gerado pelo Orch ao encerrar"
+      schema:
+        short_summary: "string (1-2 frases)"
+        topics_discussed: "string[]"
+        actions_taken: "string[] (campos preenchidos, workflows guiados, etc)"
+        issues_found: "string[] (problemas reportados)"
+        feedback_collected: "string[] (IDs de feedbacks gerados)"
+        insights_generated: "string[] (IDs de insights)"
+        corrections_received: "string[] (IDs de correcoes)"
+        unresolved_questions: "string[] (perguntas que ficaram sem resposta)"
+
+    # Mensagens da conversa (compactadas)
+    messages:
+      description: "Historico de mensagens compactado para economia de espaco"
+      schema:
+        - turn: "integer"
+          role: "user | orch"
+          content: "string"
+          timestamp: "ISO 8601"
+          page_url: "string (URL onde o usuario estava)"
+          intent: "string (classificacao da intencao)"
+          sentiment_score: "number (-1 a 1)"
+          entities_in_message: "string[] (nomes de entidades referenciadas)"
+          action_performed: "string | null (acao executada: fill, navigate, query, etc)"
+
+  example: |
+    metadata:
+      conversation_id: "conv-2026-02-03-14-30"
+      user_id: "usr_abc123"
+      user_name: "Ana Costa"
+      user_role: "coordenadora"
+      company_id: "comp_xyz"
+      started_at: "2026-02-03T14:30:00Z"
+      ended_at: "2026-02-03T14:42:00Z"
+      duration_seconds: 720
+      total_messages: 12
+      pages_visited:
+        - "/educational/class-instances"
+        - "/educational/class-instances/ci_456"
+      primary_intent: "query"
+      overall_sentiment: 0.2
+      resolution_status: "resolved"
+
+    entities_mentioned:
+      - entity_type: "student"
+        entity_name: "Joao Silva"
+        entity_id: "usr_joao456"
+        context: "Coordenadora perguntou sobre notas do aluno na turma de Marketing"
+        first_mention_turn: 2
+      - entity_type: "class"
+        entity_name: "Marketing Digital 2026.1"
+        entity_id: "ci_mktdig2026"
+        context: "Turma onde o aluno Joao esta matriculado"
+        first_mention_turn: 2
+
+    summary:
+      short_summary: "Ana perguntou sobre as notas do Joao Silva na turma de Marketing Digital. Notas em tendencia de queda."
+      topics_discussed: ["notas de aluno", "desempenho", "turma marketing"]
+      actions_taken: ["consulta de notas via query_student"]
+      issues_found: ["tendencia de queda nas notas do Joao"]
+      feedback_collected: []
+      insights_generated: ["grade_trend"]
+      corrections_received: []
+      unresolved_questions: []
+
+    messages:
+      - turn: 1
+        role: "user"
+        content: "Oi Orch, como tao as notas do Joao Silva na turma de Marketing?"
+        timestamp: "2026-02-03T14:30:05Z"
+        page_url: "/educational/class-instances"
+        intent: "query"
+        sentiment_score: 0.0
+        entities_in_message: ["Joao Silva", "Marketing"]
+      - turn: 2
+        role: "orch"
+        content: "Oi Ana! Vou verificar as notas do Joao Silva na turma de Marketing Digital 2026.1..."
+        timestamp: "2026-02-03T14:30:12Z"
+        page_url: "/educational/class-instances"
+        intent: "query_response"
+        sentiment_score: 0.0
+        action_performed: "query_student(grades)"
+
+# ============================================================
+# INDICE DO USUARIO
+# ============================================================
+user_index:
+  description: "Arquivo index.yaml por usuario com resumo de todas as conversas"
+  schema:
+    user_id: "string"
+    user_name: "string"
+    total_conversations: "integer"
+    first_interaction: "ISO 8601"
+    last_interaction: "ISO 8601"
+    preferred_topics: "string[] (top 10 temas mais discutidos)"
+    frequently_asked: "string[] (perguntas mais repetidas por este usuario)"
+    known_entities: "mapa de entidades que o usuario costuma perguntar"
+    satisfaction_trend: "number (tendencia de sentimento: -1 a 1)"
+
+    conversations:
+      description: "Lista resumida de cada conversa (para busca rapida)"
+      schema:
+        - conversation_id: "string"
+          date: "ISO 8601"
+          log_file: "string (path relativo)"
+          short_summary: "string"
+          primary_intent: "string"
+          entities_mentioned: "string[] (nomes)"
+          resolution_status: "string"
+          sentiment: "number"
+          tags: "string[]"
+
+  example: |
+    user_id: "usr_abc123"
+    user_name: "Ana Costa"
+    total_conversations: 47
+    first_interaction: "2026-01-05T09:00:00Z"
+    last_interaction: "2026-02-03T14:42:00Z"
+    preferred_topics: ["notas", "turmas", "matriculas", "processos seletivos"]
+    frequently_asked:
+      - "Como vejo as notas de um aluno?"
+      - "Quantos alunos tem na turma X?"
+      - "Como exportar lista de candidatos?"
+    known_entities:
+      students: ["Joao Silva", "Maria Santos", "Pedro Lima"]
+      classes: ["Marketing Digital 2026.1", "Pedagogia 2025.2"]
+    satisfaction_trend: 0.6
+
+    conversations:
+      - conversation_id: "conv-2026-02-03-14-30"
+        date: "2026-02-03T14:30:00Z"
+        log_file: "2026/02/2026-02-03_14-30-00.yaml"
+        short_summary: "Perguntou sobre notas do Joao Silva"
+        primary_intent: "query"
+        entities_mentioned: ["Joao Silva", "Marketing Digital 2026.1"]
+        resolution_status: "resolved"
+        sentiment: 0.2
+        tags: ["notas", "aluno", "turma"]
+
+# ============================================================
+# POLITICA DE RETENCAO
+# ============================================================
+retention_policy:
+  active_window:
+    duration_days: 30
+    description: "Logs dos ultimos 30 dias sao carregados como contexto ativo"
+    load_strategy: "summaries + entities (nao carrega mensagens completas)"
+    max_conversations_loaded: 50
+
+  searchable_archive:
+    duration_days: 365
+    description: "Logs de 31 a 365 dias ficam pesquisaveis sob demanda"
+    load_strategy: "apenas quando usuario referencia conversa antiga"
+    search_method: "keyword + entity matching no indice"
+    triggers:
+      - "quem era aquele aluno que..."
+      - "lembra quando a gente conversou sobre..."
+      - "da outra vez voce me disse..."
+      - "semana passada / mes passado eu perguntei..."
+      - "voce lembra..."
+
+  cold_archive:
+    duration_days: 365+
+    description: "Logs com mais de 1 ano sao comprimidos e movidos para archive/"
+    format: "yaml.gz"
+    searchable: true
+    load_strategy: "somente busca por ID ou entidade especifica"
+
+  cleanup:
+    auto_archive: true
+    archive_schedule: "mensal"
+    delete_after_days: 730  # 2 anos
+
+# ============================================================
+# REGRAS DE CARREGAMENTO DE CONTEXTO
+# ============================================================
+context_loading:
+  on_conversation_start:
+    description: "O que carregar quando o usuario abre o chat"
+    steps:
+      - step: "load_user_index"
+        action: "Carregar index.yaml do usuario"
+        data: "user_name, total_conversations, preferred_topics, frequently_asked, known_entities, satisfaction_trend"
+
+      - step: "load_recent_summaries"
+        action: "Carregar resumos das conversas dos ultimos 30 dias"
+        data: "short_summary, entities_mentioned, primary_intent, date"
+        max_items: 20
+
+      - step: "load_last_conversation"
+        action: "Carregar a ultima conversa completa (mensagens)"
+        data: "Todas as mensagens da sessao anterior"
+        condition: "Se a ultima conversa foi ha menos de 24 horas"
+
+      - step: "load_page_faqs"
+        action: "Carregar FAQs mais relevantes para a pagina atual"
+        data: "Top 10 FAQs da pagina/modulo atual por frequencia"
+        source: "feedback/faq-bank.yaml"
+
+      - step: "load_corrections"
+        action: "Carregar correcoes de insights feitas pelo usuario"
+        data: "Todas as correcoes deste usuario"
+        source: "feedback/insight-corrections.yaml"
+
+  on_entity_reference:
+    description: "Quando o usuario menciona uma entidade ja discutida antes"
+    steps:
+      - step: "match_entity"
+        action: "Buscar entidade no indice do usuario"
+        data: "Conversas onde essa entidade foi mencionada"
+
+      - step: "load_entity_context"
+        action: "Carregar contexto das conversas relevantes"
+        data: "Resumos + entidades das conversas encontradas"
+        max_items: 5
+
+  on_past_reference:
+    description: "Quando o usuario referencia uma conversa passada"
+    triggers:
+      - pattern: "lembra|outra vez|da vez que|semana passada|mes passado|voce disse|a gente conversou"
+        action: "search_conversations"
+    steps:
+      - step: "search_index"
+        action: "Buscar no indice por keywords e entidades"
+        scope: "Todas as conversas (incluindo arquivo)"
+
+      - step: "load_matched_conversation"
+        action: "Carregar conversa encontrada (completa)"
+        data: "Mensagens + summary + entities"
+
+      - step: "present_context"
+        action: "Apresentar o que encontrou ao usuario"
+        format: |
+          Encontrei! No dia {date}, a gente conversou sobre {summary}.
+          {context_relevante}
+          Era isso que voce estava lembrando?
+
+# ============================================================
+# APRENDIZADO VIA FAQ
+# ============================================================
+faq_learning:
+  description: "O Orch usa o FAQ Bank para antecipar duvidas e melhorar respostas"
+
+  strategies:
+    - id: "proactive_faq"
+      name: "FAQ Proativo"
+      description: "Oferecer FAQ relevante antes do usuario perguntar"
+      trigger: "Quando usuario abre pagina com FAQs frequentes"
+      action: |
+        Se a pagina atual tem FAQs com frequency >= 5:
+        Incluir na saudacao: "Aliás, muita gente pergunta sobre {faq.question} nessa tela. Quer que eu explique?"
+      max_suggestions: 2
+
+    - id: "response_enrichment"
+      name: "Enriquecimento de resposta"
+      description: "Usar FAQ para dar respostas mais completas"
+      trigger: "Quando usuario faz pergunta similar a uma FAQ existente"
+      action: |
+        Se a pergunta do usuario tem similaridade >= 0.7 com uma FAQ:
+        1. Usar a resposta da FAQ como base
+        2. Personalizar com contexto do usuario
+        3. Incrementar frequency da FAQ
+
+    - id: "pattern_detection"
+      name: "Deteccao de padroes"
+      description: "Identificar novas FAQs a partir de perguntas repetidas"
+      trigger: "Mesma pergunta feita por 3+ usuarios diferentes"
+      action: |
+        1. Criar entrada automatica no faq-bank.yaml
+        2. Status: 'draft' (para revisao)
+        3. Resposta baseada na melhor resposta dada pelo Orch
+
+    - id: "faq_gap_detection"
+      name: "Deteccao de lacunas"
+      description: "Identificar paginas sem FAQs que geram muitas duvidas"
+      trigger: "Pagina com 5+ conversas e 0 FAQs"
+      action: |
+        Registrar no relatorio diario como "pagina que precisa de documentacao"
+
+# ============================================================
+# APRENDIZADO VIA CORRECOES
+# ============================================================
+correction_learning:
+  description: "O Orch aprende com correcoes de insights para nao repetir erros"
+
+  strategies:
+    - id: "avoid_repeat_errors"
+      name: "Evitar erros repetidos"
+      description: "Consultar correcoes antes de gerar insight do mesmo tipo"
+      action: |
+        Antes de gerar insight:
+        1. Verificar se insight similar ja foi corrigido
+        2. Se sim, ajustar a conclusao com base na correcao
+        3. Mencionar: "Da ultima vez me corrigiram que..."
+
+    - id: "context_enrichment"
+      name: "Enriquecimento de contexto"
+      description: "Usar correcoes como contexto adicional"
+      action: |
+        Incluir correcoes relevantes no prompt:
+        "CORRECAO ANTERIOR: quando o aluno X saiu da turma Y,
+         o usuario Z explicou que foi transferencia voluntaria, nao evasao."

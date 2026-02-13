@@ -1,0 +1,37 @@
+# ============================================================================
+# Orch Insight Corrections - Registro de Correcoes de Insights
+#
+# Quando o usuario corrige uma conclusao/insight do Orch, a correcao
+# e registrada aqui para evitar que o mesmo erro se repita.
+#
+# Usado pelo fluxo de memoria: antes de gerar um insight, o Orch
+# consulta este arquivo para verificar se conclusao similar ja foi
+# corrigida pelo usuario.
+#
+# Status: active | superseded | expired
+# ============================================================================
+
+metadata:
+  version: "1.0.0"
+  description: "Registro de correcoes de insights feitas pelos usuarios"
+  created_at: "2026-02-03"
+  last_updated: "2026-02-03"
+  total_entries: 0
+
+# ============================================================================
+# ENTRADAS
+# ============================================================================
+entries: []
+  # Exemplo:
+  #
+  # - id: "COR-2026-02-03-001"
+  #   insight_id: "grade_trend_joao_silva"
+  #   original_conclusion: "Aluno parece estar em risco de evasao"
+  #   corrected_conclusion: "Aluno mudou de turma voluntariamente"
+  #   corrected_by: "uuid-coordenador"
+  #   corrected_at: "2026-02-03T14:30:00Z"
+  #   entity_type: "student"
+  #   entity_id: "uuid-aluno"
+  #   context: "Conversa sobre turma Marketing Digital 2026.1"
+  #   status: "active"
+  #   tags: ["evasao", "transferencia", "falso-positivo"]

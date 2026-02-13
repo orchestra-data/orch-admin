@@ -1,0 +1,354 @@
+# ============================================================
+# Orch Proactive Alerts - Sistema de Alertas Proativos
+# Define regras, gatilhos, templates e politicas de notificacao
+# ============================================================
+
+version: "1.0.0"
+updated: "2026-02-03"
+description: "Schema do sistema de alertas proativos do Orch"
+
+# ============================================================
+# REGRAS DE ALERTA
+# ============================================================
+alert_rules:
+  # --- ALUNOS ---
+  - id: "grade_drop"
+    name: "Queda de Nota Significativa"
+    category: "student"
+    severity: "high"
+    trigger:
+      condition: "Nota de aluno caiu 2+ pontos comparado com media anterior"
+      data_source: "class_grades"
+      check_interval: "daily"
+      min_data_points: 3
+    target:
+      role: ["coordenador", "professor"]
+      scope: "turma do aluno"
+    message_template: |
+      ⚠️ Alerta: {student_name} teve queda de {drop_value} pontos na ultima avaliacao de {class_name}.
+      Media anterior: {previous_avg} → Nota atual: {current_grade}
+      Isso pode indicar dificuldade no conteudo recente.
+      Quer que eu busque mais detalhes?
+    cooldown: 7  # dias antes de alertar novamente sobre o mesmo aluno
+    actions_available:
+      - "Ver detalhes do aluno"
+      - "Ver historico de notas"
+      - "Comparar com turma"
+
+  - id: "attendance_pattern"
+    name: "Padrao de Faltas"
+    category: "student"
+    severity: "medium"
+    trigger:
+      condition: "Aluno faltou 3+ vezes consecutivas ou frequencia abaixo de 70%"
+      data_source: "attendance_records"
+      check_interval: "daily"
+      min_data_points: 5
+    target:
+      role: ["coordenador"]
+      scope: "turma do aluno"
+    message_template: |
+      📋 Atencao: {student_name} esta com frequencia de {attendance_rate}% na turma {class_name}.
+      {consecutive_absences} faltas consecutivas detectadas.
+      Considere entrar em contato com o aluno.
+    cooldown: 14
+    actions_available:
+      - "Ver frequencia completa"
+      - "Ver detalhes do aluno"
+
+  - id: "progress_stall"
+    name: "Progresso Estagnado"
+    category: "student"
+    severity: "medium"
+    trigger:
+      condition: "Aluno sem progresso em conteudo por 14+ dias (0% avanco)"
+      data_source: "student_progress"
+      check_interval: "weekly"
+      min_data_points: 1
+    target:
+      role: ["coordenador", "tutor"]
+      scope: "turma do aluno"
+    message_template: |
+      🔄 {student_name} nao avancou no conteudo de {class_name} ha {days_stalled} dias.
+      Ultimo acesso ao conteudo: {last_access_date}.
+      Pode ser necessario acompanhamento.
+    cooldown: 14
+    actions_available:
+      - "Ver progresso detalhado"
+      - "Ver ultimo acesso"
+
+  # --- TURMAS ---
+  - id: "high_churn"
+    name: "Evasao Alta na Turma"
+    category: "class"
+    severity: "critical"
+    trigger:
+      condition: "Taxa de evasao da turma acima de 20% OU 3+ desistencias na mesma semana"
+      data_source: "class_enrollments"
+      check_interval: "daily"
+      min_data_points: 10  # minimo de matriculas para calcular
+    target:
+      role: ["coordenador", "gestor_academico"]
+      scope: "turma"
+    message_template: |
+      🚨 Alerta critico: A turma {class_name} esta com taxa de evasao de {churn_rate}%.
+      {dropouts_recent} alunos desistiram nos ultimos 7 dias.
+      Total: {total_enrolled} matriculados, {total_dropped} desistentes.
+      Recomendo investigar as causas.
+    cooldown: 7
+    actions_available:
+      - "Ver detalhes da turma"
+      - "Ver alunos desistentes"
+      - "Comparar com outras turmas"
+
+  - id: "low_engagement"
+    name: "Engajamento Baixo na Turma"
+    category: "class"
+    severity: "medium"
+    trigger:
+      condition: "Media de acesso ao conteudo abaixo de 30% nos ultimos 7 dias"
+      data_source: "student_progress + attendance_records"
+      check_interval: "weekly"
+      min_data_points: 5
+    target:
+      role: ["coordenador", "professor"]
+      scope: "turma"
+    message_template: |
+      📉 A turma {class_name} esta com engajamento baixo.
+      Apenas {engagement_rate}% dos alunos acessaram conteudo nos ultimos 7 dias.
+      {active_students}/{total_students} alunos ativos.
+    cooldown: 7
+    actions_available:
+      - "Ver engajamento por aluno"
+      - "Ver conteudos mais acessados"
+
+  - id: "grade_distribution_skew"
+    name: "Distribuicao de Notas Anormal"
+    category: "class"
+    severity: "medium"
+    trigger:
+      condition: "Mais de 40% da turma com nota abaixo da media de aprovacao em uma avaliacao"
+      data_source: "class_grades"
+      check_interval: "on_grade_entry"
+      min_data_points: 10
+    target:
+      role: ["coordenador", "professor"]
+      scope: "turma + avaliacao"
+    message_template: |
+      📊 Na avaliacao '{exam_name}' da turma {class_name}, {below_average_pct}% dos alunos ficaram abaixo da media.
+      Media da turma: {class_avg} (media de aprovacao: {passing_grade}).
+      Pode indicar dificuldade generalizada no conteudo.
+    cooldown: 0  # alertar sempre por avaliacao
+    actions_available:
+      - "Ver distribuicao de notas"
+      - "Comparar com avaliacoes anteriores"
+
+  # --- PROCESSOS SELETIVOS ---
+  - id: "pipeline_bottleneck"
+    name: "Gargalo no Pipeline"
+    category: "admission"
+    severity: "high"
+    trigger:
+      condition: "3+ candidatos parados no mesmo estagio por 7+ dias"
+      data_source: "admission_candidates"
+      check_interval: "daily"
+      min_data_points: 3
+    target:
+      role: ["gestor_admissao"]
+      scope: "processo seletivo"
+    message_template: |
+      ⏳ Gargalo detectado no processo '{admission_name}'.
+      {stuck_count} candidatos estao parados no estagio '{stage_name}' ha {avg_days_stuck} dias em media.
+      Isso pode estar impactando a taxa de conversao.
+    cooldown: 3
+    actions_available:
+      - "Ver pipeline"
+      - "Ver candidatos parados"
+
+  - id: "payment_overdue"
+    name: "Pagamentos Atrasados"
+    category: "admission"
+    severity: "high"
+    trigger:
+      condition: "5+ pagamentos pendentes com vencimento expirado no processo"
+      data_source: "admission_payments"
+      check_interval: "daily"
+      min_data_points: 5
+    target:
+      role: ["gestor_admissao", "financeiro"]
+      scope: "processo seletivo"
+    message_template: |
+      💳 {overdue_count} pagamentos atrasados no processo '{admission_name}'.
+      Valor total pendente: R$ {total_overdue_value}.
+      Vencimento mais antigo: {oldest_due_date}.
+    cooldown: 3
+    actions_available:
+      - "Ver pagamentos pendentes"
+      - "Ver candidatos com pagamento atrasado"
+
+  - id: "low_conversion"
+    name: "Taxa de Conversao Baixa"
+    category: "admission"
+    severity: "medium"
+    trigger:
+      condition: "Taxa de conversao (inscrito -> matriculado) abaixo de 30%"
+      data_source: "admission_candidates"
+      check_interval: "weekly"
+      min_data_points: 20
+    target:
+      role: ["gestor_admissao", "coordenador"]
+      scope: "processo seletivo"
+    message_template: |
+      📉 O processo '{admission_name}' tem taxa de conversao de {conversion_rate}%.
+      {total_applicants} inscritos, apenas {total_enrolled} matriculados.
+      Pontos de maior abandono: {top_dropout_stages}.
+    cooldown: 7
+    actions_available:
+      - "Ver funil completo"
+      - "Comparar com processos anteriores"
+
+  # --- SISTEMA / UX ---
+  - id: "page_no_faq"
+    name: "Pagina Sem FAQ com Muitas Duvidas"
+    category: "system"
+    severity: "low"
+    trigger:
+      condition: "Pagina com 10+ perguntas e 0 FAQs documentadas"
+      data_source: "analytics_events + faq_bank"
+      check_interval: "weekly"
+      min_data_points: 10
+    target:
+      role: ["admin", "produto"]
+      scope: "sistema"
+    message_template: |
+      📝 A pagina '{page_name}' ({page_url}) recebeu {question_count} perguntas e nao tem FAQs.
+      Perguntas mais frequentes:
+      {top_questions_list}
+      Recomendo criar FAQs para essa pagina.
+    cooldown: 30
+    actions_available:
+      - "Ver perguntas recebidas"
+      - "Criar FAQ"
+
+  - id: "repeated_errors"
+    name: "Erros Repetidos na Mesma Tela"
+    category: "system"
+    severity: "high"
+    trigger:
+      condition: "5+ usuarios reportaram erro/bug na mesma pagina nos ultimos 7 dias"
+      data_source: "feedback/improvements-bank.yaml"
+      check_interval: "daily"
+      min_data_points: 5
+    target:
+      role: ["admin", "produto", "desenvolvimento"]
+      scope: "sistema"
+    message_template: |
+      🐛 {error_count} usuarios reportaram problemas na pagina '{page_name}' nos ultimos 7 dias.
+      Erro mais comum: '{most_common_error}'.
+      Isso pode indicar um bug sistematico.
+    cooldown: 7
+    actions_available:
+      - "Ver reports detalhados"
+      - "Ver feedbacks da pagina"
+
+# ============================================================
+# POLITICA DE NOTIFICACAO
+# ============================================================
+notification_policy:
+  # Canais de entrega
+  channels:
+    - id: "chat_widget"
+      name: "Widget do Orch"
+      description: "Mostra alerta quando o usuario abre o chat"
+      delivery: "on_session_start"
+      max_alerts_per_session: 3
+      priority_order: "severity DESC, created_at ASC"
+
+    - id: "badge"
+      name: "Badge no Widget"
+      description: "Mostra contador de alertas pendentes no botao do widget"
+      delivery: "real_time"
+      visual: "numero vermelho no icone"
+
+  # Regras globais
+  global_rules:
+    max_alerts_per_user_per_day: 5
+    quiet_hours:
+      enabled: false  # desabilitado por padrao
+      start: "22:00"
+      end: "07:00"
+    severity_filter:
+      critical: "always"
+      high: "always"
+      medium: "business_hours"
+      low: "weekly_digest"
+    deduplication: true
+    user_can_dismiss: true
+    user_can_snooze: true
+    snooze_options: [1, 3, 7]  # dias
+
+  # Formato de apresentacao
+  presentation:
+    on_chat_open: |
+      Se ha alertas pendentes para o usuario:
+      "Oi {user_name}! Tenho {alert_count} novidade(s) para voce:
+
+      {alerts_list}
+
+      Quer que eu detalhe algum desses?"
+
+    inline: |
+      Durante conversa sobre entidade que tem alerta:
+      "A proposito, sobre {entity_name}: {alert_message}"
+
+# ============================================================
+# HISTORICO E AUDIT
+# ============================================================
+alert_history:
+  storage_path: "logs/alerts/"
+  structure: "logs/alerts/{YYYY}/{MM}/alerts-{YYYY-MM-DD}.yaml"
+  retention_days: 365
+
+  log_schema:
+    alert_id: "string (uuid)"
+    rule_id: "string (id da regra)"
+    created_at: "ISO 8601"
+    delivered_at: "ISO 8601 | null"
+    dismissed_at: "ISO 8601 | null"
+    acted_on_at: "ISO 8601 | null"
+    target_user_id: "string"
+    target_company_id: "string"
+    severity: "critical | high | medium | low"
+    entity_type: "string"
+    entity_id: "string"
+    message_rendered: "string"
+    action_taken: "string | null"
+    snoozed_until: "ISO 8601 | null"
+
+# ============================================================
+# EXEMPLOS
+# ============================================================
+examples:
+  - scenario: "Coordenadora abre o chat e tem 2 alertas"
+    interaction: |
+      Orch: Oi Ana! Tenho 2 novidades para voce:
+
+      🚨 A turma Marketing Digital 2026.1 esta com evasao de 22%.
+         3 alunos desistiram nos ultimos 7 dias.
+
+      ⚠️ O Joao Silva teve queda de 3 pontos na ultima avaliacao.
+         Media anterior: 7.5 → Nota atual: 4.5
+
+      Quer que eu detalhe algum desses?
+
+      Ana: Me fala mais sobre a evasao
+      Orch: [Executa query_class para pegar detalhes e apresenta analise completa]
+
+  - scenario: "Gestor pergunta sobre processo seletivo e Orch menciona alerta inline"
+    interaction: |
+      Gestor: Como ta o vestibular 2026?
+      Orch: O Vestibular 2026 tem 450 inscritos ate agora!
+
+      A proposito, detectei um possivel gargalo: 12 candidatos estao parados no
+      estagio 'Documentacao' ha mais de 10 dias. Pode estar impactando a conversao.
+      Quer que eu analise o funil completo?

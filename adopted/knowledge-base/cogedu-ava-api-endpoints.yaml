@@ -1,0 +1,1051 @@
+# =============================================================================
+# CogEdu AVA - API Endpoints (~179 endpoints)
+# Versao: 1.0.0
+# Descricao: Catalogo completo de endpoints da API do AVA
+# Fonte: cogedu-ava-main/API_DOCUMENTATION_COMPLETE.md + ENDPOINT_REFERENCE.md
+# =============================================================================
+
+# =============================================================================
+# MIDDLEWARE E SEGURANCA
+# =============================================================================
+
+middleware:
+  authentication:
+    description: "Valida JWT do Keycloak"
+    header: "Authorization: Bearer {jwt_token}"
+    extracts: "user_id, permissions, tenant/company claims"
+    exceptions: "Endpoints /api/public/* nao requerem auth"
+
+  tenant_authorization:
+    description: "Valida acesso ao tenant solicitado"
+    headers:
+      - "x-tenant-id: {tenant_uuid}"
+      - "x-company-id: {company_uuid}"
+    flow:
+      1: "Valida usuario tem acesso ao tenant"
+      2: "Valida acesso a empresa via hierarquia"
+      3: "Fallback para claims do JWT"
+
+  permission_based:
+    description: "RBAC com formato scope.resource.verb"
+    format: "requirePermission('edu.collection.create')"
+    categories: "edu, identity, community, analytics"
+
+  error_handling:
+    codes: "400, 401, 403, 404, 409, 500"
+    format: "JSON com mensagens descritivas"
+
+# =============================================================================
+# EDUCATIONAL CONTENT ENDPOINTS
+# =============================================================================
+
+educational:
+  collections:
+    - method: "POST"
+      path: "/api/collections"
+      description: "Criar colecao"
+      auth: true
+    - method: "GET"
+      path: "/api/collections"
+      description: "Listar colecoes (paginado)"
+      auth: true
+    - method: "POST"
+      path: "/api/getCollection"
+      description: "Obter colecao por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/updateCollection/{id}"
+      description: "Atualizar colecao"
+      auth: true
+    - method: "DELETE"
+      path: "/api/deleteCollection/{id}"
+      description: "Deletar colecao (soft delete)"
+      auth: true
+    - method: "POST"
+      path: "/api/publishCollection"
+      description: "Publicar colecao"
+      auth: true
+
+  pathways:
+    - method: "POST"
+      path: "/api/pathways"
+      description: "Criar trilha"
+      auth: true
+    - method: "GET"
+      path: "/api/pathways"
+      description: "Listar trilhas"
+      auth: true
+    - method: "POST"
+      path: "/api/getPathway"
+      description: "Obter trilha por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/updatePathway/{id}"
+      description: "Atualizar trilha"
+      auth: true
+    - method: "DELETE"
+      path: "/api/deletePathway/{id}"
+      description: "Deletar trilha"
+      auth: true
+
+  series:
+    - method: "POST"
+      path: "/api/series"
+      description: "Criar serie"
+      auth: true
+    - method: "GET"
+      path: "/api/series"
+      description: "Listar series"
+      auth: true
+    - method: "POST"
+      path: "/api/getSeries"
+      description: "Obter serie por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/updateSeries/{id}"
+      description: "Atualizar serie"
+      auth: true
+    - method: "DELETE"
+      path: "/api/deleteSeries/{id}"
+      description: "Deletar serie"
+      auth: true
+    - method: "POST"
+      path: "/api/publishSeries"
+      description: "Publicar serie"
+      auth: true
+
+  units:
+    - method: "POST"
+      path: "/api/units"
+      description: "Criar unidade"
+      auth: true
+    - method: "GET"
+      path: "/api/units"
+      description: "Listar unidades"
+      auth: true
+    - method: "POST"
+      path: "/api/getUnit"
+      description: "Obter unidade por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/updateUnit/{id}"
+      description: "Atualizar unidade"
+      auth: true
+    - method: "DELETE"
+      path: "/api/deleteUnit/{id}"
+      description: "Deletar unidade"
+      auth: true
+
+  components:
+    - method: "POST"
+      path: "/api/components"
+      description: "Criar componente (com validacao content_data)"
+      auth: true
+    - method: "GET"
+      path: "/api/components"
+      description: "Listar componentes"
+      auth: true
+    - method: "POST"
+      path: "/api/getComponent"
+      description: "Obter componente por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/updateComponent/{id}"
+      description: "Atualizar componente (com validacao)"
+      auth: true
+    - method: "DELETE"
+      path: "/api/deleteComponent/{id}"
+      description: "Deletar componente"
+      auth: true
+    - method: "POST"
+      path: "/api/components/:componentId/upload-file"
+      description: "Upload de material de apoio (presigned URL)"
+      auth: true
+    - method: "POST"
+      path: "/api/components/:componentId/upload-pdf"
+      description: "Upload de PDF (presigned URL)"
+      auth: true
+
+# =============================================================================
+# CLASS & ENROLLMENT ENDPOINTS
+# =============================================================================
+
+class_enrollment:
+  class_instance:
+    - method: "POST"
+      path: "/api/createClassInstance"
+      description: "Criar turma"
+      auth: true
+    - method: "GET"
+      path: "/api/listClassInstances"
+      description: "Listar turmas com filtros"
+      auth: true
+    - method: "POST"
+      path: "/api/getClassInstance"
+      description: "Obter turma por ID"
+      auth: true
+    - method: "PUT"
+      path: "/api/updateClassInstance"
+      description: "Atualizar turma"
+      auth: true
+    - method: "DELETE"
+      path: "/api/deleteClassInstance"
+      description: "Deletar turma (soft delete)"
+      auth: true
+    - method: "POST"
+      path: "/api/class-instances/:classInstanceId/batch-enroll"
+      description: "Matricula em lote"
+      auth: true
+
+  enrollment:
+    - method: "POST"
+      path: "/api/enrollUser"
+      description: "Matricular usuario na turma"
+      auth: true
+    - method: "GET"
+      path: "/api/listClassEnrollments"
+      description: "Listar matriculas"
+      auth: true
+    - method: "POST"
+      path: "/api/getClassEnrollment"
+      description: "Obter matricula por ID"
+      auth: true
+    - method: "PUT"
+      path: "/api/updateClassEnrollment"
+      description: "Atualizar (status, nota)"
+      auth: true
+    - method: "DELETE"
+      path: "/api/dropClassEnrollment"
+      description: "Desmatricular (hard delete GDPR)"
+      auth: true
+    - method: "GET"
+      path: "/api/getClassEnrollmentStats"
+      description: "Estatisticas de matriculas"
+      auth: true
+    - method: "GET"
+      path: "/api/getMyEducationalContent"
+      description: "Conteudo do aluno autenticado"
+      auth: true
+
+# =============================================================================
+# PROGRESS & ANALYTICS ENDPOINTS
+# =============================================================================
+
+progress_analytics:
+  progress:
+    - method: "POST"
+      path: "/api/progress"
+      description: "Upsert progresso"
+      auth: true
+    - method: "GET"
+      path: "/api/progress"
+      description: "Listar registros de progresso"
+      auth: true
+    - method: "POST"
+      path: "/api/getProgress"
+      description: "Obter progresso por ID"
+      auth: true
+    - method: "GET"
+      path: "/api/getStudentProgress"
+      description: "Progresso geral do aluno"
+      auth: true
+    - method: "GET"
+      path: "/api/getCollectionProgress"
+      description: "Progresso por colecao"
+      auth: true
+    - method: "GET"
+      path: "/api/getSeriesProgress"
+      description: "Progresso por serie"
+      auth: true
+    - method: "GET"
+      path: "/api/getUnitProgress"
+      description: "Progresso por unidade"
+      auth: true
+    - method: "GET"
+      path: "/api/getComponentProgress"
+      description: "Progresso por componente"
+      auth: true
+
+  analytics:
+    - method: "GET"
+      path: "/api/getStudentMetrics"
+      description: "Metricas de engajamento"
+      auth: true
+    - method: "GET"
+      path: "/api/getStudentAnalytics"
+      description: "Analytics detalhados"
+      auth: true
+    - method: "GET"
+      path: "/api/getRecentActivity"
+      description: "Feed de atividades recentes"
+      auth: true
+
+# =============================================================================
+# ASSESSMENT SYSTEM ENDPOINTS
+# =============================================================================
+
+assessment:
+  endpoints:
+    - method: "POST"
+      path: "/api/startAssessmentAttempt"
+      description: "Iniciar tentativa de avaliacao"
+      auth: true
+    - method: "POST"
+      path: "/api/getAssessmentQuestions"
+      description: "Obter questoes (ordenadas por question_order)"
+      auth: true
+    - method: "POST"
+      path: "/api/submitAssessmentAnswer"
+      description: "Submeter resposta a questao"
+      auth: true
+    - method: "POST"
+      path: "/api/submitAssessmentAttempt"
+      description: "Finalizar tentativa (auto-grade MC e V/F)"
+      auth: true
+    - method: "POST"
+      path: "/api/listAssessmentAttempts"
+      description: "Listar tentativas do usuario"
+      auth: true
+
+  flow:
+    1: "Start attempt -> retorna attempt ID"
+    2: "Get questions -> array ordenado de questoes"
+    3: "Submit answers (por questao) -> auto-save"
+    4: "Submit attempt -> auto-grade MC/V-F, calcula score"
+    5: "List attempts -> historico"
+
+  auto_grading: "Apenas multipla_escolha e verdadeiro_falso"
+
+# =============================================================================
+# ACTIVITY & ATTENDANCE ENDPOINTS
+# =============================================================================
+
+activity_attendance:
+  attendance_proofs:
+    - method: "POST"
+      path: "/api/components/:componentId/attendance-proof"
+      description: "Submeter prova de presenca"
+      auth: true
+      proof_types: "photo, geolocation, qr_code, document"
+    - method: "GET"
+      path: "/api/components/:componentId/attendance-proofs"
+      description: "Listar provas (professor)"
+      auth: true
+    - method: "GET"
+      path: "/api/attendance-proofs/:proofId"
+      description: "Obter prova por ID"
+      auth: true
+    - method: "POST"
+      path: "/api/attendance-proofs/:proofId/approve"
+      description: "Aprovar prova"
+      auth: true
+    - method: "POST"
+      path: "/api/attendance-proofs/:proofId/reject"
+      description: "Rejeitar prova"
+      auth: true
+    - method: "DELETE"
+      path: "/api/attendance-proofs/:proofId"
+      description: "Deletar prova"
+      auth: true
+    - method: "POST"
+      path: "/api/components/:componentId/attendance-proofs/bulk-approve"
+      description: "Aprovacao em lote"
+      auth: true
+
+  group_work:
+    - method: "POST"
+      path: "/api/components/:componentId/groups"
+      description: "Criar grupo"
+      auth: true
+    - method: "POST"
+      path: "/api/groups/:groupId/join"
+      description: "Entrar no grupo"
+      auth: true
+    - method: "POST"
+      path: "/api/groups/:groupId/leave"
+      description: "Sair do grupo"
+      auth: true
+    - method: "POST"
+      path: "/api/groups/:groupId/submit"
+      description: "Submeter trabalho do grupo"
+      auth: true
+    - method: "POST"
+      path: "/api/groups/:groupId/grade"
+      description: "Avaliar submissao"
+      auth: true
+
+# =============================================================================
+# IDENTITY & USER MANAGEMENT ENDPOINTS
+# =============================================================================
+
+identity:
+  users:
+    - method: "POST"
+      path: "/api/users"
+      description: "Criar usuario (student/employee)"
+      auth: true
+    - method: "GET"
+      path: "/api/users"
+      description: "Listar usuarios"
+      auth: true
+    - method: "POST"
+      path: "/api/getUser"
+      description: "Obter usuario por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/updateUser/{id}"
+      description: "Atualizar usuario"
+      auth: true
+    - method: "DELETE"
+      path: "/api/deleteUser/{id}"
+      description: "Deletar usuario (soft delete)"
+      auth: true
+    - method: "PUT"
+      path: "/api/replaceUserCompany"
+      description: "Substituir empresa do usuario"
+      auth: true
+    - method: "PUT"
+      path: "/api/updateUserAddress"
+      description: "Gerenciar enderecos"
+      auth: true
+    - method: "PUT"
+      path: "/api/updateUserDocument"
+      description: "Gerenciar documentos"
+      auth: true
+    - method: "PUT"
+      path: "/api/updateUserCustomFields"
+      description: "Merge custom fields (JSONB)"
+      auth: true
+    - method: "POST"
+      path: "/api/users/batch-students"
+      description: "Criacao em lote de alunos"
+      auth: true
+    - method: "GET"
+      path: "/api/users/batch-students/template"
+      description: "Download template de importacao"
+      auth: true
+    - method: "GET"
+      path: "/api/getUserCompanies"
+      description: "Empresas do usuario"
+      auth: true
+
+  companies:
+    - method: "POST"
+      path: "/api/companies"
+      description: "Criar empresa"
+      auth: true
+    - method: "POST"
+      path: "/api/bootstrapCompany"
+      description: "Bootstrap tenant root"
+      auth: true
+    - method: "GET"
+      path: "/api/companies"
+      description: "Listar empresas"
+      auth: true
+    - method: "POST"
+      path: "/api/getCompany"
+      description: "Obter empresa por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/updateCompany/{id}"
+      description: "Atualizar empresa"
+      auth: true
+    - method: "PUT"
+      path: "/api/updateCompanyAddress"
+      description: "Gerenciar enderecos"
+      auth: true
+    - method: "POST"
+      path: "/api/upsertCompanyComplementaryInfo"
+      description: "Upsert info complementar"
+      auth: true
+
+  roles:
+    - method: "POST"
+      path: "/api/roles"
+      description: "Criar role"
+      auth: true
+    - method: "GET"
+      path: "/api/roles"
+      description: "Listar roles"
+      auth: true
+    - method: "GET"
+      path: "/api/getRole"
+      description: "Obter role por ID"
+      auth: true
+    - method: "POST"
+      path: "/api/assignRoleToUser"
+      description: "Atribuir role a usuario"
+      auth: true
+
+  permissions:
+    - method: "POST"
+      path: "/api/permissions"
+      description: "Criar permissao"
+      auth: true
+    - method: "GET"
+      path: "/api/permissionsCatalog"
+      description: "Catalogo de permissoes"
+      auth: true
+    - method: "POST"
+      path: "/api/attachPermissionsToRole"
+      description: "Anexar permissoes a role"
+      auth: true
+    - method: "POST"
+      path: "/api/assignCompanyPermissions"
+      description: "Atribuir permissoes a empresa"
+      auth: true
+
+# =============================================================================
+# COMMUNITY & DISCUSSION ENDPOINTS
+# =============================================================================
+
+community:
+  spaces:
+    - method: "POST"
+      path: "/api/createCommunitySpace"
+      description: "Criar espaco de discussao"
+      auth: true
+    - method: "POST"
+      path: "/api/deleteCommunitySpace"
+      description: "Deletar espaco"
+      auth: true
+    - method: "GET"
+      path: "/api/listCommunitySpaces"
+      description: "Listar espacos"
+      auth: true
+    - method: "GET"
+      path: "/api/getCommunitySpace"
+      description: "Obter espaco por ID"
+      auth: true
+
+  members:
+    - method: "POST"
+      path: "/api/joinCommunity"
+      description: "Entrar na comunidade"
+      auth: true
+    - method: "POST"
+      path: "/api/approveCommunityMember"
+      description: "Aprovar membro"
+      auth: true
+    - method: "POST"
+      path: "/api/rejectCommunityMember"
+      description: "Rejeitar membro"
+      auth: true
+    - method: "GET"
+      path: "/api/listCommunityMembers"
+      description: "Listar membros (com filtro por role)"
+      auth: true
+    - method: "GET"
+      path: "/api/getCommunityMember"
+      description: "Obter status do membro"
+      auth: true
+    - method: "POST"
+      path: "/api/banCommunityMember"
+      description: "Banir membro"
+      auth: true
+    - method: "POST"
+      path: "/api/unbanCommunityMember"
+      description: "Desbanir membro"
+      auth: true
+    - method: "POST"
+      path: "/api/addCommunityModerator"
+      description: "Adicionar moderador"
+      auth: true
+    - method: "POST"
+      path: "/api/removeCommunityModerator"
+      description: "Remover moderador"
+      auth: true
+    - method: "POST"
+      path: "/api/transferCommunityOwnership"
+      description: "Transferir propriedade"
+      auth: true
+
+  topics:
+    - method: "POST"
+      path: "/api/createDiscussionTopic"
+      description: "Criar topico"
+      auth: true
+    - method: "POST"
+      path: "/api/deleteDiscussionTopic"
+      description: "Deletar topico"
+      auth: true
+    - method: "GET"
+      path: "/api/listDiscussionTopics"
+      description: "Listar topicos"
+      auth: true
+    - method: "GET"
+      path: "/api/getDiscussionTopic"
+      description: "Obter topico por ID"
+      auth: true
+    - method: "PUT"
+      path: "/api/updateDiscussionTopic"
+      description: "Atualizar topico"
+      auth: true
+
+  replies:
+    - method: "GET"
+      path: "/api/listTopicReplies"
+      description: "Listar respostas (paginado)"
+      auth: true
+    - method: "POST"
+      path: "/api/createTopicReply"
+      description: "Criar resposta"
+      auth: true
+    - method: "PUT"
+      path: "/api/updateTopicReply"
+      description: "Atualizar resposta"
+      auth: true
+    - method: "DELETE"
+      path: "/api/deleteTopicReply"
+      description: "Deletar resposta"
+      auth: true
+    - method: "POST"
+      path: "/api/voteTopicReply"
+      description: "Upvote/downvote"
+      auth: true
+    - method: "POST"
+      path: "/api/subscribeToTopic"
+      description: "Inscrever para notificacoes"
+      auth: true
+    - method: "POST"
+      path: "/api/uploadTopicAttachment"
+      description: "Upload de arquivo no topico"
+      auth: true
+
+  moderation:
+    - method: "GET"
+      path: "/api/getCommunityModerationQueue"
+      description: "Fila de moderacao"
+      auth: true
+    - method: "POST"
+      path: "/api/createModerationAction"
+      description: "Acao de moderacao"
+      auth: true
+
+  websocket:
+    url: "ws://api.example.com/ws/community/{communityId}"
+    events:
+      - "topic_reply_created"
+      - "topic_updated"
+      - "user_typing"
+
+# =============================================================================
+# EXPERIENCE EVENTS (xAPI) ENDPOINTS
+# =============================================================================
+
+experience_events:
+  endpoints:
+    - method: "POST"
+      path: "/api/logExperienceEvent"
+      description: "Logar evento unico"
+      auth: true
+    - method: "POST"
+      path: "/api/logExperienceEventsBatch"
+      description: "Logar eventos em lote"
+      auth: true
+    - method: "GET"
+      path: "/api/listExperienceEvents"
+      description: "Listar eventos"
+      auth: true
+    - method: "GET"
+      path: "/api/listExperienceMetrics"
+      description: "Listar metricas"
+      auth: true
+    - method: "GET"
+      path: "/api/listExperienceMetricsAggregated"
+      description: "Metricas agregadas"
+      auth: true
+
+  verbs:
+    - started
+    - completed
+    - viewed
+    - paused
+    - resumed
+    - seeked
+    - created
+    - updated
+    - deleted
+    - upvoted
+    - joined
+    - downloaded
+    - attempted
+    - submitted
+    - answered
+    - logged_in
+    - logged_out
+
+  object_types:
+    - component
+    - system
+    - collection
+    - series
+    - unit
+    - post
+    - comment
+    - community
+    - note
+    - material
+    - pdf
+    - quiz
+    - dissertation
+    - assignment
+    - live_session
+    - assessment
+    - question
+    - user
+
+# =============================================================================
+# FILE UPLOAD/DOWNLOAD ENDPOINTS
+# =============================================================================
+
+file_management:
+  documents:
+    - method: "POST"
+      path: "/api/documents/upload"
+      description: "Obter presigned URL para upload"
+      auth: true
+    - method: "GET"
+      path: "/api/documents/:documentId/download"
+      description: "Obter presigned URL para download"
+      auth: true
+    - method: "GET"
+      path: "/api/documents/:documentId/status"
+      description: "Status do documento"
+      auth: true
+    - method: "POST"
+      path: "/api/users/:userId/documents/upload"
+      description: "Upload de documento do usuario"
+      auth: true
+    - method: "GET"
+      path: "/api/users/:userId/documents/:documentId/download"
+      description: "Download de documento do usuario"
+      auth: true
+
+  photos_logos:
+    - method: "POST"
+      path: "/api/upload-company-logo"
+      description: "Presigned URL para logo da empresa"
+      auth: true
+    - method: "POST"
+      path: "/api/upload-user-photo"
+      description: "Presigned URL para foto do usuario"
+      auth: true
+
+# =============================================================================
+# SMARTPLAYER INTEGRATION
+# =============================================================================
+
+smartplayer:
+  endpoints:
+    - method: "GET"
+      path: "/api/smartplayer/auth/temp-token"
+      description: "Token temporario de autenticacao"
+      auth: true
+    - method: "GET"
+      path: "/api/smartplayer/videos/:code"
+      description: "Metadata do video"
+      auth: true
+    - method: "GET"
+      path: "/api/smartplayer/videos/:code/embed"
+      description: "Configuracao de embed"
+      auth: true
+
+# =============================================================================
+# ADMIN & SECURITY ENDPOINTS
+# =============================================================================
+
+admin_security:
+  admin:
+    - method: "POST"
+      path: "/api/admin/users/:userId/reset-password"
+      description: "Reset de senha pelo admin (com auditoria)"
+      auth: true
+      audit: "IP, user agent, request ID, justificativa (min 10 chars)"
+    - method: "GET"
+      path: "/api/admin/intervention-audit"
+      description: "Log de auditoria de intervencoes"
+      auth: true
+
+  self_service:
+    - method: "POST"
+      path: "/api/users/me/change-password"
+      description: "Troca de senha pelo usuario"
+      auth: true
+
+# =============================================================================
+# LEGAL & COMPLIANCE (LGPD) ENDPOINTS
+# =============================================================================
+
+legal_compliance:
+  endpoints:
+    - method: "GET"
+      path: "/api/legal/documents"
+      description: "Listar documentos legais publicados"
+      auth: true
+    - method: "GET"
+      path: "/api/legal/documents/:type/current"
+      description: "Versao atual do documento"
+      auth: true
+      document_types: "privacy_policy, terms_of_use, cookie_policy, data_consent"
+    - method: "GET"
+      path: "/api/legal/pending-consents"
+      description: "Verificar consentimentos pendentes"
+      auth: true
+    - method: "POST"
+      path: "/api/legal/consent/batch"
+      description: "Registrar multiplos consentimentos"
+      auth: true
+      consent_methods: "checkbox, button, implicit, api"
+
+# =============================================================================
+# MULTI-TENANT SYSTEM ENDPOINTS
+# =============================================================================
+
+multi_tenant_api:
+  endpoints:
+    - method: "GET"
+      path: "/api/me/tenants"
+      description: "Tenants e empresas do usuario"
+      auth: true
+
+# =============================================================================
+# RECOMMENDATION ENGINE
+# =============================================================================
+
+recommendations:
+  endpoints:
+    - method: "GET"
+      path: "/api/class-recommendations-by-user"
+      description: "Recomendacoes personalizadas"
+      auth: true
+      returns: "Organizado por tipo: videos, articles, books, podcasts"
+      fields: "id, url, title, description, image_url"
+
+# =============================================================================
+# ADMISSION SYSTEM ENDPOINTS
+# =============================================================================
+
+admission:
+  processes:
+    - method: "POST"
+      path: "/api/admissions"
+      description: "Criar processo seletivo"
+      auth: true
+    - method: "GET"
+      path: "/api/admissions"
+      description: "Listar processos"
+      auth: true
+    - method: "GET"
+      path: "/api/admissions/:id"
+      description: "Obter processo por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/admissions/:id"
+      description: "Atualizar processo"
+      auth: true
+    - method: "DELETE"
+      path: "/api/admissions/:id"
+      description: "Deletar processo"
+      auth: true
+    - method: "POST"
+      path: "/api/admissions/:id/publish"
+      description: "Publicar processo"
+      auth: true
+
+  candidates:
+    - method: "GET"
+      path: "/api/candidates"
+      description: "Listar candidatos"
+      auth: true
+    - method: "GET"
+      path: "/api/candidates/:id"
+      description: "Obter candidato por ID"
+      auth: true
+    - method: "PATCH"
+      path: "/api/candidates/:id/approve"
+      description: "Aprovar candidato"
+      auth: true
+    - method: "PATCH"
+      path: "/api/candidates/:id/reject"
+      description: "Rejeitar candidato"
+      auth: true
+    - method: "PATCH"
+      path: "/api/candidates/:id/status"
+      description: "Atualizar status"
+      auth: true
+    - method: "PATCH"
+      path: "/api/candidates/:id/pipeline-stage"
+      description: "Mover no pipeline"
+      auth: true
+    - method: "POST"
+      path: "/api/candidates/:candidateId/notes"
+      description: "Adicionar nota"
+      auth: true
+    - method: "GET"
+      path: "/api/candidates/:candidateId/documents"
+      description: "Listar documentos"
+      auth: true
+    - method: "GET"
+      path: "/api/candidates/:candidateId/document-requirements"
+      description: "Requisitos de documentos"
+      auth: true
+    - method: "GET"
+      path: "/api/candidates/:candidateId/contracts/:transactionId/download"
+      description: "Download de contrato"
+      auth: true
+
+  public_application:
+    note: "Endpoints publicos - SEM autenticacao"
+    endpoints:
+      - method: "POST"
+        path: "/api/public/applications/start"
+        description: "Iniciar inscricao"
+        auth: false
+      - method: "GET"
+        path: "/api/public/applications/check-user"
+        description: "Verificar se usuario existe"
+        auth: false
+      - method: "POST"
+        path: "/api/public/applications/resend-access"
+        description: "Reenviar token de acesso"
+        auth: false
+      - method: "GET"
+        path: "/api/public/applications/status/:accessToken"
+        description: "Status da inscricao"
+        auth: false
+      - method: "GET"
+        path: "/api/public/applications/resume/:accessToken"
+        description: "Retomar inscricao"
+        auth: false
+      - method: "GET"
+        path: "/api/public/applications/:candidateId"
+        description: "Progresso da inscricao"
+        auth: false
+      - method: "POST"
+        path: "/api/public/applications/:candidateId/step"
+        description: "Submeter etapa"
+        auth: false
+
+  contract_signing:
+    note: "Endpoints publicos - SEM autenticacao"
+    endpoints:
+      - method: "GET"
+        path: "/api/public/contracts/:candidateId/preview"
+        description: "Preview do contrato"
+        auth: false
+      - method: "POST"
+        path: "/api/public/contracts/:candidateId/otp"
+        description: "Solicitar OTP"
+        auth: false
+      - method: "POST"
+        path: "/api/public/contracts/:candidateId/otp/verify"
+        description: "Verificar OTP"
+        auth: false
+      - method: "POST"
+        path: "/api/public/contracts/:candidateId/sign"
+        description: "Assinar contrato"
+        auth: false
+      - method: "GET"
+        path: "/api/public/contracts/:candidateId/download"
+        description: "Download do contrato assinado"
+        auth: false
+      - method: "GET"
+        path: "/api/public/contracts/:signatureId/verify"
+        description: "Verificar assinatura"
+        auth: false
+
+  processes_public:
+    - method: "POST"
+      path: "/api/processes"
+      description: "Criar processo"
+      auth: true
+    - method: "GET"
+      path: "/api/processes/:id"
+      description: "Obter processo"
+      auth: true
+    - method: "DELETE"
+      path: "/api/processes/:id"
+      description: "Deletar processo"
+      auth: true
+    - method: "GET"
+      path: "/api/public/processes/:id"
+      description: "Processo publico (sem auth)"
+      auth: false
+
+# =============================================================================
+# COMPANY RESOURCES & EVENTS ENDPOINTS
+# =============================================================================
+
+company_resources:
+  events:
+    - method: "POST"
+      path: "/api/companies/:companyId/events"
+      description: "Criar evento"
+      auth: true
+    - method: "GET"
+      path: "/api/companies/:companyId/events"
+      description: "Listar eventos"
+      auth: true
+    - method: "GET"
+      path: "/api/companies/:companyId/events/:eventId"
+      description: "Obter evento por ID"
+      auth: true
+    - method: "DELETE"
+      path: "/api/companies/:companyId/events/:eventId"
+      description: "Deletar evento"
+      auth: true
+    - method: "GET"
+      path: "/api/companies/:companyId/events/calendar"
+      description: "Visao de calendario"
+      auth: true
+
+  event_attendance:
+    - method: "GET"
+      path: "/api/events/:eventId/attendees"
+      description: "Listar participantes"
+      auth: true
+    - method: "GET"
+      path: "/api/events/:eventId/attendees/:userId"
+      description: "Obter participante"
+      auth: true
+    - method: "POST"
+      path: "/api/events/:eventId/check-in/:userId"
+      description: "Check-in do participante"
+      auth: true
+    - method: "POST"
+      path: "/api/events/:eventId/bulk-attendance"
+      description: "Atualizacao em lote"
+      auth: true
+
+  resources:
+    - method: "POST"
+      path: "/api/companies/:companyId/resources"
+      description: "Criar recurso"
+      auth: true
+    - method: "GET"
+      path: "/api/companies/:companyId/resources"
+      description: "Listar recursos"
+      auth: true
+    - method: "GET"
+      path: "/api/companies/:companyId/resources/:resourceId"
+      description: "Obter recurso por ID"
+      auth: true
+    - method: "DELETE"
+      path: "/api/companies/:companyId/resources/:resourceId"
+      description: "Deletar recurso"
+      auth: true
+
+# =============================================================================
+# SYSTEM ENDPOINTS
+# =============================================================================
+
+system:
+  - method: "GET"
+    path: "/health"
+    description: "Health check (sem auth)"
+    auth: false
+  - method: "POST"
+    path: "/api/public/resend-password-setup"
+    description: "Reenviar email de configuracao de senha"
+    auth: false

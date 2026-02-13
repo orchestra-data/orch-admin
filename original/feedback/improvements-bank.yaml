@@ -1,0 +1,108 @@
+# ============================================================================
+# Orch Improvements Bank - Sugestoes, Ajustes e Falhas
+#
+# Gerado automaticamente pelo Orch quando detecta insatisfacao do usuario
+# ou quando o usuario reporta problemas/sugestoes proativamente.
+#
+# Tipos:
+#   - feature_request: Nova funcionalidade solicitada
+#   - adjustment: Ajuste em funcionalidade existente
+#   - bug_report: Falha ou comportamento inesperado
+#   - ux_issue: Problema de usabilidade/experiencia
+#
+# Prioridade: critical | high | medium | low
+# Status: open | in_review | accepted | rejected | implemented
+# ============================================================================
+
+metadata:
+  version: "1.0.0"
+  description: "Banco de melhorias, ajustes e falhas reportadas via Orch"
+  created_at: "2026-02-03"
+  last_updated: "2026-02-03"
+  total_entries: 0
+  stats:
+    feature_requests: 0
+    adjustments: 0
+    bug_reports: 0
+    ux_issues: 0
+
+# ============================================================================
+# ENTRADAS
+# ============================================================================
+entries: []
+  # Exemplo de feature_request:
+  #
+  # - id: "IMP-2026-02-03-001"
+  #   type: "feature_request"
+  #   title: "Exportar lista de candidatos em PDF"
+  #   description: |
+  #     O usuario precisa exportar a lista de candidatos filtrada
+  #     em formato PDF para enviar ao coordenador. Atualmente so
+  #     existe exportacao em CSV.
+  #   user_verbatim: "Queria poder baixar essa lista em PDF, o CSV nao ajuda muito"
+  #   module: "admission"
+  #   page_url: "/educational/admission/candidates"
+  #   priority: "medium"
+  #   status: "open"
+  #   reported_at: "2026-02-03T14:22:00Z"
+  #   reported_by_role: "coordenador"
+  #   frequency: 1
+  #   similar_reports: []
+  #   impact: "Facilita comunicacao com coordenadores que nao usam planilhas"
+  #   suggested_solution: "Adicionar botao 'Exportar PDF' ao lado do 'Exportar CSV'"
+  #   tags: ["exportacao", "pdf", "candidatos"]
+  #   conversation_context:
+  #     sentiment: "frustrated"
+  #     trigger: "user_trying_to_export"
+  #     orch_questions_asked: 3
+  #
+  # Exemplo de bug_report:
+  #
+  # - id: "IMP-2026-02-03-002"
+  #   type: "bug_report"
+  #   title: "Botao Salvar nao responde apos preencher todos os campos"
+  #   description: |
+  #     Ao preencher o formulario de criacao de turma, o botao Salvar
+  #     permanece desabilitado mesmo com todos os campos obrigatorios
+  #     preenchidos. O usuario precisa recarregar a pagina.
+  #   user_verbatim: "Ja preenchi tudo mas o botao nao ativa, ta bugado"
+  #   module: "class-instances"
+  #   page_url: "/educational/class-instances/create"
+  #   priority: "high"
+  #   status: "open"
+  #   reported_at: "2026-02-03T16:05:00Z"
+  #   reported_by_role: "secretaria"
+  #   frequency: 3
+  #   similar_reports: []
+  #   steps_to_reproduce:
+  #     - "Acessar /educational/class-instances/create"
+  #     - "Preencher todos os campos obrigatorios"
+  #     - "Observar que o botao Salvar continua desabilitado"
+  #   expected_behavior: "Botao Salvar deveria ficar ativo"
+  #   actual_behavior: "Botao permanece desabilitado"
+  #   workaround: "Recarregar a pagina (F5) e preencher novamente"
+  #   browser_info: ""
+  #   tags: ["bug", "botao", "formulario", "turma"]
+  #   conversation_context:
+  #     sentiment: "frustrated"
+  #     trigger: "error_reported"
+  #     orch_questions_asked: 4
+  #
+  # Exemplo de adjustment:
+  #
+  # - id: "IMP-2026-02-03-003"
+  #   type: "adjustment"
+  #   title: "Campo CPF deveria aceitar colagem com mascara"
+  #   description: |
+  #     Quando o usuario cola um CPF formatado (123.456.789-09),
+  #     o campo remove os pontos e tracos mas mostra erro de validacao.
+  #     Deveria aceitar o valor colado diretamente.
+  #   user_verbatim: "Toda vez que colo o CPF da erro, tenho que digitar um por um"
+  #   module: "users"
+  #   page_url: "/users/create/student"
+  #   priority: "medium"
+  #   status: "open"
+  #   reported_at: "2026-02-03T09:15:00Z"
+  #   reported_by_role: "atendente"
+  #   frequency: 5
+  #   tags: ["cpf", "validacao", "usabilidade", "colar"]
